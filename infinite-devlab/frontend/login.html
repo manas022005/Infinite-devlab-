@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Infinite DevLab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark:#070b14;
+      --bg-nav:rgba(7,11,20,0.8);
+      --bg-surface:#0f172a;
+      --bg-input:rgba(255,255,255,0.04);
+      --text-main:#f8fafc;
+      --text-muted:#94a3b8;
+      --accent-blue:#3b82f6;
+      --accent-blue-hover:#2563eb;
+      --accent-gold:#fbbf24;
+      --border-color:rgba(255,255,255,0.10);
+      --border-hover:rgba(59,130,246,0.5);
+      --error:#fb7185;
+      --success:#34d399;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    body{
+      background:var(--bg-dark);color:var(--text-main);min-height:100vh;
+      display:flex;align-items:center;justify-content:center;padding:5rem 1.5rem 2rem;
+      position:relative;overflow-x:hidden;
+    }
+    .ambient-bg{
+      position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(circle at 50% 40%, rgba(99,102,241,0.18) 0%, rgba(59,130,246,0.05) 30%, transparent 70%);
+    }
+    nav.top{
+      position:fixed;top:0;left:0;right:0;z-index:50;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:1rem 3%;background:var(--bg-nav);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border-color);
+    }
+    .logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;font-size:1.25rem;font-weight:800;letter-spacing:.5px;color:#fff}
+    .logo-icon{color:var(--accent-blue);display:flex;align-items:center}
+    .logo-icon svg{width:22px;height:22px;fill:currentColor}
+    .logo-text-devlab{color:var(--accent-gold)}
+    .back-home{color:var(--text-muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s}
+    .back-home:hover{color:var(--accent-blue)}
+
+    .auth-container{
+      position:relative;z-index:10;
+      background:linear-gradient(180deg, rgba(15,23,42,.85), rgba(15,23,42,.7));
+      border:1px solid var(--border-color);
+      border-radius:14px;padding:2.5rem 2rem;width:100%;max-width:440px;
+      box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+      backdrop-filter:blur(10px);
+      animation:slideUp .5s ease-out both;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+    .auth-header{text-align:center;margin-bottom:1.75rem}
+    .auth-header h1{font-size:1.4rem;font-weight:700;margin-bottom:.35rem}
+    .auth-header p{color:var(--text-muted);font-size:.9rem}
+
+    .tabs{
+      display:grid;grid-template-columns:1fr 1fr;gap:.25rem;
+      background:rgba(255,255,255,.04);padding:.3rem;border-radius:10px;
+      margin-bottom:1.5rem;border:1px solid var(--border-color);
+    }
+    .tab{
+      padding:.55rem 1rem;text-align:center;border-radius:7px;
+      font-size:.9rem;font-weight:500;color:var(--text-muted);
+      cursor:pointer;transition:all .2s;user-select:none;
+    }
+    .tab:hover{color:var(--text-main)}
+    .tab.active{background:var(--accent-blue);color:#fff;box-shadow:0 4px 12px rgba(59,130,246,.35)}
+
+    .form-container{position:relative;min-height:280px}
+    form{display:flex;flex-direction:column;gap:1rem}
+    form.hidden{display:none}
+
+    .input-group label{display:block;margin-bottom:.4rem;color:var(--text-muted);font-size:.85rem;font-weight:500}
+    .input-group input{
+      width:100%;padding:.75rem .9rem;
+      background:var(--bg-input);border:1px solid var(--border-color);
+      border-radius:8px;color:var(--text-main);font-size:.95rem;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input-group input::placeholder{color:#475569}
+    .input-group input:focus{
+      outline:none;border-color:var(--accent-blue);
+      background:rgba(59,130,246,.06);
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    .submit-btn{
+      width:100%;padding:.85rem;margin-top:.25rem;
+      background:linear-gradient(135deg,#60a5fa,#3b82f6);
+      color:#fff;border:none;border-radius:8px;
+      font-size:.95rem;font-weight:600;cursor:pointer;
+      transition:transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(59,130,246,.35)}
+    .submit-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+
+    .msg{margin-top:.75rem;font-size:.85rem;text-align:center;min-height:18px}
+    .msg.error{color:var(--error)}
+    .msg.success{color:var(--success)}
+
+    .swap-line{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:1.25rem}
+    .swap-line a{color:var(--accent-blue);text-decoration:none;font-weight:500;cursor:pointer}
+    .swap-line a:hover{text-decoration:underline}
+
+    @media (max-width:480px){
+      .auth-container{padding:2rem 1.25rem}
+      nav.top{padding:1rem 1.25rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg"></div>
+
+  <nav class="top">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/></svg>
+      </span>
+      <span>INFINITE</span> <span class="logo-text-devlab">DEVLAB</span>
+    </a>
+    <a href="index.html" class="back-home">← Back to home</a>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1 id="authTitle">Welcome back</h1>
+      <p id="authSubtitle">Sign in to continue learning</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <div class="tab active" id="showLogin" role="tab">Sign In</div>
+      <div class="tab" id="showSignup" role="tab">Sign Up</div>
+    </div>
+
+    <div class="form-container">
+      <form id="loginForm" novalidate>
+        <div class="input-group">
+          <label for="loginEmail">Email address</label>
+          <input type="email" id="loginEmail" required placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button type="submit" class="submit-btn" id="loginBtn">Sign In</button>
+        <div class="msg" id="loginMsg"></div>
+      </form>
+
+      <form id="signupForm" class="hidden" novalidate>
+        <div class="input-group">
+          <label for="signupName">Full name</label>
+          <input type="text" id="signupName" required placeholder="John Doe" autocomplete="name">
+        </div>
+        <div class="input-group">
+          <label for="signupEmail">Email address</label>
+          <input type="email" id="signupEmail" required placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="input-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" required placeholder="At least 6 characters" autocomplete="new-password" minlength="6">
+        </div>
+        <button type="submit" class="submit-btn" id="signupBtn">Create Account</button>
+        <div class="msg" id="signupMsg"></div>
+      </form>
+    </div>
+
+    <div class="swap-line" id="swapLine">
+      Don't have an account? <a id="swapLink">Sign up</a>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const API_BASE = (window.config && window.config.API_BASE_URL) || window.location.origin;
+
+    const showLogin = document.getElementById('showLogin');
+    const showSignup = document.getElementById('showSignup');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const swapLink = document.getElementById('swapLink');
+    const swapLine = document.getElementById('swapLine');
+    const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
+
+    function setMode(mode) {
+      const isLogin = mode === 'login';
+      showLogin.classList.toggle('active', isLogin);
+      showSignup.classList.toggle('active', !isLogin);
+      loginForm.classList.toggle('hidden', !isLogin);
+      signupForm.classList.toggle('hidden', isLogin);
+      authTitle.textContent = isLogin ? 'Welcome back' : 'Create your account';
+      authSubtitle.textContent = isLogin ? 'Sign in to continue learning' : 'Start your coding journey';
+      swapLine.innerHTML = isLogin
+        ? `Don't have an account? <a id="swapLink">Sign up</a>`
+        : `Already have an account? <a id="swapLink">Sign in</a>`;
+      document.getElementById('swapLink').addEventListener('click', () => setMode(isLogin ? 'signup' : 'login'));
+    }
+    showLogin.addEventListener('click', () => setMode('login'));
+    showSignup.addEventListener('click', () => setMode('signup'));
+    swapLink.addEventListener('click', () => setMode('signup'));
+
+    function showMsg(el, text, type='error') {
+      el.textContent = text || '';
+      el.className = 'msg ' + (type === 'success' ? 'success' : 'error');
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const msg = document.getElementById('loginMsg');
+      showMsg(msg, ''); btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        const body = new URLSearchParams({ username: email, password });
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+        localStorage.setItem('token', data.access_token);
+        if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = 'index.html';
+      } catch (err) {
+        showMsg(msg, err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Sign In';
+      }
+    });
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const btn = document.getElementById('signupBtn');
+      const msg = document.getElementById('signupMsg');
+      showMsg(msg, ''); btn.disabled = true; btn.textContent = 'Creating…';
+      try {
+        const res = await fetch(`${API_BASE}/auth/signup`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || 'Signup failed');
+        showMsg(msg, 'Account created! Signing you in…', 'success');
+        // Auto-login
+        const body = new URLSearchParams({ username: email, password });
+        const lres = await fetch(`${API_BASE}/auth/login`, {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body
+        });
+        const ldata = await lres.json().catch(() => ({}));
+        if (lres.ok) {
+          localStorage.setItem('token', ldata.access_token);
+          if (ldata.user) localStorage.setItem('user', JSON.stringify(ldata.user));
+          setTimeout(() => (window.location.href = 'index.html'), 600);
+        } else {
+          setMode('login');
+          document.getElementById('loginEmail').value = email;
+        }
+      } catch (err) {
+        showMsg(msg, err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

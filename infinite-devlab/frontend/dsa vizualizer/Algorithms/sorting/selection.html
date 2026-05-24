@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Selection Sort — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background .35s, color .35s;
+            overflow-x: hidden;
+        }
+
+        /* Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bar-visual {
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .bar-val {
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        #boundary {
+            position: absolute;
+            bottom: 0;
+            top: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: left 0.35s ease, opacity 0.3s;
+            z-index: 10;
+        }
+
+        #boundary.visible {
+            opacity: 0.6;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+    <div class="aurora"></div>
+<!-- 
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <button id="theme-toggle"
+            class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+            <span id="theme-knob"
+                class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+        </button>
+    </nav> -->
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Sorting Algorithm
+                    · In-Place</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none">SELECTION <span
+                        class="text-theme-accent">SORT</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl font-medium leading-relaxed">Repeatedly finds the
+                    minimum element from the unsorted part and swaps it into the target boundary slot. Makes O(n²)
+                    comparisons but at most O(n) swaps.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    Randomize</button>
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Run C++ Logic</button>
+                <div class="flex gap-2 items-center font-code text-xs ml-4">
+                    <button
+                        class="size-btn px-3 py-1 border border-theme-border rounded bg-theme-surf text-theme-muted transition-all"
+                        data-n="10">10</button>
+                    <button
+                        class="size-btn px-3 py-1 border border-theme-accent rounded bg-theme-border text-theme-text transition-all"
+                        data-n="16">16</button>
+                    <button
+                        class="size-btn px-3 py-1 border border-theme-border rounded bg-theme-surf text-theme-muted transition-all"
+                        data-n="24">24</button>
+                </div>
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="50" max="800" value="400" step="50" class="w-24 h-1" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-swap" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Swaps</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-comp" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Compares</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Map</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div> Unsorted
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border-2 border-dashed border-theme-accent bg-theme-bg"></div>
+                            Target Slot (i)
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent bg-theme-bg"></div> Scanning
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Current Min</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent/60 bg-theme-accent/30"></div> <span
+                                class="text-theme-text font-semibold">Sorted Portion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    Ready to sort</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+                <div class="flex gap-4 font-code text-xs text-theme-muted">
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Target <span class="font-bold text-theme-text" id="hud-i">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Scan <span class="font-bold text-theme-text" id="hud-j">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Min Value <span class="font-bold text-theme-accent" id="hud-min">—</span>
+                    </div>
+                </div>
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-6 h-[320px] flex items-end justify-center gap-2 relative overflow-hidden shadow-inner">
+                    <div id="boundary"></div>
+                    <div id="bar-container"
+                        class="flex items-end justify-center gap-1.5 w-full h-full pt-10 pb-2 relative z-20"></div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">void</span> <span
+                            class="text-theme-accent">selectionSort</span>(<span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp;
+                        arr) {</div>
+                    <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">int</span>
+                        n = arr.size();</div>
+                    <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">for</span>
+                        (<span class="text-pink-400">int</span> i = 0; i &lt; n - 1; i++) {</div>
+                    <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">int</span> minIdx = i; <span class="text-theme-muted italic">// Assume
+                            target is min initially</span></div>
+                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">for</span> (<span class="text-pink-400">int</span> j = i + 1; j &lt;
+                        n; j++) {</div>
+                    <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (arr[j] &lt; arr[minIdx]) {</div>
+                    <div id="p7" class="px-2 rounded transition-all">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minIdx = j; <span
+                            class="text-theme-muted italic">// New minimum found</span></div>
+                    <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                    <div id="p10" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (minIdx != i) {</div>
+                    <div id="p11" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-accent">swap</span>(arr[i], arr[minIdx]); <span
+                            class="text-theme-muted italic">// Place min at target</span></div>
+                    <div id="p12" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                    <div id="p13" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                    <div id="p14" class="px-2 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], els = [], N = 16, spd = 400, running = false, swaps = 0, comps = 0;
+
+        function updateStats() {
+            $('s-swap').textContent = swaps;
+            $('s-comp').textContent = comps;
+        }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function updateHUD(i, j, min) {
+            $('hud-i').textContent = i !== null ? `[${i}]` : '—';
+            $('hud-j').textContent = j !== null ? `[${j}]` : '—';
+            $('hud-min').textContent = min !== null ? min : '—';
+        }
+
+        function moveBoundary(i) {
+            const boundary = $('boundary');
+            if (i < 0 || i >= N - 1) {
+                boundary.classList.remove('visible');
+                return;
+            }
+            const container = $('bar-container');
+            const w = container.offsetWidth;
+            const barW = w / N;
+            boundary.style.left = `${(barW * i)}px`;
+            boundary.classList.add('visible');
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; els = []; swaps = 0; comps = 0; updateStats();
+            const container = $('bar-container');
+            container.innerHTML = '';
+            moveBoundary(-1);
+            updateHUD(null, null, null);
+
+            for (let i = 0; i < N; i++) {
+                let val = Math.floor(Math.random() * 85) + 10;
+                A.push(val);
+                const wrap = document.createElement('div');
+                wrap.className = 'flex flex-col items-center justify-end w-full h-full relative';
+                const bar = document.createElement('div');
+
+                // High Visibility Skeleton
+                bar.className = 'bar-visual w-full bg-theme-accent/10 border-2 border-slate-500 rounded-t-md flex justify-center pt-1';
+                bar.style.height = `${val}%`;
+
+                const lbl = document.createElement('div');
+                lbl.className = 'bar-val absolute -top-6 font-code text-[0.7rem] font-bold text-theme-text opacity-70';
+                lbl.textContent = val;
+
+                bar.appendChild(lbl); wrap.appendChild(bar); container.appendChild(wrap);
+                els.push({ wrap, bar, lbl });
+            }
+            setSpill('idle', 'READY TO SORT');
+            hl(null);
+        }
+
+        function setBarState(index, state) {
+            const b = els[index].bar;
+            const l = els[index].lbl;
+
+            b.className = 'bar-visual w-full border-2 rounded-t-md flex justify-center pt-1';
+            l.className = 'bar-val absolute -top-6 font-code text-[0.7rem] font-bold';
+
+            if (state === 'target') {
+                // Dashed border to indicate target placement slot
+                b.classList.add('bg-theme-accent/5', 'border-theme-accent', 'border-dashed');
+                l.classList.add('text-theme-text');
+            } else if (state === 'scanning') {
+                b.classList.add('bg-theme-bg', 'border-theme-accent', 'scale-105');
+                l.classList.add('text-theme-text');
+            } else if (state === 'minimum') {
+                // The Hero Element
+                b.classList.add('bg-theme-accent', 'border-theme-accent', 'shadow-[0_0_20px_rgba(45,212,191,0.6)]', '-translate-y-2');
+                l.classList.add('text-theme-bg', 'scale-110'); // White text for contrast
+            } else if (state === 'sorted') {
+                b.classList.add('bg-theme-accent/30', 'border-theme-accent/60');
+                l.classList.add('text-theme-text');
+            } else {
+                b.classList.add('bg-theme-accent/10', 'border-slate-500');
+                l.classList.add('text-theme-text', 'opacity-70');
+            }
+        }
+
+        async function domSwap(a, b) {
+            // Flash both as minimum state briefly during swap
+            setBarState(a, 'minimum');
+            setBarState(b, 'minimum');
+            await sleep(spd * 0.5);
+
+            swaps++; updateStats();
+            let temp = A[a]; A[a] = A[b]; A[b] = temp;
+
+            els[a].bar.style.height = `${A[a]}%`;
+            els[a].lbl.textContent = A[a];
+            els[b].bar.style.height = `${A[b]}%`;
+            els[b].lbl.textContent = A[b];
+
+            await sleep(spd * 0.8);
+        }
+
+        async function selectionSort() {
+            if (running) return;
+            running = true;
+            $('btn-gen').disabled = true; $('btn-run').disabled = true;
+            setSpill('run', 'SORTING...');
+
+            hl('p1'); await sleep(spd / 2);
+            hl('p2'); await sleep(spd / 2);
+
+            for (let i = 0; i < N - 1; i++) {
+                hl('p3');
+                moveBoundary(i);
+                await sleep(spd / 2);
+
+                hl('p4');
+                let minIdx = i;
+                setBarState(i, 'target'); // Mark slot as target
+                updateHUD(i, null, A[minIdx]);
+                await sleep(spd / 2);
+
+                for (let j = i + 1; j < N; j++) {
+                    hl('p5'); await sleep(spd / 4);
+
+                    hl('p6');
+                    setBarState(j, 'scanning');
+                    updateHUD(i, j, A[minIdx]);
+                    comps++; updateStats();
+                    await sleep(spd);
+
+                    if (A[j] < A[minIdx]) {
+                        hl('p7');
+                        // Reset old minIdx styling (careful if it was the target slot)
+                        if (minIdx === i) setBarState(minIdx, 'target');
+                        else setBarState(minIdx, 'idle');
+
+                        minIdx = j;
+                        setBarState(minIdx, 'minimum'); // New Hero Element
+                        updateHUD(i, j, A[minIdx]);
+                        await sleep(spd);
+                    } else {
+                        // Restore scanned item to idle
+                        setBarState(j, 'idle');
+                    }
+                }
+
+                hl('p10'); await sleep(spd / 2);
+
+                if (minIdx !== i) {
+                    hl('p11');
+                    await domSwap(i, minIdx);
+                    // Target slot was swapped, minIdx is now where the old target value went
+                    setBarState(minIdx, 'idle');
+                } else {
+                    // Min was already at target, just blink it
+                    setBarState(i, 'minimum');
+                    await sleep(spd / 2);
+                }
+
+                // Finalize target slot as sorted
+                setBarState(i, 'sorted');
+            }
+
+            // The last element is inherently sorted
+            setBarState(N - 1, 'sorted');
+            updateHUD(null, null, null);
+            moveBoundary(-1);
+
+            hl(null);
+            setSpill('found', `DONE ✓ (${swaps} SWAPS)`);
+            running = false;
+            $('btn-gen').disabled = false; $('btn-run').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = selectionSort;
+        $('spd').oninput = function () { spd = 850 - parseInt(this.value); };
+
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.onclick = function () {
+                if (running) return;
+                document.querySelectorAll('.size-btn').forEach(b => {
+                    b.classList.remove('border-theme-accent', 'bg-theme-border', 'text-theme-text');
+                    b.classList.add('border-theme-border', 'bg-theme-surf', 'text-theme-muted');
+                });
+                this.classList.remove('border-theme-border', 'bg-theme-surf', 'text-theme-muted');
+                this.classList.add('border-theme-accent', 'bg-theme-border', 'text-theme-text');
+                N = parseInt(this.dataset.n);
+                genData();
+            }
+        });
+
+        genData();
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            const root = document.documentElement;
+            root.classList.toggle('light');
+            if (root.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+    </script>
+</body>
+
+</html>

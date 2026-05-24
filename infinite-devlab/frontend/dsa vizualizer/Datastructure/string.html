@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Palindrome Check — Two-Pointer Technique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        code,
+        pre,
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .code-line {
+            display: block;
+            padding: 1px 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .code-line.active {
+            background: rgba(251, 191, 36, 0.18);
+            border-left-color: #fbbf24;
+            color: #fde68a;
+        }
+
+        .ctrl-btn {
+            transition: all 0.15s;
+        }
+
+        .ctrl-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .char-box {
+            transition: background 0.3s, border-color 0.3s, transform 0.3s;
+        }
+
+        .char-box.bounce {
+            animation: bounce 0.4s cubic-bezier(.22, .68, 0, 1.2);
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: scale(1)
+            }
+
+            40% {
+                transform: scale(1.2)
+            }
+
+            100% {
+                transform: scale(1)
+            }
+        }
+
+        .ptr-arrow {
+            transition: all 0.4s cubic-bezier(.22, .68, 0, 1.2);
+        }
+
+        @keyframes matchPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7)
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(52, 211, 153, 0)
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0)
+            }
+        }
+
+        .match-pulse {
+            animation: matchPulse 0.5s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <nav class="border-b border-slate-700/60 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
+            <span class="text-cyan-400 font-black text-lg tracking-tight">DSA<span class="text-white">.</span>vis</span>
+            <div class="flex gap-1 text-sm">
+                <a href="trees.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Trees</a>
+                <a href="linkedlist.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Linked List</a>
+                <a href="stackqueue.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Stack & Queue</a>
+                <a href="strings.html"
+                    class="px-3 py-1.5 rounded-md bg-cyan-400/10 text-cyan-400 font-semibold">Strings</a>
+                <a href="greedy.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Greedy</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <p class="text-cyan-400 text-xs font-bold tracking-widest uppercase mb-1">String Algorithm Visualization</p>
+            <h1 class="text-4xl font-black tracking-tight">Palindrome Check</h1>
+            <p class="text-slate-400 mt-1 text-sm">Two-Pointer Technique — converging from both ends</p>
+        </div>
+
+        <!-- INPUT + CONTROLS -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <div class="flex items-center gap-2 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2">
+                <label class="text-slate-400 text-sm">String:</label>
+                <input id="strInput" type="text" value="racecar" maxlength="16"
+                    class="bg-transparent text-cyan-400 font-bold mono text-sm w-32 focus:outline-none tracking-widest uppercase" />
+                <button onclick="loadString()"
+                    class="text-xs bg-cyan-500 text-slate-900 font-bold px-2 py-1 rounded">Load</button>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="btnStepB"
+                    class="ctrl-btn bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">⏮
+                    Back</button>
+                <button id="btnPlay"
+                    class="ctrl-btn bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-5 py-2 rounded-lg text-sm font-bold">▶
+                    Play</button>
+                <button id="btnPause"
+                    class="ctrl-btn bg-amber-400 hover:bg-amber-300 text-slate-900 px-4 py-2 rounded-lg text-sm font-bold"
+                    disabled>⏸ Pause</button>
+                <button id="btnStepF"
+                    class="ctrl-btn bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">Step
+                    ⏭</button>
+                <button id="btnReset"
+                    class="ctrl-btn bg-slate-700 hover:bg-rose-500/30 border border-slate-600 hover:border-rose-500 text-slate-300 hover:text-rose-400 px-4 py-2 rounded-lg text-sm font-semibold">↺
+                    Reset</button>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="text-slate-400 text-xs">Speed</span>
+                <input id="speedRange" type="range" min="1" max="5" value="3" class="w-24 accent-cyan-400" />
+            </div>
+        </div>
+
+        <!-- QUICK PRESETS -->
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <span class="text-xs text-slate-500 mt-1">Try:</span>
+            <button onclick="loadPreset('racecar')"
+                class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full mono">racecar</button>
+            <button onclick="loadPreset('level')"
+                class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full mono">level</button>
+            <button onclick="loadPreset('madam')"
+                class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full mono">madam</button>
+            <button onclick="loadPreset('hello')"
+                class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full mono">hello
+                ✗</button>
+            <button onclick="loadPreset('abacaba')"
+                class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full mono">abacaba</button>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="flex gap-4 mb-6 text-xs font-semibold">
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-cyan-400 inline-block"></span>Unexamined</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-amber-400 inline-block"></span>Active Pointer</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-emerald-400 inline-block"></span>Matched Pair</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-rose-500 inline-block"></span>Mismatch</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- VIZ -->
+            <div class="lg:col-span-3 bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-6">
+
+                <!-- Character display -->
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-widest mb-4">Character Array</p>
+                    <div id="charRow" class="flex flex-wrap gap-2 justify-center mb-3"></div>
+                    <!-- Index row -->
+                    <div id="indexRow" class="flex flex-wrap gap-2 justify-center"></div>
+                </div>
+
+                <!-- Pointer positions -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-center">
+                        <p class="text-xs text-slate-400 mb-1">LEFT pointer</p>
+                        <p class="text-2xl font-black text-amber-400 mono" id="leftLabel">—</p>
+                        <p class="text-xs text-slate-500 mono" id="leftChar">index: —</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-center">
+                        <p class="text-xs text-slate-400 mb-1">RIGHT pointer</p>
+                        <p class="text-2xl font-black text-cyan-400 mono" id="rightLabel">—</p>
+                        <p class="text-xs text-slate-500 mono" id="rightChar">index: —</p>
+                    </div>
+                </div>
+
+                <!-- Compare banner -->
+                <div id="compareBanner"
+                    class="hidden bg-slate-900 border border-slate-700 rounded-xl p-3 text-center mono">
+                    <span id="cmpLeft" class="text-2xl font-black text-amber-400"></span>
+                    <span class="text-slate-500 text-lg mx-3">vs</span>
+                    <span id="cmpRight" class="text-2xl font-black text-cyan-400"></span>
+                    <span id="cmpResult" class="ml-4 text-lg font-bold"></span>
+                </div>
+
+                <!-- Status -->
+                <div id="statusMsg"
+                    class="text-sm text-amber-300 italic bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2 min-h-[40px] flex items-center">
+                </div>
+
+                <!-- Verdict -->
+                <div id="verdict" class="hidden text-center py-4 rounded-xl text-xl font-black"></div>
+            </div>
+
+            <!-- CODE PANEL -->
+            <div class="lg:col-span-2 bg-slate-950 border border-slate-700 rounded-2xl overflow-hidden flex flex-col">
+                <div class="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <span class="ml-2 text-xs text-slate-400 mono">palindrome_check.cpp</span>
+                </div>
+                <pre class="p-4 text-xs leading-relaxed overflow-auto flex-1 text-slate-300 mono" id="codeBlock"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const codeLines = [
+            '// Palindrome Check — Two Pointer',
+            '// Time: O(n)   Space: O(1)',
+            '',
+            'bool isPalindrome(string s) {',
+            '    // Convert to lowercase',
+            '    transform(s.begin(), s.end(),',
+            '              s.begin(), ::tolower);',
+            '',
+            '    int left  = 0;',
+            '    int right = s.length() - 1;',
+            '',
+            '    while (left < right) {',
+            '        if (s[left] != s[right]) {',
+            '            return false;  // mismatch!',
+            '        }',
+            '        left++;   // move left inward',
+            '        right--;  // move right inward',
+            '    }',
+            '    return true;  // it is a palindrome!',
+            '}',
+        ];
+
+        function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function renderCode(activeLine = -1) {
+            document.getElementById('codeBlock').innerHTML = codeLines.map((l, i) =>
+                `<span class="code-line${i === activeLine ? ' active' : ''}">${escHtml(l) || '&nbsp;'}</span>`
+            ).join('\n');
+        }
+        renderCode();
+
+        // ─── STATE ────────────────────────────────────────────────────
+        let STR = 'racecar';
+        let steps = [], stepIdx = 0, playing = false, timer = null;
+        const speeds = [1200, 800, 500, 300, 150];
+        function getSpeed() { return speeds[parseInt(document.getElementById('speedRange').value) - 1]; }
+
+        // ─── CHAR BOX RENDERING ───────────────────────────────────────
+        function charColor(state) {
+            return state === 'left' ? 'bg-amber-400 text-slate-900 scale-110' :
+                state === 'right' ? 'bg-cyan-400 text-slate-900 scale-110' :
+                    state === 'both' ? 'bg-violet-400 text-slate-900 scale-110' :
+                        state === 'match' ? 'bg-emerald-400 text-slate-900' :
+                            state === 'mismatch' ? 'bg-rose-500 text-white' :
+                                'bg-slate-700 text-slate-300';
+        }
+
+        function renderChars(charStates) {
+            const row = document.getElementById('charRow');
+            const idxRow = document.getElementById('indexRow');
+            row.innerHTML = ''; idxRow.innerHTML = '';
+            charStates.forEach((cs, i) => {
+                const div = document.createElement('div');
+                div.className = `char-box w-12 h-12 flex items-center justify-center rounded-xl font-black text-xl shadow-md ${charColor(cs.state)} transform transition-all duration-300`;
+                div.id = `char-${i}`;
+                div.textContent = cs.ch.toUpperCase();
+                row.appendChild(div);
+
+                const idx = document.createElement('div');
+                idx.className = 'w-12 text-center text-xs text-slate-500 mono';
+                idx.textContent = i;
+                idxRow.appendChild(idx);
+            });
+        }
+
+        // ─── STEP GENERATOR ───────────────────────────────────────────
+        function generateSteps(s) {
+            const steps = [];
+            const n = s.length;
+            const baseState = () => s.split('').map(ch => ({ ch, state: 'default' }));
+
+            steps.push({
+                chars: baseState(), left: 0, right: n - 1, codeLine: 8,
+                msg: `Initialize: left=0, right=${n - 1}. String: "${s}"`
+            });
+
+            let L = 0, R = n - 1;
+            while (L < R) {
+                // Show pointers
+                const st1 = baseState();
+                st1[L].state = L === R ? 'both' : 'left'; st1[R].state = L === R ? 'both' : 'right';
+                // Mark already matched
+                for (let i = 0; i < L; i++) st1[i].state = 'match';
+                for (let i = R + 1; i < n; i++) st1[i].state = 'match';
+                steps.push({
+                    chars: st1, left: L, right: R, codeLine: 11,
+                    msg: `Comparing s[${L}]='${s[L]}' with s[${R}]='${s[R]}'`
+                });
+
+                if (s[L] !== s[R]) {
+                    const stM = baseState();
+                    stM[L].state = 'mismatch'; stM[R].state = 'mismatch';
+                    steps.push({
+                        chars: stM, left: L, right: R, codeLine: 12,
+                        msg: `MISMATCH! '${s[L]}' ≠ '${s[R]}' — not a palindrome!`, mismatch: true
+                    });
+                    steps.push({
+                        chars: stM, left: L, right: R, codeLine: 13,
+                        msg: `Return false.`, verdict: 'false', verdictMsg: `"${s}" is NOT a palindrome ✗`
+                    });
+                    return steps;
+                }
+
+                const stOk = baseState();
+                stOk[L].state = 'match'; stOk[R].state = 'match';
+                for (let i = 0; i < L; i++) stOk[i].state = 'match';
+                for (let i = R + 1; i < n; i++) stOk[i].state = 'match';
+                steps.push({
+                    chars: stOk, left: L, right: R, codeLine: 15,
+                    msg: `Match! '${s[L]}'='${s[R]}' ✓ — move pointers inward`, match: true
+                });
+
+                L++; R--;
+                const stAdv = baseState();
+                for (let i = 0; i < L; i++) stAdv[i].state = 'match';
+                for (let i = R + 1; i < n; i++) stAdv[i].state = 'match';
+                if (L <= R) { stAdv[L].state = 'left'; stAdv[R].state = L === R ? 'both' : 'right'; }
+                steps.push({
+                    chars: stAdv, left: L, right: R, codeLine: 16,
+                    msg: `left=${L}, right=${R} — moving inward`
+                });
+            }
+
+            // All matched
+            const stFinal = s.split('').map(ch => ({ ch, state: 'match' }));
+            steps.push({
+                chars: stFinal, left: L, right: R, codeLine: 18,
+                msg: `All pairs matched! Pointers crossed. It's a palindrome!`,
+                verdict: 'true', verdictMsg: `"${s}" IS a palindrome ✓`
+            });
+            return steps;
+        }
+
+        // ─── APPLY STEP ───────────────────────────────────────────────
+        function applyStep(idx) {
+            const s = steps[idx]; if (!s) return;
+            renderCode(s.codeLine);
+            renderChars(s.chars);
+            document.getElementById('statusMsg').textContent = s.msg || '';
+
+            // Left/right labels
+            const L = s.left, R = s.right, n = STR.length;
+            document.getElementById('leftLabel').textContent = L < n ? STR[L].toUpperCase() : '—';
+            document.getElementById('leftChar').textContent = `index: ${L < n ? L : '—'}`;
+            document.getElementById('rightLabel').textContent = R >= 0 && R < n ? STR[R].toUpperCase() : '—';
+            document.getElementById('rightChar').textContent = `index: ${R >= 0 && R < n ? R : '—'}`;
+
+            // Compare banner
+            const banner = document.getElementById('compareBanner');
+            if (L < n && R >= 0 && L <= R && s.codeLine >= 11 && s.codeLine <= 16) {
+                banner.classList.remove('hidden');
+                document.getElementById('cmpLeft').textContent = STR[L].toUpperCase();
+                document.getElementById('cmpRight').textContent = STR[R].toUpperCase();
+                const res = document.getElementById('cmpResult');
+                if (s.match) { res.textContent = '✓ Match'; res.className = 'ml-4 text-lg font-bold text-emerald-400'; }
+                else if (s.mismatch) { res.textContent = '✗ Mismatch'; res.className = 'ml-4 text-lg font-bold text-rose-500'; }
+                else { res.textContent = ''; }
+            } else { banner.classList.add('hidden'); }
+
+            // Verdict
+            const vd = document.getElementById('verdict');
+            if (s.verdict) {
+                vd.classList.remove('hidden');
+                if (s.verdict === 'true') {
+                    vd.className = 'text-center py-4 rounded-xl text-xl font-black bg-emerald-400/10 border border-emerald-400 text-emerald-400';
+                } else {
+                    vd.className = 'text-center py-4 rounded-xl text-xl font-black bg-rose-500/10 border border-rose-500 text-rose-400';
+                }
+                vd.textContent = s.verdictMsg;
+            } else { vd.classList.add('hidden'); }
+        }
+
+        function loadPreset(str) { document.getElementById('strInput').value = str; loadString(); }
+        function loadString() {
+            STR = (document.getElementById('strInput').value || 'racecar').toLowerCase().replace(/[^a-z]/g, '').slice(0, 16);
+            document.getElementById('strInput').value = STR;
+            reset();
+        }
+
+        function reset() {
+            clearInterval(timer); playing = false; stepIdx = 0;
+            steps = generateSteps(STR);
+            renderChars(STR.split('').map(ch => ({ ch, state: 'default' })));
+            renderCode(-1);
+            document.getElementById('statusMsg').textContent = '';
+            document.getElementById('verdict').classList.add('hidden');
+            document.getElementById('compareBanner').classList.add('hidden');
+            document.getElementById('leftLabel').textContent = '—'; document.getElementById('leftChar').textContent = 'index: —';
+            document.getElementById('rightLabel').textContent = '—'; document.getElementById('rightChar').textContent = 'index: —';
+            updateBtns();
+        }
+        function updateBtns() {
+            document.getElementById('btnPlay').disabled = playing;
+            document.getElementById('btnPause').disabled = !playing;
+            document.getElementById('btnStepF').disabled = playing || stepIdx >= steps.length;
+            document.getElementById('btnStepB').disabled = playing || stepIdx <= 0;
+        }
+        function playNext() {
+            if (stepIdx >= steps.length) { playing = false; clearInterval(timer); updateBtns(); return; }
+            applyStep(stepIdx++); updateBtns();
+        }
+        document.getElementById('btnPlay').addEventListener('click', () => {
+            if (stepIdx >= steps.length) reset();
+            playing = true; updateBtns(); timer = setInterval(playNext, getSpeed());
+        });
+        document.getElementById('btnPause').addEventListener('click', () => { playing = false; clearInterval(timer); updateBtns(); });
+        document.getElementById('btnStepF').addEventListener('click', () => { if (stepIdx < steps.length) { applyStep(stepIdx++); updateBtns(); } });
+        document.getElementById('btnStepB').addEventListener('click', () => { if (stepIdx > 1) { stepIdx -= 2; applyStep(stepIdx++); updateBtns(); } else { stepIdx = 0; reset(); } });
+        document.getElementById('btnReset').addEventListener('click', reset);
+        reset();
+    </script>
+</body>
+
+</html>

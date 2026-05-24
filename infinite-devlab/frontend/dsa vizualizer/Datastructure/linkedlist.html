@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linked List Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        code,
+        pre,
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .code-line {
+            display: block;
+            padding: 1px 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .code-line.active {
+            background: rgba(251, 191, 36, 0.18);
+            border-left-color: #fbbf24;
+            color: #fde68a;
+        }
+
+        .ctrl-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .ctrl-btn {
+            transition: all 0.15s;
+        }
+
+        .node-box {
+            transition: background 0.35s, border-color 0.35s, transform 0.35s;
+        }
+
+        .arrow-line {
+            transition: stroke 0.35s;
+        }
+
+        .pop-in {
+            animation: popIn 0.35s cubic-bezier(.22, .68, 0, 1.2) both;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.6)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.35s cubic-bezier(.22, .68, 0, 1.2) both;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <nav class="border-b border-slate-700/60 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
+            <span class="text-cyan-400 font-black text-lg tracking-tight">DSA<span class="text-white">.</span>vis</span>
+            <div class="flex gap-1 text-sm">
+                <a href="trees.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Trees</a>
+                <a href="linkedlist.html"
+                    class="px-3 py-1.5 rounded-md bg-cyan-400/10 text-cyan-400 font-semibold">Linked List</a>
+                <a href="stackqueue.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Stack & Queue</a>
+                <a href="strings.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Strings</a>
+                <a href="greedy.html"
+                    class="px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-colors">Greedy</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <p class="text-cyan-400 text-xs font-bold tracking-widest uppercase mb-1">Data Structure Visualization</p>
+            <h1 class="text-4xl font-black tracking-tight">Linked List Operations</h1>
+            <p class="text-slate-400 mt-1 text-sm">Reverse a Linked List · Find the Middle Node (Floyd's Algorithm)</p>
+        </div>
+
+        <!-- ALGO SELECT + CONTROLS -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <select id="algoSelect"
+                class="bg-slate-800 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-400">
+                <option value="reverse">Reverse a Linked List</option>
+                <option value="middle">Find the Middle Node</option>
+            </select>
+            <div class="flex gap-2">
+                <button id="btnStepB"
+                    class="ctrl-btn bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">⏮
+                    Back</button>
+                <button id="btnPlay"
+                    class="ctrl-btn bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-5 py-2 rounded-lg text-sm font-bold">▶
+                    Play</button>
+                <button id="btnPause"
+                    class="ctrl-btn bg-amber-400 hover:bg-amber-300 text-slate-900 px-4 py-2 rounded-lg text-sm font-bold"
+                    disabled>⏸ Pause</button>
+                <button id="btnStepF"
+                    class="ctrl-btn bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">Step
+                    ⏭</button>
+                <button id="btnReset"
+                    class="ctrl-btn bg-slate-700 hover:bg-rose-500/30 border border-slate-600 hover:border-rose-500 text-slate-300 hover:text-rose-400 px-4 py-2 rounded-lg text-sm font-semibold">↺
+                    Reset</button>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="text-slate-400 text-xs">Speed</span>
+                <input id="speedRange" type="range" min="1" max="5" value="3" class="w-24 accent-cyan-400" />
+            </div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="flex gap-4 mb-6 text-xs font-semibold">
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-cyan-400 inline-block"></span>Default</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-amber-400 inline-block"></span>Active Pointer</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-emerald-400 inline-block"></span>Done / Middle</span>
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded bg-violet-400 inline-block"></span>Previous</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- VIZ -->
+            <div class="lg:col-span-3 bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-6">
+                <!-- List render area -->
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-widest mb-4">Linked List</p>
+                    <div id="listContainer" class="flex flex-wrap items-center gap-1 min-h-[80px]"></div>
+                </div>
+
+                <!-- Pointer labels (for middle algo) -->
+                <div id="pointerArea" class="hidden">
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-widest mb-2">Pointer Positions</p>
+                    <div class="flex gap-4 text-sm">
+                        <span>🐢 Slow: <span id="slowLabel" class="text-amber-400 font-bold">—</span></span>
+                        <span>🐇 Fast: <span id="fastLabel" class="text-violet-400 font-bold">—</span></span>
+                    </div>
+                </div>
+
+                <!-- Arrows (for reverse algo) -->
+                <div id="arrowViz" class="overflow-x-auto">
+                    <svg id="arrowSvg" height="60" style="min-width:100%;display:block;"></svg>
+                </div>
+
+                <!-- Status -->
+                <div id="statusMsg"
+                    class="text-sm text-amber-300 italic min-h-[20px] bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2">
+                </div>
+            </div>
+
+            <!-- CODE -->
+            <div class="lg:col-span-2 bg-slate-950 border border-slate-700 rounded-2xl overflow-hidden flex flex-col">
+                <div class="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <span class="ml-2 text-xs text-slate-400 mono" id="codeTitle">reverse_list.cpp</span>
+                </div>
+                <pre class="p-4 text-xs leading-relaxed overflow-auto flex-1 text-slate-300 mono" id="codeBlock"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const VALS = [1, 2, 3, 4, 5, 6];
+
+        // ─── CODE DEFS ────────────────────────────────────────────────
+        const codes = {
+            reverse: {
+                title: 'reverse_linked_list.cpp',
+                lines: [
+                    '// Reverse a Singly Linked List',
+                    '// Time: O(n)  Space: O(1)',
+                    '',
+                    'ListNode* reverseList(ListNode* head) {',
+                    '    ListNode* prev = nullptr;',
+                    '    ListNode* curr = head;',
+                    '',
+                    '    while (curr != nullptr) {',
+                    '        ListNode* next = curr->next; // save next',
+                    '        curr->next = prev;           // reverse link',
+                    '        prev = curr;                 // advance prev',
+                    '        curr = next;                 // advance curr',
+                    '    }',
+                    '    return prev; // new head',
+                    '}',
+                ]
+            },
+            middle: {
+                title: 'find_middle_node.cpp',
+                lines: [
+                    '// Find Middle Node — Floyd\'s Algorithm',
+                    '// Time: O(n)  Space: O(1)',
+                    '',
+                    'ListNode* middleNode(ListNode* head) {',
+                    '    ListNode* slow = head;',
+                    '    ListNode* fast = head;',
+                    '',
+                    '    while (fast != nullptr &&',
+                    '           fast->next != nullptr) {',
+                    '        slow = slow->next;       // 1 step',
+                    '        fast = fast->next->next; // 2 steps',
+                    '    }',
+                    '    return slow; // middle node',
+                    '}',
+                ]
+            }
+        };
+
+        function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function renderCode(key, activeLine = -1) {
+            const cfg = codes[key];
+            document.getElementById('codeTitle').textContent = cfg.title;
+            document.getElementById('codeBlock').innerHTML = cfg.lines.map((l, i) =>
+                `<span class="code-line${i === activeLine ? ' active' : ''}">${escHtml(l) || '&nbsp;'}</span>`
+            ).join('\n');
+        }
+
+        // ─── NODE RENDERING ───────────────────────────────────────────
+        function nodeColor(state) {
+            return state === 'active' ? 'bg-amber-400 text-slate-900' :
+                state === 'done' ? 'bg-emerald-400 text-slate-900' :
+                    state === 'prev' ? 'bg-violet-400 text-slate-900' :
+                        'bg-cyan-400 text-slate-900';
+        }
+
+        function renderList(states, arrows = null, arrowsReversed = null) {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = '';
+            const n = VALS.length;
+
+            VALS.forEach((v, i) => {
+                const st = states[i] || 'default';
+                // Node box
+                const box = document.createElement('div');
+                box.className = `node-box pop-in flex items-center justify-center w-12 h-12 rounded-xl font-black text-lg shadow-lg ${nodeColor(st)}`;
+                box.style.animationDelay = `${i * 30}ms`;
+                box.textContent = v;
+                container.appendChild(box);
+
+                // Arrow
+                if (i < n - 1) {
+                    const arr = document.createElement('div');
+                    const rev = arrowsReversed && arrowsReversed[i];
+                    arr.className = `text-2xl font-bold transition-all duration-300 ${rev ? 'text-violet-400 rotate-180' : 'text-slate-500'}`;
+                    arr.textContent = '→';
+                    container.appendChild(arr);
+                }
+            });
+
+            // NULL terminator
+            const nullEl = document.createElement('div');
+            nullEl.className = 'text-slate-500 font-mono text-sm ml-1';
+            nullEl.textContent = '→ null';
+            container.appendChild(nullEl);
+        }
+
+        // ─── STEP GENERATORS ──────────────────────────────────────────
+        function generateReverseSteps() {
+            const steps = [];
+            const n = VALS.length;
+            let prev = -1, curr = 0;
+            const rev = new Array(n - 1).fill(false);
+            const states = new Array(n).fill('default');
+
+            steps.push({ states: [...states], rev: [...rev], codeLine: 4, msg: 'Initialize: prev=nullptr, curr=head' });
+
+            while (curr < n) {
+                const ns = [...states]; const nr = [...rev];
+                ns[curr] = 'active';
+                if (prev >= 0) ns[prev] = 'prev';
+                steps.push({ states: ns, rev: nr, codeLine: 8, msg: `Loop: curr=${VALS[curr]}, prev=${prev >= 0 ? VALS[prev] : 'nullptr'}` });
+
+                const ns2 = [...ns];
+                if (curr > 0) { nr[curr - 1] = true; } // reverse arrow from prev to curr
+                steps.push({ states: ns2, rev: [...nr], codeLine: 9, msg: `Save next = curr->next (node ${curr + 1 < n ? VALS[curr + 1] : 'nullptr'})` });
+
+                steps.push({ states: ns2, rev: [...nr], codeLine: 10, msg: `curr->next = prev (reverse the link)` });
+
+                const ns3 = [...ns2];
+                ns3[curr] = 'done';
+                if (prev >= 0) ns3[prev] = 'done';
+                steps.push({ states: ns3, rev: [...nr], codeLine: 11, msg: `prev = curr (advance prev to ${VALS[curr]})` });
+                prev = curr; curr++;
+                steps.push({ states: ns3, rev: [...nr], codeLine: 12, msg: `curr = next (advance curr)` });
+            }
+
+            const finalStates = new Array(n).fill('done');
+            steps.push({ states: finalStates, rev: new Array(n - 1).fill(true), codeLine: 13, msg: `Reversal complete! New head = ${VALS[n - 1]}` });
+            return steps;
+        }
+
+        function generateMiddleSteps() {
+            const steps = [];
+            const n = VALS.length;
+            let slow = 0, fast = 0;
+            const states = new Array(n).fill('default');
+
+            steps.push({ states: [...states], slow, fast, codeLine: 4, msg: 'Initialize: slow=head, fast=head' });
+
+            while (fast < n && fast + 1 < n) {
+                const ns = [...states];
+                ns[slow] = 'active'; ns[fast] = 'prev';
+                if (slow !== fast) ns[fast] = 'prev'; else ns[fast] = 'active';
+                steps.push({ states: ns, slow, fast, codeLine: 7, msg: `Check: fast(${VALS[fast]}) & fast->next(${VALS[fast + 1]}) exist` });
+                slow++; fast += 2;
+                const ns2 = [...states];
+                if (fast < n) ns2[fast] = 'prev'; ns2[slow] = 'active';
+                steps.push({ states: ns2, slow, fast: Math.min(fast, n - 1), codeLine: 9, msg: `slow→${VALS[slow]}  fast→${fast < n ? VALS[fast] : 'end'}` });
+            }
+
+            const finalStates = new Array(n).fill('default');
+            finalStates[slow] = 'done';
+            steps.push({ states: finalStates, slow, fast: Math.min(fast, n - 1), codeLine: 12, msg: `Middle node found: ${VALS[slow]} (index ${slow})` });
+            return steps;
+        }
+
+        // ─── ENGINE ───────────────────────────────────────────────────
+        let steps = [], stepIdx = 0, playing = false, timer = null;
+        const speeds = [1200, 800, 500, 300, 150];
+        function getSpeed() { return speeds[parseInt(document.getElementById('speedRange').value) - 1]; }
+
+        function applyStep(idx) {
+            const s = steps[idx];
+            if (!s) return;
+            const algo = document.getElementById('algoSelect').value;
+            renderCode(algo, s.codeLine);
+            renderList(s.states, null, algo === 'reverse' ? s.rev : null);
+            document.getElementById('statusMsg').textContent = s.msg || '';
+
+            const pa = document.getElementById('pointerArea');
+            if (algo === 'middle') {
+                pa.classList.remove('hidden');
+                document.getElementById('slowLabel').textContent = s.slow !== undefined ? `node ${VALS[s.slow]}` : '—';
+                document.getElementById('fastLabel').textContent = s.fast !== undefined && s.fast < VALS.length ? `node ${VALS[s.fast]}` : 'null';
+            } else { pa.classList.add('hidden'); }
+        }
+
+        function reset() {
+            clearInterval(timer); playing = false; stepIdx = 0;
+            const algo = document.getElementById('algoSelect').value;
+            steps = algo === 'reverse' ? generateReverseSteps() : generateMiddleSteps();
+            renderList(new Array(VALS.length).fill('default'), null, null);
+            renderCode(algo, -1);
+            document.getElementById('statusMsg').textContent = '';
+            document.getElementById('pointerArea').classList.add('hidden');
+            updateBtns();
+        }
+        function updateBtns() {
+            document.getElementById('btnPlay').disabled = playing;
+            document.getElementById('btnPause').disabled = !playing;
+            document.getElementById('btnStepF').disabled = playing || stepIdx >= steps.length;
+            document.getElementById('btnStepB').disabled = playing || stepIdx <= 0;
+        }
+        function playNext() {
+            if (stepIdx >= steps.length) { playing = false; clearInterval(timer); updateBtns(); return; }
+            applyStep(stepIdx++); updateBtns();
+        }
+        document.getElementById('btnPlay').addEventListener('click', () => {
+            if (stepIdx >= steps.length) reset();
+            playing = true; updateBtns(); timer = setInterval(playNext, getSpeed());
+        });
+        document.getElementById('btnPause').addEventListener('click', () => { playing = false; clearInterval(timer); updateBtns(); });
+        document.getElementById('btnStepF').addEventListener('click', () => { if (stepIdx < steps.length) { applyStep(stepIdx++); updateBtns(); } });
+        document.getElementById('btnStepB').addEventListener('click', () => {
+            if (stepIdx > 1) { stepIdx -= 2; applyStep(stepIdx++); updateBtns(); } else { stepIdx = 0; reset(); }
+        });
+        document.getElementById('btnReset').addEventListener('click', reset);
+        document.getElementById('algoSelect').addEventListener('change', reset);
+        reset();
+    </script>
+</body>
+
+</html>

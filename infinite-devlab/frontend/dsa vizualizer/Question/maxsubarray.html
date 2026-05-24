@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Max Subarray (Kadane's) — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        /* Window Brackets */
+        .bracket-curr,
+        .bracket-max {
+            position: absolute;
+            height: 3px;
+            border-radius: 2px;
+            transition: left .3s ease, width .3s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Top Bracket (Current Window) */
+        .bracket-curr {
+            top: -14px;
+            background: var(--text);
+        }
+
+        .bracket-curr::before,
+        .bracket-curr::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 3px;
+            height: 8px;
+            background: var(--text);
+            border-radius: 2px;
+        }
+
+        .bracket-curr::before {
+            left: 0;
+        }
+
+        .bracket-curr::after {
+            right: 0;
+        }
+
+        /* Bottom Bracket (Max Window) */
+        .bracket-max {
+            bottom: -28px;
+            background: var(--accent);
+        }
+
+        .bracket-max::before,
+        .bracket-max::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .bracket-max::before {
+            left: 0;
+        }
+
+        .bracket-max::after {
+            right: 0;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">O(n)
+                Greedy / DP</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Algorithm · Arrays
+                </p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">KADANE'S <span
+                        class="text-theme-accent">ALGORITHM</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Finds the contiguous
+                    subarray with the largest sum in O(n) time. It elegantly decides whether to add the current element
+                    to the existing sequence or start a fresh sequence.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Run C++ Kadane's</button>
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent hover:text-theme-accent transition-all">↺
+                    Generate Array</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="600" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Variables</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-arr" class="font-display text-3xl text-theme-text leading-none">—</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">arr[i]</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-curr" class="font-display text-3xl text-theme-text leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">curr_sum</div>
+                        </div>
+                        <div
+                            class="bg-theme-bg border border-theme-accent rounded-lg p-3 col-span-2 shadow-[inset_0_0_10px_rgba(45,212,191,0.1)]">
+                            <div id="s-max" class="font-display text-4xl text-theme-accent font-bold leading-none">-∞
+                            </div>
+                            <div class="font-code text-[0.6rem] text-theme-accent uppercase mt-1 tracking-widest">
+                                max_sum</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div>
+                            <span>Array Element</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border-2 border-theme-text bg-theme-bg scale-110"></div>
+                            <span class="text-theme-text font-bold">Scanning Cursor</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-2 rounded bg-theme-text"></div>
+                            <span class="text-theme-text">Current Subarray</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-2 rounded bg-theme-accent"></div>
+                            <span class="text-theme-accent font-bold">Max Subarray (Best)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">Key
+                        Insight</span>
+                    <div
+                        class="font-ui text-[0.75rem] text-theme-text leading-relaxed bg-theme-bg border border-theme-border rounded-lg p-3">
+                        If <code>curr_sum</code> drops below the current element <code>arr[i]</code>, the previous
+                        accumulated numbers are dragging us down. <br><br><b class="text-theme-accent">Drop them and
+                            start a fresh sequence from <code>arr[i]</code>.</b>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
+                    IDLE — Press Run</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col justify-center items-center relative shadow-inner min-h-[300px] overflow-x-auto">
+
+                    <div class="relative inline-block mt-8 mb-8" id="array-wrapper">
+
+                        <div class="bracket-curr" id="b-curr">
+                            <div class="absolute -top-5 left-1/2 -translate-x-1/2 font-code text-[0.65rem] font-bold text-theme-text whitespace-nowrap"
+                                id="l-curr">curr_sum</div>
+                        </div>
+
+                        <div id="arr-row" class="flex gap-2 relative z-20">
+                        </div>
+
+                        <div class="bracket-max" id="b-max">
+                            <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 font-code text-[0.65rem] font-bold text-theme-accent whitespace-nowrap"
+                                id="l-max">max_sum</div>
+                        </div>
+
+                    </div>
+
+                    <div id="result" class="text-center font-code text-sm text-theme-muted mt-4 w-full">// Array
+                        generated. Ready to calculate max subarray.</div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">int</span> <span
+                            class="text-theme-accent">maxSubArray</span>(<span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp;
+                        arr) {</div>
+                    <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">int</span>
+                        max_sum = INT_MIN;</div>
+                    <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">int</span>
+                        curr_sum = 0;</div>
+                    <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">for</span>
+                        (<span class="text-pink-400">int</span> i = 0; i &lt; arr.size(); i++) {</div>
+                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-muted italic">// Extend window or start fresh from arr[i]</span></div>
+                    <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;curr_sum = <span
+                            class="text-theme-accent">max</span>(arr[i], curr_sum + arr[i]);</div>
+                    <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-muted italic">// Update overall best</span></div>
+                    <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (curr_sum > max_sum) {</div>
+                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_sum =
+                        curr_sum;</div>
+                    <div id="p10" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                    <div id="p11" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                    <div id="p12" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">return</span> max_sum;</div>
+                    <div id="p13" class="px-2 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], els = [], N = 12, spd = 600, running = false;
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        // Bracket rendering calculation using offsets
+        function updateBracket(id, startIdx, endIdx, value, textPrefix) {
+            const b = $(id);
+            const lbl = $(id.replace('b-', 'l-'));
+            if (startIdx < 0 || endIdx < 0 || startIdx > endIdx) {
+                b.style.opacity = '0'; return;
+            }
+
+            const startEl = els[startIdx].box;
+            const endEl = els[endIdx].box;
+
+            const offsetLeft = startEl.offsetLeft;
+            const width = (endEl.offsetLeft + endEl.offsetWidth) - offsetLeft;
+
+            b.style.opacity = '1';
+            b.style.left = `${offsetLeft}px`;
+            b.style.width = `${width}px`;
+            lbl.textContent = `${textPrefix}: ${value}`;
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; els = [];
+            const container = $('arr-row');
+            container.innerHTML = '';
+
+            // Generate mix of pos/neg, force at least one positive
+            let hasPos = false;
+            for (let i = 0; i < N; i++) {
+                let val = Math.floor(Math.random() * 18) - 8;
+                if (val > 0) hasPos = true;
+                if (i === N - 1 && !hasPos) val = 5;
+
+                A.push(val);
+
+                const el = document.createElement('div');
+                // High Visibility Skeleton
+                el.className = 'w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent/10 border-2 border-slate-500 text-theme-text transition-all duration-300 z-10 relative';
+
+                // Dim red for negative numbers for visual cue without breaking single-color theme heavily
+                if (val < 0) {
+                    el.classList.add('text-red-400/80');
+                }
+
+                el.textContent = val;
+
+                // Index Label
+                const idxLbl = document.createElement('span');
+                idxLbl.className = 'absolute -bottom-5 text-[0.6rem] font-code text-theme-muted opacity-60';
+                idxLbl.textContent = `[${i}]`;
+
+                el.appendChild(idxLbl);
+                container.appendChild(el);
+                els.push({ box: el });
+            }
+
+            $('s-arr').textContent = '—'; $('s-curr').textContent = '0'; $('s-max').textContent = '-∞';
+
+            const r = $('result');
+            r.className = 'text-center font-code text-sm text-theme-muted mt-4 w-full transition-colors';
+            r.textContent = '// Array generated. Ready to calculate max subarray.';
+
+            updateBracket('b-curr', -1, -1, 0, '');
+            updateBracket('b-max', -1, -1, 0, '');
+
+            setSpill('idle', 'READY (O(n) MODE)');
+            hl(null);
+        }
+
+        function setElState(index, state) {
+            const b = els[index].box;
+
+            // Base Class
+            b.className = 'w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold transition-all duration-300 z-10 relative';
+            if (A[index] < 0) b.classList.add('text-red-400/80'); else b.classList.add('text-theme-text');
+
+            if (state === 'scan') {
+                b.classList.add('bg-theme-bg', 'border-2', 'border-theme-text', 'scale-110', 'shadow-[0_0_15px_rgba(255,255,255,0.2)]', 'z-20');
+            } else if (state === 'best') {
+                b.classList.add('bg-theme-accent/20', 'border-2', 'border-theme-accent');
+                if (A[index] < 0) b.classList.replace('text-red-400/80', 'text-red-300');
+            } else {
+                b.classList.add('bg-theme-accent/10', 'border-2', 'border-slate-500');
+            }
+        }
+
+        async function runKadane() {
+            if (running) return;
+            running = true; $('btn-gen').disabled = true; $('btn-run').disabled = true;
+
+            setSpill('run', 'RUNNING KADANE...');
+            const r = $('result');
+            r.className = 'text-center font-code text-sm text-theme-text mt-4 w-full';
+
+            let maxSum = -Infinity;
+            let currSum = 0;
+
+            let tempStart = 0;
+            let bestStart = -1;
+            let bestEnd = -1;
+
+            hl('p2'); await sleep(spd / 2);
+            hl('p3'); await sleep(spd / 2);
+
+            for (let i = 0; i < N; i++) {
+                hl('p4');
+                els.forEach((_, idx) => setElState(idx, 'idle'));
+                setElState(i, 'scan');
+
+                $('s-arr').textContent = A[i];
+                if (A[i] < 0) $('s-arr').classList.add('text-red-400'); else $('s-arr').classList.remove('text-red-400');
+
+                await sleep(spd / 2);
+
+                hl('p6');
+                let extendedSum = currSum + A[i];
+
+                // Decide to extend or start fresh
+                if (A[i] > extendedSum) {
+                    currSum = A[i];
+                    tempStart = i; // Reset window start
+                    r.textContent = `// arr[i] (${A[i]}) > curr_sum + arr[i] (${extendedSum}). Dropping past baggage, starting fresh.`;
+                } else {
+                    currSum = extendedSum;
+                    r.textContent = `// Extending window. New curr_sum = ${currSum}.`;
+                }
+
+                $('s-curr').textContent = currSum;
+                updateBracket('b-curr', tempStart, i, currSum, 'curr_sum');
+                await sleep(spd);
+
+                hl('p8');
+                if (currSum > maxSum) {
+                    await sleep(spd / 2);
+                    hl('p9');
+                    maxSum = currSum;
+                    bestStart = tempStart;
+                    bestEnd = i;
+
+                    $('s-max').textContent = maxSum;
+                    updateBracket('b-max', bestStart, bestEnd, maxSum, 'BEST');
+                    r.className = 'text-center font-code text-sm text-theme-accent font-bold mt-4 w-full';
+                    r.textContent = `// ✓ New max_sum found: ${maxSum}!`;
+                }
+                await sleep(spd);
+            }
+
+            hl('p12');
+
+            // Highlight the final best window permanently
+            els.forEach((_, idx) => {
+                if (idx >= bestStart && idx <= bestEnd) setElState(idx, 'best');
+                else setElState(idx, 'idle');
+            });
+
+            r.className = 'text-center font-code text-sm text-theme-accent font-bold mt-4 w-full';
+            r.textContent = `✓ Algorithm Complete. Max Subarray Sum is ${maxSum} (Indices [${bestStart}..${bestEnd}]).`;
+            setSpill('found', 'COMPLETE ✓');
+
+            running = false; $('btn-gen').disabled = false; $('btn-run').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = runKadane;
+        $('spd').oninput = function () { spd = 1600 - parseInt(this.value); };
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        window.onresize = () => {
+            if (!running && $('s-max').textContent !== '-∞') {
+                // If it's already run, find the ranges based on the visualizer logic state
+                // This is a quick hack just to hide brackets on resize if they break alignment
+                updateBracket('b-curr', -1, -1, 0, '');
+                updateBracket('b-max', -1, -1, 0, '');
+            }
+        };
+
+        // Init
+        setTimeout(genData, 50);
+    </script>
+</body>
+
+</html>

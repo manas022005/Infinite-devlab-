@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Top K Elements — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Custom Box Animations */
+        .el-box {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .heap-box {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .anim-pop {
+            animation: popIn 0.4s ease forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Heaps
+                / Priority Queue</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Algorithm · K-th
+                    Elements</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">TOP K <span
+                        class="text-theme-accent">ELEMENTS</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Finds the K largest
+                    elements in an array using a Min-Heap of size K. Instead of sorting the whole array O(N log N), this
+                    optimizes the process to O(N log K).</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <div class="flex items-center bg-theme-bg border border-theme-border rounded-lg px-3 py-1">
+                    <span class="font-code text-sm text-theme-muted mr-2">K =</span>
+                    <input id="inp-k" type="number" value="3" min="1" max="6"
+                        class="font-code text-sm py-1.5 bg-transparent text-theme-accent font-bold focus:outline-none w-12 text-center" />
+                </div>
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Run Top K</button>
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    New Array</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="600" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-heap" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Heap Size</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-push" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Push / Pops</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div>
+                            <span>Unprocessed (Visible)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border-2 border-theme-accent bg-theme-bg scale-110"></div>
+                            <span class="text-theme-text font-bold">Comparing Now</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Stored in Heap</span>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-40">
+                            <div class="w-4 h-4 rounded border border-slate-700/50 bg-theme-accent/5"></div>
+                            <span>Discarded</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">Key
+                        Insight</span>
+                    <div
+                        class="font-ui text-[0.75rem] text-theme-text leading-relaxed bg-theme-bg border border-theme-border rounded-lg p-3">
+                        A <b>Min-Heap</b> of size K keeps the smallest element at the top. If a new number is bigger
+                        than the heap's minimum, the minimum gets kicked out!
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
+                    IDLE — Press Run</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col items-center justify-center gap-8 relative shadow-inner min-h-[380px] overflow-x-auto">
+
+                    <div class="w-full max-w-3xl flex flex-col items-center">
+                        <span class="font-code text-[0.65rem] text-theme-muted mb-3 tracking-widest uppercase">Input
+                            Array</span>
+                        <div id="arr-row" class="flex flex-wrap justify-center gap-2 relative z-20">
+                        </div>
+                    </div>
+
+                    <div class="w-3/4 h-[1px] bg-theme-border my-2"></div>
+
+                    <div class="w-full max-w-xl flex flex-col items-center">
+                        <span
+                            class="font-code text-[0.65rem] text-theme-accent mb-3 tracking-widest uppercase flex items-center gap-2">
+                            Min-Heap (Size K) <span id="heap-min-lbl"
+                                class="bg-theme-accent/20 px-2 py-0.5 rounded text-theme-text hidden">Min: <b
+                                    id="min-val">—</b></span>
+                        </span>
+                        <div id="heap-row"
+                            class="flex flex-wrap justify-center gap-3 relative z-20 min-h-[60px] p-4 border border-theme-border rounded-xl bg-theme-bg w-full">
+                        </div>
+                    </div>
+
+                    <div id="result" class="absolute bottom-4 font-code text-sm text-theme-muted">// Array generated.
+                        Ready to build heap.</div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">vector</span>&lt;<span
+                            class="text-pink-400">int</span>&gt; <span
+                            class="text-theme-accent">topKElements</span>(<span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp;
+                        arr, <span class="text-pink-400">int</span> k) {</div>
+                    <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-theme-accent">priority_queue</span>&lt;<span class="text-pink-400">int</span>,
+                        <span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">int</span>&gt;, <span
+                            class="text-theme-accent">greater</span>&lt;<span class="text-pink-400">int</span>&gt;&gt;
+                        minHeap;</div>
+                    <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">for</span>
+                        (<span class="text-pink-400">int</span> num : arr) {</div>
+                    <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;minHeap.<span
+                            class="text-theme-accent">push</span>(num);
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-muted italic">// Add to Heap</span></div>
+                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (minHeap.size() > k) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-muted italic">// Heap exceeds size K</span></div>
+                    <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minHeap.<span
+                            class="text-theme-accent">pop</span>();
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-theme-muted italic">// Remove the smallest element</span></div>
+                    <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                    <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">return</span> extractElements(minHeap);</div>
+                    <div id="p10" class="px-2 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], elsA = [], heapEls = [];
+        let N = 12, spd = 600, running = false, heapOps = 0;
+
+        function updateStats(hSize) {
+            $('s-heap').textContent = hSize;
+            $('s-push').textContent = heapOps;
+        }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; elsA = []; heapEls = []; heapOps = 0; updateStats(0);
+
+            const container = $('arr-row');
+            container.innerHTML = '';
+            $('heap-row').innerHTML = '<span class="font-code text-xs text-theme-muted flex items-center justify-center w-full h-full opacity-50">Heap is empty</span>';
+            $('heap-min-lbl').classList.add('hidden');
+
+            for (let i = 0; i < N; i++) {
+                let val = Math.floor(Math.random() * 90) + 10;
+                A.push(val);
+
+                const wrap = document.createElement('div');
+                wrap.className = 'relative flex flex-col items-center pb-5 transition-opacity duration-300';
+
+                const el = document.createElement('div');
+                // High Visibility Skeleton
+                el.className = 'el-box w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent/10 border-2 border-slate-500 text-theme-muted transition-all duration-300';
+                el.textContent = val;
+
+                const idxLbl = document.createElement('span');
+                idxLbl.className = 'absolute bottom-0 text-[0.6rem] font-code text-theme-muted opacity-80';
+                idxLbl.textContent = `[${i}]`;
+
+                wrap.appendChild(el);
+                wrap.appendChild(idxLbl);
+                container.appendChild(wrap);
+                elsA.push({ box: el, wrap: wrap });
+            }
+
+            setSpill('idle', 'READY (O(N LOG K))');
+            hl(null);
+            $('result').textContent = '// Generated new array. Enter K and start.';
+        }
+
+        function setArrState(index, state) {
+            const b = elsA[index].box;
+            const wrap = elsA[index].wrap;
+
+            b.className = 'el-box w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold transition-all duration-300';
+
+            if (state === 'scan') {
+                b.classList.add('bg-theme-bg', 'border-2', 'border-theme-accent', 'text-theme-text', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.3)]', 'z-10');
+                wrap.classList.remove('opacity-40');
+            } else if (state === 'added') {
+                b.classList.add('bg-theme-accent/20', 'border-2', 'border-theme-accent', 'text-theme-text');
+                wrap.classList.remove('opacity-40');
+            } else if (state === 'discard') {
+                b.classList.add('bg-theme-accent/5', 'border-2', 'border-slate-700/50', 'text-theme-muted');
+                wrap.classList.add('opacity-40');
+            } else {
+                b.classList.add('bg-theme-accent/10', 'border-2', 'border-slate-500', 'text-theme-muted');
+                wrap.classList.remove('opacity-40');
+            }
+        }
+
+        function renderHeap(heapArr) {
+            const hRow = $('heap-row');
+            hRow.innerHTML = '';
+
+            if (heapArr.length === 0) {
+                hRow.innerHTML = '<span class="font-code text-xs text-theme-muted flex items-center justify-center w-full h-full opacity-50">Heap is empty</span>';
+                $('heap-min-lbl').classList.add('hidden');
+                return;
+            }
+
+            $('heap-min-lbl').classList.remove('hidden');
+            $('min-val').textContent = heapArr[0]; // Assumes heap is sorted asc
+
+            heapArr.forEach((val, i) => {
+                const el = document.createElement('div');
+                // Heap items are always highly visible (solid accent)
+                el.className = 'heap-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent text-theme-bg shadow-[0_0_12px_rgba(45,212,191,0.4)] anim-pop relative';
+                el.textContent = val;
+
+                // Highlight the root (minimum) explicitly
+                if (i === 0) {
+                    el.classList.add('border-2', 'border-white');
+                    const label = document.createElement('span');
+                    label.className = 'absolute -top-3 bg-theme-bg text-theme-text text-[0.55rem] px-1 rounded border border-theme-border';
+                    label.textContent = 'MIN';
+                    el.appendChild(label);
+                }
+
+                hRow.appendChild(el);
+            });
+            updateStats(heapArr.length);
+        }
+
+        async function runTopK() {
+            if (running) return;
+            const kVal = parseInt($('inp-k').value);
+            if (isNaN(kVal) || kVal < 1 || kVal > N) {
+                alert(`Please enter a valid K (1 to ${N})`);
+                return;
+            }
+
+            running = true;
+            $('btn-run').disabled = true; $('btn-gen').disabled = true;
+            elsA.forEach((_, i) => setArrState(i, 'idle'));
+
+            let H = []; // Internal array to simulate Min-Heap (we keep it sorted asc, H[0] is min)
+            heapOps = 0; updateStats(0);
+
+            setSpill('run', 'BUILDING HEAP...');
+            $('result').textContent = `// Starting Top ${kVal} search using a Min-Heap.`;
+
+            hl('p1'); await sleep(spd / 2);
+            hl('p2'); await sleep(spd / 2);
+
+            for (let i = 0; i < N; i++) {
+                hl('p3');
+                setArrState(i, 'scan');
+                await sleep(spd / 2);
+
+                hl('p4');
+                H.push(A[i]);
+                H.sort((a, b) => a - b); // Maintaining Min-Heap visually
+                heapOps++;
+                renderHeap(H);
+                $('result').textContent = `// Pushed ${A[i]} to Heap.`;
+                await sleep(spd);
+
+                if (H.length > kVal) {
+                    hl('p5'); await sleep(spd / 2);
+                    hl('p6');
+
+                    const removed = H.shift(); // Pop minimum
+                    heapOps++;
+
+                    // Visually reflect removal
+                    renderHeap(H);
+                    $('result').textContent = `// Heap size > K. Popped minimum element (${removed}).`;
+
+                    // The element that just got discarded (either A[i] or something older)
+                    // Visual Hack: If A[i] was just removed, mark it discarded. Otherwise, added.
+                    if (removed === A[i]) {
+                        setArrState(i, 'discard');
+                    } else {
+                        setArrState(i, 'added');
+                        // Find the original index of 'removed' and dim it
+                        const origIdx = A.indexOf(removed);
+                        if (origIdx !== -1) setArrState(origIdx, 'discard');
+                    }
+                    await sleep(spd);
+                } else {
+                    setArrState(i, 'added');
+                }
+            }
+
+            hl('p9');
+            $('result').className = 'absolute bottom-4 font-code text-sm text-theme-accent font-bold';
+            $('result').textContent = `✓ Done! The Top ${kVal} elements are: [${H.join(', ')}].`;
+            setSpill('found', 'COMPLETE ✓');
+
+            running = false;
+            $('btn-run').disabled = false; $('btn-gen').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = runTopK;
+        // Inverse speed slider
+        $('spd').oninput = function () { spd = 1700 - parseInt(this.value); };
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        // Initialize
+        setTimeout(genData, 50);
+    </script>
+</body>
+
+</html>

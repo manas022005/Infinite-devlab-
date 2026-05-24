@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Sliding Window Visualizer — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@400;500;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)',
+                            accent2: 'var(--accent2)', yellow: 'var(--devlab-yellow)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Poppins', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════════
+       TOKENS (INFINITE DEVLAB THEME - SKY BLUE VARIANT)
+    ═══════════════════════════════════════════ */
+        :root {
+            --bg: #0B0F19;
+            --surf: #111827;
+            --border: #1F2937;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --accent: #0EA5E9;
+            /* Sky Blue for Patterns */
+            --accent2: #0284C7;
+            --devlab-yellow: #FBBF24;
+            --nav-height: 70px;
+        }
+
+        html.light {
+            --bg: #F3F4F6;
+            --surf: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #111827;
+            --muted: #4B5563;
+            --accent: #0284C7;
+            --accent2: #0369A1;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        /* Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(14, 165, 233, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(14, 165, 233, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════
+       GLOBAL NAVBAR
+    ═══════════════════════════════════════════ */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-infinite {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-devlab {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--devlab-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .nav-links a {
+            font-family: var(--font-ui);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-login {
+            font-family: var(--font-ui);
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: var(--surf);
+        }
+
+        .btn-register {
+            font-family: var(--font-ui);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-register:hover {
+            background: var(--accent2);
+        }
+
+        /* Theme Toggle */
+        .th-btn {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surf);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .th-btn .kn {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        html.light .th-btn .kn {
+            transform: translateX(18px);
+            background: var(--accent);
+        }
+
+        @media (max-width: 950px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .btn-login,
+            .btn-register {
+                display: none;
+            }
+
+            .global-nav {
+                padding: 0 12px;
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+       VISUALIZER SPECIFICS
+    ═══════════════════════════════════════════ */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Window Overlays */
+        #window-overlay {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 8px;
+            background: rgba(14, 165, 233, 0.15);
+            border: 2px solid rgba(14, 165, 233, 0.5);
+            pointer-events: none;
+            transition: left 0.3s ease, width 0.3s ease, opacity 0.25s;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        #window-overlay.visible {
+            opacity: 1;
+        }
+
+        #best-overlay {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 8px;
+            background: rgba(14, 165, 233, 0.05);
+            border: 2px dashed rgba(14, 165, 233, 0.8);
+            pointer-events: none;
+            transition: left 0.3s ease, width 0.3s ease, opacity 0.25s;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        #best-overlay.visible {
+            opacity: 1;
+        }
+
+        /* Custom Box Animations */
+        .el-box {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15) translateY(-5px);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .anim-pop {
+            animation: pop 0.4s ease forwards;
+        }
+
+        .ptr-label {
+            transition: opacity 0.3s;
+        }
+
+        /* Fixed Opacity Classes for JS Toggling (Mapped to Sky Blue: 14, 165, 233) */
+        .bg-theme-accent-5 {
+            background-color: rgba(14, 165, 233, 0.05);
+        }
+
+        .bg-theme-accent-10 {
+            background-color: rgba(14, 165, 233, 0.1);
+        }
+
+        .bg-theme-accent-20 {
+            background-color: rgba(14, 165, 233, 0.2);
+        }
+
+        .border-theme-accent-50 {
+            border-color: rgba(14, 165, 233, 0.5);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300 pt-[70px]">
+    <div class="aurora"></div>
+
+    <!-- GLOBAL NAVBAR -->
+    <nav class="global-nav">
+        <div class="nav-left">
+            <a href="#" class="logo-link">
+                <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+                </svg>
+                <span class="logo-infinite">INFINITE</span>
+                <span class="logo-devlab">DEVLAB</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">CSS Lab</a>
+                <a href="#">Codebreaker</a>
+                <a href="#" class="active">DSA Visualizer</a>
+                <a href="#">Problem Solver</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-login">Login</button>
+            <button class="btn-register">Register</button>
+            <button class="th-btn" id="thbtn" aria-label="Toggle theme">
+                <span class="kn" id="thkn">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <a href="#"
+                    class="inline-flex items-center gap-2 text-theme-muted hover:text-theme-accent text-sm font-semibold mb-4 transition-colors">
+                    <span>←</span> Back to Patterns
+                </a>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Algorithm
+                    Technique · O(n)</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">SLIDING <span
+                        class="text-theme-accent">WINDOW</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium" id="header-desc">
+                    Maintains a window of elements to solve subarray/substring problems efficiently without nested
+                    loops.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <select id="probSelect"
+                    class="bg-theme-surf border border-theme-border text-theme-text rounded-lg px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-theme-accent transition-colors cursor-pointer shadow-sm w-[260px]">
+                    <option value="maxsum">Max Sum Subarray (Fixed K)</option>
+                    <option value="minsum">Min Sum Subarray (Fixed K)</option>
+                    <option value="longestuniq">Longest Unique Substring</option>
+                    <option value="maxlt">Longest Subarray (Sum ≤ K)</option>
+                </select>
+
+                <div id="k-section"
+                    class="flex items-center gap-2 border border-theme-border bg-theme-surf px-3 py-1.5 rounded-lg">
+                    <span class="font-code text-xs text-theme-muted font-bold">K =</span>
+                    <input type="number" id="k-input" value="3" min="2" max="10"
+                        class="w-12 bg-transparent text-theme-accent font-code text-sm outline-none text-center" />
+                </div>
+
+                <div id="klimit-section"
+                    class="hidden items-center gap-2 border border-theme-border bg-theme-surf px-3 py-1.5 rounded-lg">
+                    <span class="font-code text-xs text-theme-muted font-bold">Limit K =</span>
+                    <input type="number" id="klimit-input" value="15" min="1" max="200"
+                        class="w-16 bg-transparent text-theme-accent font-code text-sm outline-none text-center" />
+                </div>
+
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-accent text-white hover:bg-theme-accent2 transition-all shadow-[0_0_10px_rgba(14,165,233,0.2)]">▶
+                    Run C++ Algorithm</button>
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    New Data</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="100" max="1000" value="400" step="50"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="stat-val" class="font-display text-3xl text-theme-accent leading-none">—</div>
+                            <div class="font-code text-[0.5rem] text-theme-muted uppercase mt-1 font-bold">Cur Window
+                            </div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="stat-best" class="font-display text-3xl text-theme-text leading-none">—</div>
+                            <div class="font-code text-[0.5rem] text-theme-muted uppercase mt-1 font-bold">Best Found
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent-5"></div>
+                            <span class="font-medium">Outside Window</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent-50 bg-theme-accent-20"></div>
+                            <span class="text-theme-text font-semibold">Inside Window</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-text bg-theme-bg"></div>
+                            <span class="font-medium">Pointer L / R</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(14,165,233,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Entering / Leaving</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    Ready to Slide
+                </div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6 overflow-hidden bg-theme-bg">
+                <div class="flex gap-4 font-code text-[0.65rem] text-theme-muted">
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        L <span id="h-l" class="text-theme-text font-bold text-sm">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        R <span id="h-r" class="text-theme-text font-bold text-sm">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2 ml-auto">
+                        <span id="h-info">// Window Info</span>
+                    </div>
+                </div>
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-10 flex flex-col justify-center items-center relative shadow-inner min-h-[260px] overflow-x-auto">
+                    <div id="array-wrapper" class="relative inline-flex items-center h-16 px-1">
+                        <div id="el-row" class="flex gap-3 relative z-20 transition-all duration-500"></div>
+
+                        <div id="ptr-l"
+                            class="ptr-label absolute -bottom-8 opacity-0 font-code text-[0.6rem] text-theme-text flex flex-col items-center z-30">
+                            <span class="mb-0.5">▲</span>L
+                        </div>
+                        <div id="ptr-r"
+                            class="ptr-label absolute -top-8 opacity-0 font-code text-[0.6rem] text-theme-text flex flex-col items-center z-30">
+                            R<span class="mt-0.5">▼</span>
+                        </div>
+
+                        <div id="window-overlay"></div>
+                        <div id="best-overlay"></div>
+                    </div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg relative min-h-[220px]">
+                    <div id="pc-lines"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="pc"]').forEach(e => e.classList.remove('bg-theme-accent-20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent-20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], els = [], prob = 'maxsum', running = false, spd = 400;
+
+        const PROBLEMS = {
+            maxsum: {
+                type: 'int', showK: true, showLimit: false,
+                code: `
+<div class="code-line" id="pc1"><span class="text-pink-400">int</span> <span class="text-theme-accent">maxSumK</span>(<span class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp; arr, <span class="text-pink-400">int</span> k) {</div>
+<div class="code-line" id="pc2">&nbsp;&nbsp;<span class="text-pink-400">int</span> sum = 0, best = 0, L = 0;</div>
+<div class="code-line" id="pc3">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = 0; i &lt; k; i++) sum += arr[i]; <span class="text-theme-muted italic">// First window</span></div>
+<div class="code-line" id="pc4">&nbsp;&nbsp;best = sum;</div>
+<div class="code-line" id="pc5">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> R = k; R &lt; arr.size(); R++) {</div>
+<div class="code-line" id="pc6">&nbsp;&nbsp;&nbsp;&nbsp;sum += arr[R]; &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-theme-muted italic">// Add incoming</span></div>
+<div class="code-line" id="pc7">&nbsp;&nbsp;&nbsp;&nbsp;sum -= arr[L]; &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-theme-muted italic">// Remove outgoing</span></div>
+<div class="code-line" id="pc8">&nbsp;&nbsp;&nbsp;&nbsp;L++;</div>
+<div class="code-line" id="pc9">&nbsp;&nbsp;&nbsp;&nbsp;best = <span class="text-theme-accent">max</span>(best, sum);</div>
+<div class="code-line" id="pc10">&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc11">&nbsp;&nbsp;<span class="text-pink-400">return</span> best;</div>
+<div class="code-line" id="pc12">}</div>`
+            },
+            minsum: {
+                type: 'int', showK: true, showLimit: false,
+                code: `
+<div class="code-line" id="pc1"><span class="text-pink-400">int</span> <span class="text-theme-accent">minSumK</span>(<span class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp; arr, <span class="text-pink-400">int</span> k) {</div>
+<div class="code-line" id="pc2">&nbsp;&nbsp;<span class="text-pink-400">int</span> sum = 0, best = 0, L = 0;</div>
+<div class="code-line" id="pc3">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = 0; i &lt; k; i++) sum += arr[i];</div>
+<div class="code-line" id="pc4">&nbsp;&nbsp;best = sum;</div>
+<div class="code-line" id="pc5">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> R = k; R &lt; arr.size(); R++) {</div>
+<div class="code-line" id="pc6">&nbsp;&nbsp;&nbsp;&nbsp;sum += arr[R];</div>
+<div class="code-line" id="pc7">&nbsp;&nbsp;&nbsp;&nbsp;sum -= arr[L];</div>
+<div class="code-line" id="pc8">&nbsp;&nbsp;&nbsp;&nbsp;L++;</div>
+<div class="code-line" id="pc9">&nbsp;&nbsp;&nbsp;&nbsp;best = <span class="text-theme-accent">min</span>(best, sum);</div>
+<div class="code-line" id="pc10">&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc11">&nbsp;&nbsp;<span class="text-pink-400">return</span> best;</div>
+<div class="code-line" id="pc12">}</div>`
+            },
+            longestuniq: {
+                type: 'char', showK: false, showLimit: false,
+                code: `
+<div class="code-line" id="pc1"><span class="text-pink-400">int</span> <span class="text-theme-accent">longestUnique</span>(<span class="text-theme-accent">string</span> s) {</div>
+<div class="code-line" id="pc2">&nbsp;&nbsp;<span class="text-theme-accent">unordered_set</span>&lt;<span class="text-pink-400">char</span>&gt; seen;</div>
+<div class="code-line" id="pc3">&nbsp;&nbsp;<span class="text-pink-400">int</span> L = 0, best = 0;</div>
+<div class="code-line" id="pc4">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> R = 0; R &lt; s.length(); R++) {</div>
+<div class="code-line" id="pc5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">while</span> (seen.<span class="text-theme-accent">count</span>(s[R])) { <span class="text-theme-muted italic">// Duplicate found! Shrink</span></div>
+<div class="code-line" id="pc6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;seen.<span class="text-theme-accent">erase</span>(s[L]);</div>
+<div class="code-line" id="pc7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L++;</div>
+<div class="code-line" id="pc8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc9">&nbsp;&nbsp;&nbsp;&nbsp;seen.<span class="text-theme-accent">insert</span>(s[R]);</div>
+<div class="code-line" id="pc10">&nbsp;&nbsp;&nbsp;&nbsp;best = <span class="text-theme-accent">max</span>(best, R - L + 1);</div>
+<div class="code-line" id="pc11">&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc12">&nbsp;&nbsp;<span class="text-pink-400">return</span> best;</div>
+<div class="code-line" id="pc13">}</div>`
+            },
+            maxlt: {
+                type: 'int', showK: false, showLimit: true,
+                code: `
+<div class="code-line" id="pc1"><span class="text-pink-400">int</span> <span class="text-theme-accent">longestSumLE</span>(<span class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp; arr, <span class="text-pink-400">int</span> k) {</div>
+<div class="code-line" id="pc2">&nbsp;&nbsp;<span class="text-pink-400">int</span> sum = 0, L = 0, best = 0;</div>
+<div class="code-line" id="pc3">&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> R = 0; R &lt; arr.size(); R++) {</div>
+<div class="code-line" id="pc4">&nbsp;&nbsp;&nbsp;&nbsp;sum += arr[R];</div>
+<div class="code-line" id="pc5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">while</span> (sum &gt; k && L &lt;= R) { <span class="text-theme-muted italic">// Exceeds limit, shrink</span></div>
+<div class="code-line" id="pc6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum -= arr[L];</div>
+<div class="code-line" id="pc7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L++;</div>
+<div class="code-line" id="pc8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc9">&nbsp;&nbsp;&nbsp;&nbsp;best = <span class="text-theme-accent">max</span>(best, R - L + 1);</div>
+<div class="code-line" id="pc10">&nbsp;&nbsp;}</div>
+<div class="code-line" id="pc11">&nbsp;&nbsp;<span class="text-pink-400">return</span> best;</div>
+<div class="code-line" id="pc12">}</div>`
+            }
+        };
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent-10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function switchProb() {
+            if (running) return;
+            prob = $('probSelect').value;
+            const p = PROBLEMS[prob];
+
+            if (p.showK) { $('k-section').style.display = 'flex'; $('klimit-section').style.display = 'none'; }
+            else if (p.showLimit) { $('k-section').style.display = 'none'; $('klimit-section').style.display = 'flex'; }
+            else { $('k-section').style.display = 'none'; $('klimit-section').style.display = 'none'; }
+
+            $('pc-lines').innerHTML = p.code;
+            genData();
+        }
+
+        function updateHUD(L, R, cur, best, info) {
+            $('h-l').textContent = L ?? '—';
+            $('h-r').textContent = R ?? '—';
+            $('stat-val').textContent = cur ?? '0';
+            $('stat-best').textContent = best ?? '—';
+            if (info) $('h-info').innerHTML = `// ${info}`;
+        }
+
+        function movePtr(id, index) {
+            const ptr = $(id);
+            if (index === null || index < 0 || index >= els.length) { ptr.style.opacity = '0'; return; }
+            const targetEl = els[index].box;
+            const offsetLeft = targetEl.offsetLeft + (targetEl.offsetWidth / 2);
+            ptr.style.opacity = '1';
+            ptr.style.left = `${offsetLeft}px`;
+        }
+
+        function moveOverlay(id, L, R) {
+            const ov = $(id);
+            if (L === null || R === null || L > R || L < 0 || R >= els.length) { ov.classList.remove('visible'); return; }
+            const fLeft = els[L].box.offsetLeft;
+            const lRight = els[R].box.offsetLeft + els[R].box.offsetWidth;
+            ov.style.left = `${fLeft - 2}px`;
+            ov.style.width = `${lRight - fLeft + 4}px`;
+            ov.classList.add('visible');
+        }
+
+        function setElState(i, state) {
+            const b = els[i].box;
+            b.className = 'el-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold transition-all z-10';
+            if (state === 'idle') b.classList.add('bg-theme-accent-5', 'border-2', 'border-slate-500', 'text-theme-muted');
+            else if (state === 'window') b.classList.add('bg-theme-accent-20', 'border-2', 'border-theme-accent-50', 'text-theme-text');
+            else if (state === 'ptr') b.classList.add('bg-theme-bg', 'border-2', 'border-theme-text', 'text-theme-text', 'scale-110', 'z-20');
+            else if (state === 'active') b.classList.add('bg-theme-accent', 'border-2', 'border-theme-accent', 'text-white', 'scale-110', 'shadow-[0_0_15px_rgba(14,165,233,0.6)]', 'z-20');
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; els = [];
+            updateHUD(null, null, null, null, 'Generated new array.');
+
+            const p = PROBLEMS[prob];
+            const container = $('el-row');
+            container.innerHTML = '';
+
+            if (p.type === 'char') {
+                const pool = 'aabcbdeefghi'.split('');
+                for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[pool[i], pool[j]] = [pool[j], pool[i]]; }
+                A = pool.slice(0, 12);
+            } else {
+                A = Array.from({ length: 12 }, () => Math.floor(Math.random() * 14) + 2);
+            }
+
+            A.forEach((v, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'relative flex flex-col items-center';
+
+                const el = document.createElement('div');
+                el.className = 'el-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent-5 border-2 border-slate-500 text-theme-muted transition-all';
+                el.textContent = v;
+
+                const idxLbl = document.createElement('span');
+                idxLbl.className = 'absolute -bottom-5 text-[0.6rem] font-code text-theme-muted opacity-80';
+                idxLbl.textContent = `[${i}]`;
+
+                wrap.appendChild(el);
+                wrap.appendChild(idxLbl);
+                container.appendChild(wrap);
+                els.push({ box: el, wrap: wrap });
+            });
+
+            movePtr('ptr-l', null); movePtr('ptr-r', null);
+            moveOverlay('window-overlay', null, null); moveOverlay('best-overlay', null, null);
+            setSpill('idle', 'READY TO RUN'); hl(null);
+        }
+
+        /* ── RUN ALGORITHMS ── */
+        async function runFixedSum(isMin) {
+            const k = parseInt($('k-input').value) || 3;
+            if (k > A.length) { setSpill('idle', 'K > Array Size'); return; }
+
+            let sum = 0, best = 0, L = 0;
+            hl('pc3');
+            for (let i = 0; i < k; i++) {
+                sum += A[i];
+                setElState(i, 'window');
+            }
+            best = sum;
+            updateHUD(L, k - 1, sum, best, `Initial Window Sum = <span class="text-theme-accent">${sum}</span>`);
+            movePtr('ptr-l', L); movePtr('ptr-r', k - 1);
+            moveOverlay('window-overlay', L, k - 1);
+            await sleep(spd);
+
+            hl('pc4'); await sleep(spd / 2);
+
+            for (let R = k; R < A.length; R++) {
+                hl('pc5'); await sleep(spd / 2);
+
+                // Add right
+                hl('pc6');
+                setElState(R, 'active'); movePtr('ptr-r', R);
+                sum += A[R];
+                updateHUD(L, R, sum, best, `Add R=${R} (+${A[R]}). Sum = <span class="text-theme-accent">${sum}</span>`);
+                await sleep(spd);
+                setElState(R, 'window');
+
+                // Remove left
+                hl('pc7');
+                setElState(L, 'ptr');
+                sum -= A[L];
+                updateHUD(L, R, sum, best, `Drop L=${L} (-${A[L]}). Sum = <span class="text-theme-accent">${sum}</span>`);
+                await sleep(spd);
+                setElState(L, 'idle');
+
+                // Slide L
+                hl('pc8');
+                L++; movePtr('ptr-l', L);
+                moveOverlay('window-overlay', L, R);
+                await sleep(spd / 2);
+
+                // Update best
+                hl('pc9');
+                if ((isMin && sum < best) || (!isMin && sum > best)) {
+                    best = sum;
+                    moveOverlay('best-overlay', L, R);
+                    updateHUD(L, R, sum, best, `<span class="text-theme-accent">New Best Found!</span>`);
+                    els[R].box.classList.add('anim-pop');
+                    setTimeout(() => els[R].box.classList.remove('anim-pop'), 400);
+                }
+                await sleep(spd);
+            }
+            hl('pc11');
+            setSpill('found', `DONE ✓ BEST = ${best}`);
+        }
+
+        async function runLongestUniq() {
+            let L = 0, best = 0;
+            let seen = new Set();
+            moveOverlay('best-overlay', null, null);
+
+            hl('pc4'); await sleep(spd / 2);
+            for (let R = 0; R < A.length; R++) {
+                setElState(R, 'active'); movePtr('ptr-r', R);
+                updateHUD(L, R, R - L + 1, best, `R points to '${A[R]}'`);
+                await sleep(spd);
+
+                hl('pc5');
+                while (seen.has(A[R])) {
+                    setElState(L, 'ptr');
+                    updateHUD(L, R, R - L, best, `Duplicate '${A[R]}'. Dropping L='${A[L]}'`);
+                    await sleep(spd);
+
+                    hl('pc6');
+                    seen.delete(A[L]);
+                    setElState(L, 'idle');
+
+                    hl('pc7');
+                    L++; movePtr('ptr-l', L);
+                    moveOverlay('window-overlay', L, R);
+                    await sleep(spd / 2);
+                }
+
+                hl('pc9');
+                seen.add(A[R]);
+                setElState(R, 'window');
+                moveOverlay('window-overlay', L, R);
+
+                hl('pc10');
+                if (R - L + 1 > best) {
+                    best = R - L + 1;
+                    moveOverlay('best-overlay', L, R);
+                    updateHUD(L, R, best, best, `<span class="text-theme-accent">New Best Length!</span>`);
+                } else {
+                    updateHUD(L, R, R - L + 1, best, `Valid Window. Length = ${R - L + 1}`);
+                }
+                await sleep(spd);
+            }
+            hl('pc12');
+            setSpill('found', `DONE ✓ LENGTH = ${best}`);
+        }
+
+        async function runMaxLt() {
+            const k = parseInt($('klimit-input').value) || 15;
+            let sum = 0, L = 0, best = 0;
+            moveOverlay('best-overlay', null, null);
+
+            hl('pc3'); await sleep(spd / 2);
+            for (let R = 0; R < A.length; R++) {
+                hl('pc4');
+                setElState(R, 'active'); movePtr('ptr-r', R);
+                sum += A[R];
+                updateHUD(L, R, sum, best, `Add R (+${A[R]}). Sum = <span class="text-theme-accent">${sum}</span>`);
+                await sleep(spd);
+
+                hl('pc5');
+                while (sum > k && L <= R) {
+                    setElState(L, 'ptr');
+                    updateHUD(L, R, sum, best, `Sum > ${k}. Dropping L (-${A[L]})`);
+                    await sleep(spd);
+
+                    hl('pc6');
+                    sum -= A[L];
+                    setElState(L, 'idle');
+
+                    hl('pc7');
+                    L++; movePtr('ptr-l', L);
+                    moveOverlay('window-overlay', L, R);
+                    await sleep(spd / 2);
+                }
+
+                setElState(R, 'window');
+                moveOverlay('window-overlay', L, R);
+
+                hl('pc9');
+                if (R - L + 1 > best && L <= R) {
+                    best = R - L + 1;
+                    moveOverlay('best-overlay', L, R);
+                    updateHUD(L, R, sum, best, `<span class="text-theme-accent">Valid! New Best Length.</span>`);
+                } else {
+                    updateHUD(L, R, sum, best, `Valid Window.`);
+                }
+                await sleep(spd);
+            }
+            hl('pc11');
+            setSpill('found', `DONE ✓ LENGTH = ${best}`);
+        }
+
+        async function doRun() {
+            if (running) return;
+            running = true;
+            $('btn-run').disabled = true; $('btn-gen').disabled = true; $('probSelect').disabled = true;
+            els.forEach((_, i) => setElState(i, 'idle'));
+            setSpill('run', 'SLIDING...');
+
+            if (prob === 'maxsum') await runFixedSum(false);
+            else if (prob === 'minsum') await runFixedSum(true);
+            else if (prob === 'longestuniq') await runLongestUniq();
+            else if (prob === 'maxlt') await runMaxLt();
+
+            running = false;
+            $('btn-run').disabled = false; $('btn-gen').disabled = false; $('probSelect').disabled = false;
+        }
+
+        $('probSelect').onchange = switchProb;
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = doRun;
+        $('spd').oninput = function () { spd = 1100 - parseInt(this.value); };
+
+        /* Theme Engine Integration */
+        (function () {
+            const html = document.documentElement, btn = document.getElementById('thbtn'), kn = document.getElementById('thkn');
+            function set(l) { html.classList.toggle('light', l); kn.textContent = l ? '☀️' : '🌙'; localStorage.setItem('idl_theme', l ? 'l' : 'd') }
+            set(localStorage.getItem('idl_theme') === 'l');
+            btn.addEventListener('click', () => set(!html.classList.contains('light')));
+        })();
+
+        // Resize proofing for overlays and pointers
+        window.onresize = () => {
+            const l = parseInt($('h-l').textContent);
+            const r = parseInt($('h-r').textContent);
+            if (!isNaN(l)) movePtr('ptr-l', l);
+            if (!isNaN(r)) movePtr('ptr-r', r);
+            if (!isNaN(l) && !isNaN(r)) moveOverlay('window-overlay', l, r);
+        };
+
+        // Initialize
+        switchProb();
+    </script>
+</body>
+
+</html>

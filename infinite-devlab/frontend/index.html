@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infinite DevLab — AI-Powered Coding Lab</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-dark: #070b14;
+        --bg-nav: rgba(7, 11, 20, 0.8);
+        --bg-surface: #0f172a;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --accent-blue: #3b82f6;
+        --accent-blue-hover: #2563eb;
+        --accent-gold: #fbbf24;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --nav-link: #cbd5e1;
+        --nav-link-hover: #60a5fa;
+        --font-family: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: var(--font-family);
+      }
+      html,
+      body {
+        height: 100vh;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg-dark);
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .ambient-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          circle at 50% 60%,
+          rgba(99, 102, 241, 0.15) 0%,
+          rgba(59, 130, 246, 0.05) 30%,
+          transparent 70%
+        );
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 3%;
+        background: var(--bg-nav);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #fff;
+        cursor: pointer;
+      }
+      .logo-icon {
+        color: var(--accent-blue);
+        display: flex;
+        align-items: center;
+      }
+      .logo-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+      }
+      .logo-text-devlab {
+        color: var(--accent-gold);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.25rem;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--nav-link);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.2s;
+        cursor: pointer;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--nav-link-hover);
+      }
+
+      .auth-area {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        position: relative;
+      }
+      .btn {
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+      }
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .btn-primary {
+        background: var(--accent-blue);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-blue-hover);
+      }
+
+      .avatar-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .avatar-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+      .avatar-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        min-width: 220px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        padding: 0.5rem;
+        display: none;
+        z-index: 200;
+      }
+      .avatar-menu.open {
+        display: block;
+      }
+      .menu-user {
+        padding: 0.75rem 0.75rem 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 0.25rem;
+      }
+      .menu-user .name {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .menu-user .email {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-top: 2px;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 6px;
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+      }
+      .menu-item:hover {
+        background: rgba(59, 130, 246, 0.12);
+        color: var(--nav-link-hover);
+      }
+      .menu-item.danger:hover {
+        background: rgba(251, 113, 133, 0.12);
+        color: #fb7185;
+      }
+
+      .hero {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 5rem 2rem;
+        position: relative;
+        z-index: 10;
+        overflow-y: auto;
+      }
+      .badge {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.4rem 1.2rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .badge span {
+        color: var(--accent-gold);
+        font-size: 1.2rem;
+      }
+      .hero h1 {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.5px;
+        color: #fff;
+        line-height: 1.2;
+      }
+      .hero h1 .highlight {
+        color: #5bb2a8;
+      }
+      .hero p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 650px;
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+      }
+      .cta-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn-start {
+        padding: 0.8rem 1.8rem;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      }
+      .btn-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      }
+      .btn-explore {
+        padding: 0.8rem 1.8rem;
+        border-radius: 8px;
+        background: transparent;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .btn-explore:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      #app-container {
+        display: none;
+        flex-direction: column;
+        flex: 1;
+        width: 100%;
+        height: calc(100vh - 65px);
+      }
+      #module-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+        background: var(--bg-dark);
+      }
+
+      /* Inline pages (dashboard / history) */
+      .panel {
+        display: none;
+        flex: 1;
+        padding: 3rem 2rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+        position: relative;
+        z-index: 10;
+        overflow-y: auto;
+      }
+      .panel.active {
+        display: block;
+      }
+      .panel h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
+      .panel .sub {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .card .label {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .card .value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-top: 0.25rem;
+      }
+      .card .meta {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+      }
+      .list-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .list-row:last-child {
+        border-bottom: none;
+      }
+      .list-row .meta {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+      .empty {
+        padding: 3rem;
+        text-align: center;
+        color: var(--text-muted);
+        border: 1px dashed var(--border-color);
+        border-radius: 12px;
+      }
+
+      .menu-toggle {
+        display: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+      @media (max-width: 1024px) {
+        .nav-links {
+          display: none;
+        }
+        .menu-toggle {
+          display: block;
+        }
+      }
+
+      /* Premium History Accordion Styles */
+      .accordion-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .accordion-item:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+      }
+      .accordion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        cursor: pointer;
+        user-select: none;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .accordion-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+      }
+      .accordion-header-left .icon {
+        font-size: 1.3rem;
+      }
+      .accordion-header-left .title {
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+      }
+      .accordion-header-left .count-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-muted);
+      }
+      .accordion-header-right {
+        color: var(--text-muted);
+        transition: transform 0.3s;
+      }
+      .accordion-item.active .accordion-header-right {
+        transform: rotate(180deg);
+        color: var(--accent-blue);
+      }
+      .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease-out;
+        border-top: 1px solid transparent;
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .accordion-item.active .accordion-content {
+        max-height: 500px;
+        overflow-y: auto;
+        border-top: 1px solid var(--border-color);
+      }
+      
+      .history-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+      }
+      .history-list-item:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .history-list-item:last-child {
+        border-bottom: none;
+      }
+      .history-list-item-left {
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+      }
+      .history-list-item-left .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 0.4rem;
+      }
+      .history-list-item-left.css-lab .dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+      .history-list-item-left.dsa-visualizer .dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
+      .history-list-item-left.codebreaker .dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+      .history-list-item-left.problem-solver .dot { background: #a855f7; box-shadow: 0 0 8px #a855f7; }
+      
+      .history-item-action {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .history-item-detail {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-top: 0.2rem;
+      }
+      .history-item-date {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-family: monospace;
+      }
+    </style>
+    <!-- ---css---------------------------- -->
+
+    <!-- ---css---------------------------- -->
+  </head>
+  <body>
+    <div class="ambient-bg"></div>
+
+    <nav>
+      <a class="logo" onclick="loadPage('home')">
+        <span class="logo-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" />
+          </svg>
+        </span>
+        <span>INFINITE</span> <span class="logo-text-devlab">DEVLAB</span>
+      </a>
+
+      <div class="nav-links">
+        <a onclick="loadPage('home')" class="nav-item active" data-page="home"
+          >Home</a
+        >
+        <a onclick="loadPage('css-lab')" class="nav-item" data-page="css-lab"
+          >CSS Lab</a
+        >
+        <a
+          onclick="loadPage('codebreaker')"
+          class="nav-item"
+          data-page="codebreaker"
+          >CodeBreaker</a
+        >
+        <a
+          onclick="loadPage('dsa-visualizer')"
+          class="nav-item"
+          data-page="dsa-visualizer"
+          >DSA Visualizer</a
+        >
+        <a
+          onclick="loadPage('problem-solver')"
+          class="nav-item"
+          data-page="problem-solver"
+          >Problem Solver</a
+        >
+        <a onclick="loadPage('history')" class="nav-item" data-page="history"
+          >History</a
+        >
+        <a
+          onclick="loadPage('dashboard')"
+          class="nav-item"
+          data-page="dashboard"
+          >Dashboard</a
+        >
+      </div>
+
+      <div class="auth-area" id="authArea">
+        <!-- populated by JS -->
+        <button
+          class="menu-toggle"
+          onclick="
+            document.querySelector('.nav-links').style.display =
+              document.querySelector('.nav-links').style.display === 'flex'
+                ? 'none'
+                : 'flex'
+          "
+        >
+          ☰
+        </button>
+      </div>
+    </nav>
+
+    <main class="hero" id="hero-view">
+      <div class="badge"><span>✨</span> AI-Powered Coding Lab</div>
+      <h1>Learn Coding <span class="highlight">Visually</span> with AI</h1>
+      <p>
+        Master CSS, DSA &amp; Problem Solving smarter — interactive
+        visualizations,<br />gamified levels, and an adaptive AI tutor that
+        meets you at your skill level.
+      </p>
+      <div class="cta-group">
+        <button class="btn-start" onclick="loadPage('css-lab')">
+          ▶ Start Learning
+        </button>
+        <button class="btn-explore" onclick="loadPage('dashboard')">
+          Explore Modules
+        </button>
+      </div>
+    </main>
+
+    <div id="app-container"><iframe id="module-frame" src=""></iframe></div>
+
+    <!-- Inline dashboard -->
+    <section class="panel" id="dashboard-panel">
+      <h2>Dashboard</h2>
+      <p class="sub" id="dashHello">Welcome back.</p>
+      <div class="grid" id="dashGrid"></div>
+    </section>
+
+    <!-- Inline history -->
+    <section class="panel" id="history-panel">
+      <h2>History</h2>
+      <p class="sub">Your recent activity across modules.</p>
+      <div class="card" style="padding: 0" id="historyBox"></div>
+    </section>
+
+    <script src="config.js"></script>
+    <script>
+      const API_BASE = (window.config && window.config.API_BASE_URL) || window.location.origin;
+
+      const pages = {
+        home: null,
+        "css-lab": "module1.html",
+        codebreaker: "module2.html",
+        "dsa-visualizer": "dsa vizualizer/index.html",
+        "problem-solver": "module 4.html",
+        history: "__inline__",
+        dashboard: "__inline__",
+      };
+
+      function authHeaders() {
+        const t = localStorage.getItem("token");
+        return t ? { Authorization: "Bearer " + t } : {};
+      }
+      function isAuthed() {
+        return !!localStorage.getItem("token");
+      }
+      function getUser() {
+        try {
+          return JSON.parse(localStorage.getItem("user") || "null");
+        } catch {
+          return null;
+        }
+      }
+      function initial(name) {
+        return (name || "?").trim().charAt(0).toUpperCase();
+      }
+
+      function renderAuthArea() {
+        const area = document.getElementById("authArea");
+        const toggle =
+          "<button class=\"menu-toggle\" onclick=\"document.querySelector('.nav-links').style.display = (document.querySelector('.nav-links').style.display === 'flex' ? 'none' : 'flex')\">☰</button>";
+        if (!isAuthed()) {
+          area.innerHTML = `
+          <a href="login.html" class="btn btn-ghost">Sign In</a>
+          <a href="login.html" class="btn btn-primary">Get Started</a>
+          ${toggle}
+        `;
+          return;
+        }
+        const u = getUser() || { name:'User', email:'' };
+        area.innerHTML = `
+        <div style="position:relative" id="avatarWrap">
+          <button class="avatar-btn" id="avatarBtn" aria-haspopup="true" aria-expanded="false" title="${u.name}">${initial(u.name)}</button>
+          <div class="avatar-menu" id="avatarMenu" role="menu">
+            <div class="menu-user">
+              <div class="name">${u.name || "User"}</div>
+              <div class="email">${u.email || ""}</div>
+            </div>
+            <button class="menu-item" onclick="loadPage('dashboard');closeMenu()">📊 Dashboard</button>
+            <button class="menu-item" onclick="loadPage('history');closeMenu()">🕒 History</button>
+            <button class="menu-item danger" onclick="logout()">↩  Sign out</button>
+          </div>
+        </div>
+        ${toggle}
+      `;
+        document.getElementById("avatarBtn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          document.getElementById("avatarMenu").classList.toggle("open");
+        });
+        document.addEventListener("click", closeMenu);
+      }
+      function closeMenu() {
+        const m = document.getElementById("avatarMenu");
+        if (m) m.classList.remove("open");
+      }
+      function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        renderAuthArea();
+        loadPage("home");
+      }
+
+      async function refreshUser() {
+        if (!isAuthed()) return;
+        try {
+          const r = await fetch(`${API_BASE}/auth/me`, {
+            headers: authHeaders(),
+          });
+          if (r.status === 401) {
+            logout();
+            return;
+          }
+          const u = await r.json();
+          localStorage.setItem("user", JSON.stringify(u));
+          renderAuthArea();
+        } catch {}
+      }
+
+      function loadPage(pageId) {
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((el) => el.classList.remove("active"));
+        const activeLink = document.querySelector(
+          `.nav-item[data-page="${pageId}"]`,
+        );
+        if (activeLink) activeLink.classList.add("active");
+
+        const hero = document.getElementById("hero-view");
+        const appC = document.getElementById("app-container");
+        const iframe = document.getElementById("module-frame");
+        const dash = document.getElementById("dashboard-panel");
+        const hist = document.getElementById("history-panel");
+
+        // reset
+        hero.style.display = "none";
+        appC.style.display = "none";
+        dash.classList.remove("active");
+        hist.classList.remove("active");
+        iframe.src = "";
+
+        if (pageId === "home") {
+          hero.style.display = "flex";
+          history.pushState(null, "", "#home");
+          return;
+        }
+
+        const src = pages[pageId];
+        if (src === "__inline__") {
+          if (!isAuthed()) {
+            alert("Please sign in to view this page.");
+            window.location.href = "login.html";
+            return;
+          }
+          if (pageId === "dashboard") {
+            dash.classList.add("active");
+            renderDashboard();
+          } else {
+            hist.classList.add("active");
+            renderHistory();
+          }
+          history.pushState(null, "", "#" + pageId);
+          return;
+        }
+
+        if (src) {
+          appC.style.display = "flex";
+          iframe.src = src;
+          history.pushState(null, "", "#" + pageId);
+        } else {
+          alert("This module is under construction.");
+        }
+      }
+
+      async function renderDashboard() {
+        const u = getUser();
+        document.getElementById("dashHello").textContent = u
+          ? `Welcome back, ${u.name}.`
+          : "Welcome back.";
+        const grid = document.getElementById("dashGrid");
+        grid.innerHTML =
+          '<div class="card"><div class="label">Loading…</div></div>';
+        try {
+          const r = await fetch(`${API_BASE}/api/progress`, {
+            headers: authHeaders(),
+          });
+          const rows = r.ok ? await r.json() : [];
+          const modules = [
+            { key: "css-lab", name: "CSS Lab" },
+            { key: "codebreaker", name: "CodeBreaker" },
+            { key: "dsa-visualizer", name: "DSA Visualizer" },
+            { key: "problem-solver", name: "Problem Solver" },
+          ];
+          const map = Object.fromEntries(rows.map((r) => [r.module, r]));
+          grid.innerHTML = modules
+            .map((m) => {
+              const p = map[m.key];
+              const lvl = p?.level ?? 0;
+              const score = p?.score ?? 0;
+              return `<div class="card">
+            <div class="label">${m.name}</div>
+            <div class="value">Lv ${lvl}</div>
+            <div class="meta">Score ${score}</div>
+          </div>`;
+            })
+            .join("");
+        } catch {
+          grid.innerHTML = '<div class="empty">Could not load progress.</div>';
+        }
+      }
+
+      async function renderHistory() {
+        const box = document.getElementById("historyBox");
+        box.style.padding = "0";
+        box.style.background = "transparent";
+        box.style.border = "none";
+        box.style.boxShadow = "none";
+        box.innerHTML = '<div style="padding:1rem;color:var(--text-muted)">Loading…</div>';
+        try {
+          const r = await fetch(`${API_BASE}/api/history`, {
+            headers: authHeaders(),
+          });
+          const rows = r.ok ? await r.json() : [];
+          
+          const modules = {
+            "css-lab": { name: "CSS QUEST (CSS LAB)", icon: "🎨", color: "#3b82f6", items: [] },
+            "dsa-visualizer": { name: "DSA VISUALIZER (DSAVIS)", icon: "📊", color: "#10b981", items: [] },
+            "codebreaker": { name: "CODEBREAKER", icon: "⚡", color: "#f59e0b", items: [] },
+            "problem-solver": { name: "PROBLEM SOLVER", icon: "🧠", color: "#a855f7", items: [] }
+          };
+          
+          const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+          // Classify history items
+          rows.forEach(item => {
+            const act = (item.action || "").toLowerCase();
+            if (act.includes("css") || act.includes("quest")) {
+              modules["css-lab"].items.push(item);
+            } else if (act.includes("dsa") || act.includes("visualizer") || act.includes("sort") || act.includes("search")) {
+              modules["dsa-visualizer"].items.push(item);
+            } else if (act.includes("breaker") || act.includes("code")) {
+              modules["codebreaker"].items.push(item);
+            } else if (act.includes("solver") || act.includes("problem") || act.includes("blueprint") || act.includes("cp")) {
+              modules["problem-solver"].items.push(item);
+            } else {
+              modules["problem-solver"].items.push(item);
+            }
+          });
+          
+          box.innerHTML = Object.entries(modules).map(([key, mod]) => {
+            const count = mod.items.length;
+            const itemsHtml = count > 0 ? mod.items.map(item => `
+              <div class="history-list-item">
+                <div class="history-list-item-left ${key}">
+                  <div class="dot"></div>
+                  <div>
+                    <div class="history-item-action">${esc(item.action)}</div>
+                    ${item.detail ? `<div class="history-item-detail">${esc(item.detail)}</div>` : ""}
+                  </div>
+                </div>
+                <div class="history-item-date">${new Date(item.created_at.endsWith('Z') ? item.created_at : item.created_at + 'Z').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>
+              </div>
+            `).join("") : `<div style="padding: 2.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No activity recorded in this module yet.</div>`;
+            
+            return `
+              <div class="accordion-item" id="accordion-${key}">
+                <div class="accordion-header" onclick="toggleAccordion('${key}')">
+                  <div class="accordion-header-left">
+                    <span class="icon">${mod.icon}</span>
+                    <span class="title" style="color: ${mod.color}">${mod.name}</span>
+                    <span class="count-badge">${count} entries</span>
+                  </div>
+                  <div class="accordion-header-right">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <div class="accordion-content">
+                  ${itemsHtml}
+                </div>
+              </div>
+            `;
+          }).join("");
+          
+        } catch (e) {
+          console.error(e);
+          box.innerHTML = '<div class="empty">Could not load history.</div>';
+        }
+      }
+
+      window.toggleAccordion = function(key) {
+        const item = document.getElementById(`accordion-${key}`);
+        const isActive = item.classList.contains("active");
+        
+        // Close all other accordions
+        document.querySelectorAll(".accordion-item").forEach(el => {
+          el.classList.remove("active");
+          el.querySelector(".accordion-content").style.maxHeight = null;
+        });
+        
+        if (!isActive) {
+          item.classList.add("active");
+          const content = item.querySelector(".accordion-content");
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      };
+
+      window.addEventListener("popstate", () => {
+        const hash = window.location.hash.replace("#", "") || "home";
+        if (pages[hash] !== undefined) loadPage(hash);
+      });
+      window.addEventListener("DOMContentLoaded", () => {
+        renderAuthArea();
+        refreshUser();
+        const hash = window.location.hash.replace("#", "");
+        if (hash && pages[hash] !== undefined) loadPage(hash);
+      });
+    </script>
+  </body>
+</html>

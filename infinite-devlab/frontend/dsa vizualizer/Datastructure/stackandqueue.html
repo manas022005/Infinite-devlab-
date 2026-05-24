@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Stack & Queue — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        /* Custom Animations for Push/Pop */
+        @keyframes slideDownIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUpOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+        }
+
+        @keyframes slideLeftIn {
+            0% {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideLeftOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+        }
+
+        .anim-push {
+            animation: slideDownIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .anim-pop {
+            animation: slideUpOut 0.3s ease-in forwards;
+        }
+
+        .anim-enq {
+            animation: slideLeftIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .anim-deq {
+            animation: slideLeftOut 0.3s ease-in forwards;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Linear
+                Structures</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2" id="header-type">
+                    Linear Data Structure · LIFO</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text"
+                    id="header-title">STACK <span class="text-theme-accent">OPERATIONS</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium" id="header-desc">Stack
+                    follows the Last-In-First-Out (LIFO) principle. You can only insert (push) or remove (pop) elements
+                    from the top.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <select id="algoSelect"
+                    class="bg-theme-surf border border-theme-border text-theme-text rounded-lg px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-theme-accent transition-colors cursor-pointer shadow-sm">
+                    <option value="stack">Stack (LIFO)</option>
+                    <option value="queue">Queue (FIFO)</option>
+                </select>
+
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Run Full Demo</button>
+                <button id="btn-reset"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    Reset</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="700" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        State</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-size" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Current Size</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-top" class="font-display text-3xl text-theme-text leading-none">—</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1" id="lbl-top">Top
+                                Element</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent/60 bg-theme-accent/20"></div>
+                            <span>Stored Element</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Active Operation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    READY</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-10 flex flex-col justify-center items-center relative shadow-inner min-h-[300px] overflow-hidden">
+
+                    <div id="stack-container"
+                        class="flex flex-col justify-end w-40 h-[240px] border-b-4 border-l-4 border-r-4 border-theme-border rounded-b-xl relative px-2 pb-2 gap-2">
+                    </div>
+
+                    <div id="queue-container"
+                        class="hidden flex-row items-center w-[90%] max-w-2xl h-24 border-t-4 border-b-4 border-theme-border relative px-4 gap-2 overflow-hidden">
+                        <span class="absolute left-2 top-1 font-code text-[0.6rem] text-theme-muted">FRONT</span>
+                        <span class="absolute right-2 top-1 font-code text-[0.6rem] text-theme-muted">BACK</span>
+                    </div>
+
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg relative h-[260px]">
+
+                    <div id="code-stack">
+                        <div id="ps1" class="px-2 rounded transition-all"><span class="text-pink-400">#include</span>
+                            &lt;stack&gt;</div>
+                        <br>
+                        <div id="ps2" class="px-2 rounded transition-all"><span class="text-pink-400">int</span> main()
+                            {</div>
+                        <div id="ps3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-theme-accent">stack</span>&lt;<span class="text-pink-400">int</span>&gt; s;
+                        </div>
+                        <br>
+                        <div id="ps4" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">push</span>(10); <span class="text-theme-muted italic">// Push
+                                to top</span></div>
+                        <div id="ps5" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">push</span>(20);</div>
+                        <div id="ps6" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">push</span>(30);</div>
+                        <div id="ps7" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">push</span>(40);</div>
+                        <br>
+                        <div id="ps8" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">pop</span>(); &nbsp;<span class="text-theme-muted italic">//
+                                Remove from top</span></div>
+                        <div id="ps9" class="px-2 rounded transition-all">&nbsp;&nbsp;s.<span
+                                class="text-theme-accent">pop</span>();</div>
+                        <br>
+                        <div id="ps10" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">int</span> top_val = s.<span
+                                class="text-theme-accent">top</span>(); <span class="text-theme-muted italic">//
+                                Peek</span></div>
+                        <div id="ps11" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">return</span> 0;</div>
+                        <div id="ps12" class="px-2 rounded transition-all">}</div>
+                    </div>
+
+                    <div id="code-queue" class="hidden">
+                        <div id="pq1" class="px-2 rounded transition-all"><span class="text-pink-400">#include</span>
+                            &lt;queue&gt;</div>
+                        <br>
+                        <div id="pq2" class="px-2 rounded transition-all"><span class="text-pink-400">int</span> main()
+                            {</div>
+                        <div id="pq3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-theme-accent">queue</span>&lt;<span class="text-pink-400">int</span>&gt; q;
+                        </div>
+                        <br>
+                        <div id="pq4" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">push</span>(10); <span class="text-theme-muted italic">//
+                                Enqueue at back</span></div>
+                        <div id="pq5" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">push</span>(20);</div>
+                        <div id="pq6" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">push</span>(30);</div>
+                        <div id="pq7" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">push</span>(40);</div>
+                        <br>
+                        <div id="pq8" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">pop</span>(); &nbsp;<span class="text-theme-muted italic">//
+                                Dequeue from front</span></div>
+                        <div id="pq9" class="px-2 rounded transition-all">&nbsp;&nbsp;q.<span
+                                class="text-theme-accent">pop</span>();</div>
+                        <br>
+                        <div id="pq10" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">int</span> front_val = q.<span
+                                class="text-theme-accent">front</span>(); <span class="text-theme-muted italic">//
+                                Peek</span></div>
+                        <div id="pq11" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">return</span> 0;</div>
+                        <div id="pq12" class="px-2 rounded transition-all">}</div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = (id, prefix) => {
+            document.querySelectorAll(`[id^="${prefix}"]`).forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let mode = 'stack'; // 'stack' or 'queue'
+        let elements = [];
+        let spd = 700;
+        let running = false;
+
+        function updateStats() {
+            $('s-size').textContent = elements.length;
+            if (elements.length === 0) {
+                $('s-top').textContent = '—';
+            } else {
+                $('s-top').textContent = mode === 'stack' ? elements[elements.length - 1] : elements[0];
+            }
+        }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function switchMode() {
+            if (running) return;
+            mode = $('algoSelect').value;
+            resetViz();
+
+            if (mode === 'stack') {
+                $('header-type').textContent = 'Linear Data Structure · LIFO';
+                $('header-title').innerHTML = 'STACK <span class="text-theme-accent">OPERATIONS</span>';
+                $('header-desc').textContent = 'Stack follows the Last-In-First-Out (LIFO) principle. You can only insert (push) or remove (pop) elements from the top.';
+                $('lbl-top').textContent = 'Top Element';
+                $('stack-container').classList.replace('hidden', 'flex');
+                $('queue-container').classList.add('hidden');
+                $('code-stack').classList.remove('hidden');
+                $('code-queue').classList.add('hidden');
+            } else {
+                $('header-type').textContent = 'Linear Data Structure · FIFO';
+                $('header-title').innerHTML = 'QUEUE <span class="text-theme-accent">OPERATIONS</span>';
+                $('header-desc').textContent = 'Queue follows the First-In-First-Out (FIFO) principle. Insertions (enqueue) happen at the back, removals (dequeue) from the front.';
+                $('lbl-top').textContent = 'Front Element';
+                $('stack-container').classList.add('hidden');
+                $('queue-container').classList.replace('hidden', 'flex');
+                $('code-stack').classList.add('hidden');
+                $('code-queue').classList.remove('hidden');
+            }
+        }
+
+        function resetViz() {
+            elements = [];
+            $('stack-container').innerHTML = '';
+            // Reset queue container but keep front/back labels
+            $('queue-container').innerHTML = '<span class="absolute left-2 top-1 font-code text-[0.55rem] text-theme-muted font-bold tracking-widest">FRONT</span><span class="absolute right-2 top-1 font-code text-[0.55rem] text-theme-muted font-bold tracking-widest">BACK</span>';
+            updateStats();
+            setSpill('idle', 'READY');
+            hl(null, mode === 'stack' ? 'ps' : 'pq');
+        }
+
+        function createNode(val, type) {
+            const el = document.createElement('div');
+            el.className = `w-full h-10 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent border-2 border-theme-accent text-theme-bg shadow-[0_0_12px_rgba(45,212,191,0.5)] z-10 shrink-0`;
+
+            if (type === 'push') el.classList.add('anim-push');
+            if (type === 'enq') {
+                el.classList.add('anim-enq');
+                el.className = el.className.replace('w-full', 'w-12 h-12 ml-2');
+            }
+            el.textContent = val;
+            return el;
+        }
+
+        function settleNodes() {
+            const nodes = document.querySelectorAll('#stack-container div, #queue-container div');
+            nodes.forEach(n => {
+                n.classList.remove('anim-push', 'anim-enq', 'bg-theme-accent', 'text-theme-bg', 'shadow-[0_0_12px_rgba(45,212,191,0.5)]');
+                n.classList.add('bg-theme-accent/20', 'text-theme-text', 'border-theme-accent/60');
+            });
+        }
+
+        async function runStackDemo() {
+            const p = 'ps';
+            hl(`${p}3`); await sleep(spd);
+
+            const pushes = [10, 20, 30, 40];
+            const pLines = [4, 5, 6, 7];
+
+            for (let i = 0; i < pushes.length; i++) {
+                hl(`${p}${pLines[i]}`);
+                settleNodes();
+                setSpill('run', `PUSH(${pushes[i]})`);
+                const node = createNode(pushes[i], 'push');
+                // Stack grows from bottom up visually, so we prepend
+                $('stack-container').prepend(node);
+                elements.push(pushes[i]);
+                updateStats();
+                await sleep(spd);
+            }
+
+            settleNodes();
+
+            const popLines = [8, 9];
+            for (let i = 0; i < 2; i++) {
+                hl(`${p}${popLines[i]}`);
+                setSpill('run', `POP()`);
+                const topNode = $('stack-container').firstElementChild;
+                topNode.classList.add('anim-pop');
+                elements.pop();
+                updateStats();
+                await sleep(300); // Wait for animation
+                topNode.remove();
+                await sleep(spd - 300);
+            }
+
+            hl(`${p}10`);
+            setSpill('found', `PEEK: ${elements[elements.length - 1]}`);
+            const topNode = $('stack-container').firstElementChild;
+            topNode.classList.remove('bg-theme-accent/20', 'text-theme-text');
+            topNode.classList.add('bg-theme-accent', 'text-theme-bg', 'shadow-[0_0_12px_rgba(45,212,191,0.5)]');
+            await sleep(spd);
+
+            hl(`${p}11`);
+            setSpill('idle', 'DEMO COMPLETE');
+            settleNodes();
+        }
+
+        async function runQueueDemo() {
+            const p = 'pq';
+            hl(`${p}3`); await sleep(spd);
+
+            const enqs = [10, 20, 30, 40];
+            const eLines = [4, 5, 6, 7];
+
+            for (let i = 0; i < enqs.length; i++) {
+                hl(`${p}${eLines[i]}`);
+                settleNodes();
+                setSpill('run', `ENQUEUE(${enqs[i]})`);
+                const node = createNode(enqs[i], 'enq');
+                // Queue grows left to right, we append to the end (right)
+                $('queue-container').appendChild(node);
+                elements.push(enqs[i]);
+                updateStats();
+                await sleep(spd);
+            }
+
+            settleNodes();
+
+            const dLines = [8, 9];
+            for (let i = 0; i < 2; i++) {
+                hl(`${p}${dLines[i]}`);
+                setSpill('run', `DEQUEUE()`);
+                // Get the second child (first child is the FRONT label, second is BACK label, nodes start at index 2)
+                const frontNode = $('queue-container').children[2];
+                frontNode.classList.add('anim-deq');
+                elements.shift();
+                updateStats();
+                await sleep(300);
+                frontNode.remove();
+                await sleep(spd - 300);
+            }
+
+            hl(`${p}10`);
+            setSpill('found', `FRONT: ${elements[0]}`);
+            const frontNode = $('queue-container').children[2];
+            frontNode.classList.remove('bg-theme-accent/20', 'text-theme-text');
+            frontNode.classList.add('bg-theme-accent', 'text-theme-bg', 'shadow-[0_0_12px_rgba(45,212,191,0.5)]');
+            await sleep(spd);
+
+            hl(`${p}11`);
+            setSpill('idle', 'DEMO COMPLETE');
+            settleNodes();
+        }
+
+        async function runDemo() {
+            if (running) return;
+            running = true;
+            $('algoSelect').disabled = true;
+            $('btn-run').disabled = true;
+            $('btn-reset').disabled = true;
+
+            resetViz();
+
+            if (mode === 'stack') await runStackDemo();
+            else await runQueueDemo();
+
+            running = false;
+            $('algoSelect').disabled = false;
+            $('btn-run').disabled = false;
+            $('btn-reset').disabled = false;
+        }
+
+        $('algoSelect').onchange = switchMode;
+        $('btn-reset').onclick = resetViz;
+        $('btn-run').onclick = runDemo;
+        $('spd').oninput = function () { spd = 1700 - parseInt(this.value); }; // Inverse mapping
+
+        /* ── THEME TOGGLE ── */
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            html.classList.toggle('light');
+            if (html.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+    </script>
+</body>
+
+</html>

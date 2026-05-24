@@ -1,0 +1,17 @@
+# Render Blueprint — one-click deploy
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: infinite-devlab
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        sync: false        # paste your MySQL URL (e.g. PlanetScale / Railway / Aiven)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_DIR
+        value: /app/frontend
+      - key: CORS_ORIGINS
+        value: "*"

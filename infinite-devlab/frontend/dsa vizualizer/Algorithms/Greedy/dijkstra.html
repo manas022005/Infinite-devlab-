@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dijkstra's Algorithm Visualizer — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@400;500;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)',
+                            accent2: 'var(--accent2)', yellow: 'var(--devlab-yellow)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Poppins', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════════
+       TOKENS (INFINITE DEVLAB THEME - INDIGO VARIANT)
+    ═══════════════════════════════════════════ */
+        :root {
+            --bg: #0B0F19;
+            --surf: #111827;
+            --border: #1F2937;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --accent: #6366F1;
+            /* Indigo Variant for Algorithms */
+            --accent2: #4F46E5;
+            --devlab-yellow: #FBBF24;
+            --nav-height: 70px;
+        }
+
+        html.light {
+            --bg: #F3F4F6;
+            --surf: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #111827;
+            --muted: #4B5563;
+            --accent: #4F46E5;
+            --accent2: #4338CA;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        /* Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(99, 102, 241, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(99, 102, 241, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════
+       GLOBAL NAVBAR
+    ═══════════════════════════════════════════ */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-infinite {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-devlab {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--devlab-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .nav-links a {
+            font-family: var(--font-ui);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-login {
+            font-family: var(--font-ui);
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: var(--surf);
+        }
+
+        .btn-register {
+            font-family: var(--font-ui);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-register:hover {
+            background: var(--accent2);
+        }
+
+        /* Theme Toggle */
+        .th-btn {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surf);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .th-btn .kn {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        html.light .th-btn .kn {
+            transform: translateX(18px);
+            background: var(--accent);
+        }
+
+        @media (max-width: 950px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .btn-login,
+            .btn-register {
+                display: none;
+            }
+
+            .global-nav {
+                padding: 0 12px;
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+       VISUALIZER SPECIFICS
+    ═══════════════════════════════════════════ */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        /* SVG Graph Styling tied to CSS Vars */
+        svg {
+            width: 100%;
+            height: 100%;
+            max-width: 560px;
+            max-height: 320px;
+        }
+
+        .node-circle {
+            transition: fill .3s, stroke .3s, stroke-width .3s, filter .3s, transform .3s;
+        }
+
+        .edge-line {
+            transition: stroke .3s, stroke-width .3s;
+        }
+
+        .weight-bg {
+            transition: fill .3s;
+        }
+
+        .weight-text {
+            transition: fill .3s;
+        }
+
+        /* Dist Table Animations */
+        .dist-val {
+            transition: all 0.3s;
+        }
+
+        .dist-val.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .dist-val.updated {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: scale(1.1);
+            font-weight: 800;
+        }
+
+        /* Code Line Highlights */
+        .cl {
+            display: block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .cl.hl {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--text);
+            border-left-color: var(--accent);
+        }
+
+        /* Fixed Opacity Classes for JS Toggling (Mapped to Indigo: 99, 102, 241) */
+        .bg-theme-accent-5 {
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+
+        .bg-theme-accent-20 {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300 pt-[70px]">
+    <div class="aurora"></div>
+
+    <nav class="global-nav">
+        <div class="nav-left">
+            <a href="#" class="logo-link">
+                <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+                </svg>
+                <span class="logo-infinite">INFINITE</span>
+                <span class="logo-devlab">DEVLAB</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">CSS Lab</a>
+                <a href="#">Codebreaker</a>
+                <a href="#" class="active">DSA Visualizer</a>
+                <a href="#">Problem Solver</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-login">Login</button>
+            <button class="btn-register">Register</button>
+            <button class="th-btn" id="thbtn" aria-label="Toggle theme">
+                <span class="kn" id="thkn">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <a href="#"
+                    class="inline-flex items-center gap-2 text-theme-muted hover:text-theme-accent text-sm font-semibold mb-4 transition-colors">
+                    <span>←</span> Back to Algorithms
+                </a>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Graph Algorithm ·
+                    Shortest Path</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">DIJKSTRA'S
+                    <span class="text-theme-accent">ALGORITHM</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Finds the shortest path
+                    from a source node to all other nodes in a graph with non-negative edge weights using a Priority
+                    Queue.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <button id="btnPlay"
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-accent text-white hover:bg-theme-accent2 transition-all shadow-[0_0_10px_rgba(99,102,241,0.3)]">▶
+                    Run Dijkstra</button>
+                <div class="flex gap-2">
+                    <button id="btnStepB"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-surf hover:border-theme-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>⏮</button>
+                    <button id="btnPause"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-accent text-theme-accent hover:bg-theme-accent-5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:border-theme-border disabled:text-theme-muted"
+                        disabled>⏸ Pause</button>
+                    <button id="btnStepF"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-surf hover:border-theme-accent transition-all">⏭</button>
+                    <button id="btnReset"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:text-theme-accent transition-all ml-2">↺
+                        Reset Graph</button>
+                </div>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="600" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Distances
+                        from Source (A)</span>
+                    <div id="distTable" class="grid grid-cols-3 gap-2"></div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full border-2 border-slate-500 bg-theme-bg"></div>
+                            <span>Unvisited Node</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div
+                                class="w-4 h-4 rounded-full border-2 border-theme-accent bg-theme-bg scale-110 shadow-[0_0_8px_rgba(99,102,241,0.4)]">
+                            </div>
+                            <span class="text-theme-text font-bold">Processing (Relaxing)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full bg-theme-accent-20 border-2 border-theme-accent"></div>
+                            <span class="text-theme-accent font-bold">Settled (Shortest Found)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-1 rounded-full bg-theme-accent"></div>
+                            <span class="text-theme-text">Active Edge</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
+                    IDLE — Press Play
+                </div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6 bg-theme-bg">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col justify-center items-center relative shadow-inner min-h-[360px] overflow-hidden">
+                    <span class="absolute top-4 left-4 font-code text-[0.7rem] text-theme-muted font-bold">// GRAPH
+                        VIEW</span>
+                    <svg id="graphSvg" viewBox="0 0 560 320" class="mt-4"></svg>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="flex items-center gap-2 border-b border-theme-border pb-2 mb-2">
+                                <span
+                                    class="text-xs text-theme-accent uppercase tracking-widest font-bold">dijkstra.cpp</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="cl" id="p1"><span class="text-pink-400">void</span> <span
+                                        class="text-theme-accent">dijkstra</span>(<span class="text-pink-400">int</span>
+                                    src) {</span>
+                                <span class="cl" id="p2">&nbsp;&nbsp;<span class="text-pink-400">vector</span>&lt;<span
+                                        class="text-pink-400">int</span>&gt; dist(V, INT_MAX);</span>
+                                <span class="cl" id="p3">&nbsp;&nbsp;<span
+                                        class="text-theme-accent">priority_queue</span>&lt;<span
+                                        class="text-theme-accent">pair</span>&lt;<span class="text-pink-400">int</span>,
+                                    <span class="text-pink-400">int</span>&gt;, <span
+                                        class="text-pink-400">vector</span>&lt;<span
+                                        class="text-theme-accent">pair</span>&lt;<span class="text-pink-400">int</span>,
+                                    <span class="text-pink-400">int</span>&gt;&gt;, <span
+                                        class="text-theme-accent">greater</span>&lt;&gt;&gt; pq;</span>
+                                <span class="cl" id="p4"></span>
+                                <span class="cl" id="p5">&nbsp;&nbsp;dist[src] = 0;</span>
+                                <span class="cl" id="p6">&nbsp;&nbsp;pq.<span class="text-theme-accent">push</span>({0,
+                                    src});</span>
+                                <span class="cl" id="p7"></span>
+                                <span class="cl" id="p8">&nbsp;&nbsp;<span class="text-pink-400">while</span> (!pq.<span
+                                        class="text-theme-accent">empty</span>()) {</span>
+                                <span class="cl" id="p9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">auto</span>
+                                    [d, u] = pq.<span class="text-theme-accent">top</span>(); pq.<span
+                                        class="text-theme-accent">pop</span>();</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col mt-8 md:mt-10">
+                                <span class="cl" id="p10">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span>
+                                    (d > dist[u]) <span class="text-pink-400">continue</span>; <span
+                                        class="text-theme-muted italic">// Skip stale</span></span>
+                                <span class="cl" id="p11"></span>
+                                <span class="cl" id="p12">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span>
+                                    (<span class="text-pink-400">auto</span>&amp; edge : graph[u]) { <span
+                                        class="text-theme-muted italic">// Check neighbors</span></span>
+                                <span class="cl" id="p13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                        class="text-pink-400">int</span> v = edge.to, weight = edge.wt;</span>
+                                <span class="cl" id="p14">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                        class="text-pink-400">if</span> (dist[u] + weight &lt; dist[v]) {</span>
+                                <span class="cl" id="p15">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] =
+                                    dist[u] + weight; <span class="text-theme-muted italic">// Relax</span></span>
+                                <span class="cl" id="p16">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pq.<span
+                                        class="text-theme-accent">push</span>({dist[v], v});</span>
+                                <span class="cl" id="p17">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+                                <span class="cl" id="p18">&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+                                <span class="cl" id="p19">&nbsp;&nbsp;}</span>
+                                <span class="cl" id="p20">}</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('.cl').forEach(e => e.classList.remove('hl'));
+            if (id) $(id).classList.add('hl');
+        };
+
+        /* ── GRAPH DATA ── */
+        const NODES = [
+            { id: 0, label: 'A', x: 80, y: 160 },
+            { id: 1, label: 'B', x: 200, y: 60 },
+            { id: 2, label: 'C', x: 200, y: 260 },
+            { id: 3, label: 'D', x: 340, y: 60 },
+            { id: 4, label: 'E', x: 340, y: 260 },
+            { id: 5, label: 'F', x: 480, y: 160 }
+        ];
+        const EDGES = [
+            { u: 0, v: 1, w: 4 }, { u: 0, v: 2, w: 2 },
+            { u: 1, v: 3, w: 5 }, { u: 1, v: 2, w: 1 },
+            { u: 2, v: 4, w: 8 }, { u: 3, v: 5, w: 2 },
+            { u: 4, v: 5, w: 6 }, { u: 3, v: 4, w: 2 }
+        ];
+        const INF = 1e9;
+
+        /* ── SVG RENDERING ── */
+        const NS = 'http://www.w3.org/2000/svg';
+        function mkEl(tag, attrs) {
+            const e = document.createElementNS(NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+            return e;
+        }
+
+        function drawGraph() {
+            const svg = $('graphSvg');
+            svg.innerHTML = '';
+
+            // Draw edges
+            EDGES.forEach(({ u, v, w }, i) => {
+                const n1 = NODES[u], n2 = NODES[v];
+                const line = mkEl('line', { x1: n1.x, y1: n1.y, x2: n2.x, y2: n2.y, stroke: 'var(--border)', 'stroke-width': '2', id: `edge-${i}` });
+                line.classList.add('edge-line');
+                svg.appendChild(line);
+
+                const mx = (n1.x + n2.x) / 2, my = (n1.y + n2.y) / 2;
+                const bg = mkEl('rect', { x: mx - 10, y: my - 8, width: 20, height: 16, fill: 'var(--bg)', rx: 3 });
+                bg.classList.add('weight-bg');
+                svg.appendChild(bg);
+
+                const wt = mkEl('text', { x: mx, y: my + 4, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': '11', 'font-family': 'JetBrains Mono', 'font-weight': 'bold' });
+                wt.classList.add('weight-text');
+                wt.textContent = w;
+                svg.appendChild(wt);
+            });
+
+            // Draw nodes
+            NODES.forEach(n => {
+                const g = mkEl('g', { id: `ng-${n.id}` });
+                // Base state: Unvisited
+                const c = mkEl('circle', { cx: n.x, cy: n.y, r: 22, fill: 'var(--bg)', stroke: 'var(--border)', 'stroke-width': '2', id: `nc-${n.id}` });
+                c.classList.add('node-circle');
+
+                const t = mkEl('text', { x: n.x, y: n.y + 5, 'text-anchor': 'middle', fill: 'var(--text)', 'font-size': '14', 'font-weight': '700', 'font-family': 'JetBrains Mono' });
+                t.textContent = n.label;
+
+                g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+            });
+        }
+
+        function setNodeState(id, state) {
+            const c = $(`nc-${id}`);
+            if (!c) return;
+
+            if (state === 'active') {
+                c.setAttribute('fill', 'var(--bg)');
+                c.setAttribute('stroke', 'var(--accent)');
+                c.setAttribute('stroke-width', '3');
+                c.style.transform = `scale(1.15)`;
+                c.style.transformOrigin = `${NODES[id].x}px ${NODES[id].y}px`;
+            } else if (state === 'settled') {
+                c.setAttribute('fill', 'var(--accent)');
+                c.style.fillOpacity = '0.2';
+                c.setAttribute('stroke', 'var(--accent)');
+                c.setAttribute('stroke-width', '2');
+                c.style.transform = `scale(1)`;
+            } else {
+                c.setAttribute('fill', 'var(--bg)');
+                c.style.fillOpacity = '1';
+                c.setAttribute('stroke', 'var(--border)');
+                c.setAttribute('stroke-width', '2');
+                c.style.transform = `scale(1)`;
+            }
+        }
+
+        function setEdgeState(i, isActive) {
+            const e = $(`edge-${i}`);
+            if (e) {
+                e.setAttribute('stroke', isActive ? 'var(--accent)' : 'var(--border)');
+                e.setAttribute('stroke-width', isActive ? '4' : '2');
+            }
+        }
+
+        /* ── DISTANCE TABLE ── */
+        function buildDistTable() {
+            const dt = $('distTable');
+            dt.innerHTML = '';
+            NODES.forEach((n, i) => {
+                const box = document.createElement('div');
+                box.className = 'flex flex-col items-center p-2 border border-theme-border rounded-lg bg-theme-bg/50';
+                box.innerHTML = `<span class="font-display text-xl text-theme-text mb-1">${n.label}</span><div class="dist-val w-full text-center font-code text-sm font-bold text-theme-muted bg-theme-bg border border-theme-border rounded py-1" id="dist-${i}">∞</div>`;
+                dt.appendChild(box);
+            });
+        }
+
+        function updateDistUI(i, val, state = '') {
+            const c = $(`dist-${i}`);
+            if (!c) return;
+            c.textContent = val === INF ? '∞' : val;
+
+            c.className = 'dist-val w-full text-center font-code text-sm rounded py-1 transition-all duration-300';
+            if (state === 'updated') {
+                c.classList.add('bg-theme-accent', 'text-white', 'font-bold');
+            } else if (state === 'active') {
+                c.classList.add('bg-theme-bg', 'border', 'border-theme-accent', 'text-theme-accent');
+            } else {
+                c.classList.add('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-muted');
+            }
+        }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider mt-auto';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent-10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        /* ── DIJKSTRA ENGINE ── */
+        function genDijkstraSteps() {
+            const steps = [];
+            const dist = new Array(6).fill(INF);
+            const settled = new Array(6).fill(false);
+
+            const adj = NODES.map(() => []);
+            EDGES.forEach(({ u, v, w }, i) => {
+                adj[u].push({ v, w, ei: i });
+                adj[v].push({ u: v, v: u, w, ei: i });
+            });
+
+            dist[0] = 0;
+            const pq = [[0, 0]];
+
+            steps.push({ codeLine: 'p5', dist: [...dist], settled: [...settled], msg: 'Initialize: dist[A] = 0', activeNode: -1, activeEdge: -1 });
+            steps.push({ codeLine: 'p6', dist: [...dist], settled: [...settled], msg: 'Push Source A into Priority Queue', activeNode: -1, activeEdge: -1 });
+
+            while (pq.length > 0) {
+                pq.sort((a, b) => a[0] - b[0]);
+                const [d, u] = pq.shift();
+
+                if (settled[u]) continue;
+
+                settled[u] = true;
+                steps.push({ codeLine: 'p9', dist: [...dist], settled: [...settled], msg: `Pop Node ${NODES[u].label} from Queue. Min dist: ${d}.`, activeNode: u, activeEdge: -1 });
+
+                for (const { v, w, ei } of adj[u]) {
+                    steps.push({ codeLine: 'p12', dist: [...dist], settled: [...settled], msg: `Check neighbor ${NODES[v].label} via edge weight ${w}.`, activeNode: u, activeEdge: ei, relaxV: v });
+
+                    if (dist[u] + w < dist[v]) {
+                        dist[v] = dist[u] + w;
+                        pq.push([dist[v], v]);
+                        steps.push({ codeLine: 'p15', dist: [...dist], settled: [...settled], msg: `Relaxing edge! New shortest path to ${NODES[v].label} is ${dist[v]}.`, activeNode: u, activeEdge: ei, relaxV: v, updatedV: v });
+                        steps.push({ codeLine: 'p16', dist: [...dist], settled: [...settled], msg: `Push Node ${NODES[v].label} to Queue.`, activeNode: u, activeEdge: ei, relaxV: v, updatedV: v });
+                    }
+                }
+            }
+            steps.push({ codeLine: null, dist: [...dist], settled: [...settled], msg: 'Dijkstra Complete! All shortest paths found.', activeNode: -1, activeEdge: -1, done: true });
+            return steps;
+        }
+
+        let steps = [], stepIdx = 0, playing = false, timer = null;
+        let spd = 600;
+
+        function applyStep(i) {
+            if (i < 0 || i >= steps.length) return;
+            const s = steps[i];
+
+            hl(s.codeLine);
+            if (s.done) setSpill('found', s.msg);
+            else setSpill('run', s.msg);
+
+            // Graph Updates
+            NODES.forEach((n, ni) => {
+                if (s.settled && s.settled[ni]) setNodeState(ni, 'settled');
+                else setNodeState(ni, 'unvisited');
+            });
+            EDGES.forEach((_, ei) => setEdgeState(ei, false));
+
+            if (s.activeNode >= 0) setNodeState(s.activeNode, 'active');
+            if (s.activeEdge >= 0) setEdgeState(s.activeEdge, true);
+            if (s.relaxV !== undefined && !s.settled[s.relaxV]) {
+                const c = $(`nc-${s.relaxV}`);
+                if (c) {
+                    c.setAttribute('stroke', 'var(--accent)');
+                    c.setAttribute('stroke-width', '3');
+                }
+            }
+
+            if (s.done) NODES.forEach((_, ni) => setNodeState(ni, 'settled'));
+
+            // Dist Table
+            NODES.forEach((_, ni) => {
+                let state = '';
+                if (s.updatedV === ni) state = 'updated';
+                else if (s.relaxV === ni) state = 'active';
+                updateDistUI(ni, s.dist[ni], state);
+            });
+        }
+
+        function reset() {
+            clearInterval(timer); playing = false; stepIdx = 0;
+            drawGraph();
+            buildDistTable();
+            steps = genDijkstraSteps();
+
+            setSpill('idle', 'GRAPH READY');
+            NODES.forEach((_, i) => updateDistUI(i, i === 0 ? 0 : INF));
+            hl(null);
+            updateBtns();
+        }
+
+        function updateBtns() {
+            const pb = $('btnPlay');
+            if (playing) {
+                pb.innerHTML = '⏸ Pause';
+                pb.classList.remove('bg-theme-accent', 'text-white');
+                pb.classList.add('border', 'border-theme-accent', 'text-theme-accent', 'bg-transparent');
+            } else {
+                pb.innerHTML = '▶ Run Dijkstra';
+                pb.classList.add('bg-theme-accent', 'text-white');
+                pb.classList.remove('border', 'border-theme-accent', 'text-theme-accent', 'bg-transparent');
+            }
+            $('btnStepF').disabled = playing || stepIdx >= steps.length;
+            $('btnStepB').disabled = playing || stepIdx <= 0;
+        }
+
+        function playNext() {
+            if (stepIdx >= steps.length) {
+                playing = false; clearInterval(timer); updateBtns();
+                return;
+            }
+            applyStep(stepIdx++);
+            updateBtns();
+        }
+
+        $('btnPlay').addEventListener('click', () => {
+            if (stepIdx >= steps.length) reset();
+            if (playing) { playing = false; clearInterval(timer); }
+            else { playing = true; timer = setInterval(playNext, spd); }
+            updateBtns();
+        });
+        $('btnStepF').addEventListener('click', () => { if (stepIdx < steps.length) { applyStep(stepIdx++); updateBtns(); } });
+        $('btnStepB').addEventListener('click', () => {
+            if (stepIdx > 1) { stepIdx -= 2; applyStep(stepIdx++); updateBtns(); }
+            else { reset(); }
+        });
+        $('btnPause').addEventListener('click', () => {
+            if (playing) { playing = false; clearInterval(timer); updateBtns(); }
+        });
+        $('btnReset').addEventListener('click', reset);
+
+        // Reverse speed mapped slider
+        $('spd').oninput = function () {
+            spd = 1700 - parseInt(this.value);
+            if (playing) {
+                clearInterval(timer);
+                timer = setInterval(playNext, spd);
+            }
+        };
+
+        /* Theme Engine Integration */
+        (function () {
+            const html = document.documentElement, btn = document.getElementById('thbtn'), kn = document.getElementById('thkn');
+            function set(l) { html.classList.toggle('light', l); kn.textContent = l ? '☀️' : '🌙'; localStorage.setItem('idl_theme', l ? 'l' : 'd') }
+            set(localStorage.getItem('idl_theme') === 'l');
+            btn.addEventListener('click', () => set(!html.classList.contains('light')));
+
+            // Rapid redraw for SVG strokes
+            btn.addEventListener('click', () => {
+                setTimeout(() => { if (!playing && stepIdx === 0) reset(); else applyStep(stepIdx - 1); }, 50);
+            });
+        })();
+
+        // Init
+        reset();
+    </script>
+</body>
+
+</html>

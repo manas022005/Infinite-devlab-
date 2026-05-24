@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>N-Queens — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Chess Board Styles */
+        #board-grid {
+            display: grid;
+            border: 2px solid var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(45, 212, 191, .08);
+        }
+
+        .cell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+
+        .cell.light-sq {
+            background: rgba(45, 212, 191, .04);
+        }
+
+        .cell.dark-sq {
+            background: var(--bg);
+        }
+
+        html.light .cell.light-sq {
+            background: rgba(13, 148, 136, .06);
+        }
+
+        html.light .cell.dark-sq {
+            background: rgba(0, 0, 0, .03);
+        }
+
+        /* Monochromatic State Overrides */
+        .cell.threatened {
+            background: rgba(100, 116, 139, 0.4) !important;
+        }
+
+        .cell.placing {
+            background: rgba(45, 212, 191, .2) !important;
+        }
+
+        .cell.backtrack {
+            background: rgba(100, 116, 139, .6) !important;
+        }
+
+        .cell.solution {
+            background: rgba(45, 212, 191, .1) !important;
+        }
+
+        .queen {
+            font-size: 1.6rem;
+            line-height: 1;
+            user-select: none;
+            position: relative;
+            z-index: 2;
+            transition: all .2s;
+            color: var(--accent);
+        }
+
+        .queen.placed {
+            animation: queen-in .25s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .queen.removing {
+            animation: queen-out .18s ease forwards;
+            color: var(--muted);
+        }
+
+        .queen.solved {
+            filter: drop-shadow(0 0 8px var(--accent));
+            color: var(--text);
+        }
+
+        @keyframes queen-in {
+            from {
+                transform: scale(0) rotate(-15deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes queen-out {
+            to {
+                transform: scale(0) rotate(15deg);
+                opacity: 0;
+            }
+        }
+
+        .sol-mini {
+            display: grid;
+            gap: 1px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color .15s, transform .15s;
+            flex-shrink: 0;
+        }
+
+        .sol-mini:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .sol-mini-cell.q {
+            background: var(--accent) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Backtracking
+                & Recursion</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Algorithm
+                    Technique · Constraint Satisfaction</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">N-QUEENS <span
+                        class="text-theme-accent">PUZZLE</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Place N non-attacking
+                    queens on an N×N chessboard. Each step tries a column in the current row, checks safety across rows,
+                    columns, and both diagonals, recurses down, then backtracks when stuck.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <div
+                    class="flex items-center gap-1 border border-theme-border bg-theme-surf rounded-lg overflow-hidden">
+                    <button
+                        class="n-btn font-code text-xs font-bold px-3 py-2.5 text-theme-muted hover:text-theme-accent hover:bg-theme-bg transition-colors"
+                        data-n="4">N=4</button>
+                    <div class="w-px h-4 bg-theme-border"></div>
+                    <button
+                        class="n-btn font-code text-xs font-bold px-3 py-2.5 bg-theme-accent text-theme-bg transition-colors active"
+                        data-n="6">N=6</button>
+                    <div class="w-px h-4 bg-theme-border"></div>
+                    <button
+                        class="n-btn font-code text-xs font-bold px-3 py-2.5 text-theme-muted hover:text-theme-accent hover:bg-theme-bg transition-colors"
+                        data-n="8">N=8</button>
+                </div>
+
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)] ml-2">▶
+                    Run C++ Backtrack</button>
+                <button id="btn-reset"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    Reset</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="20" max="700" value="200" step="20"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Recursion
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-calls" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Recur Calls</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-backs" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Backtracks</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-placed" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Q Placed</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-sols" class="font-display text-3xl text-theme-text leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Solutions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/20"></div>
+                            <span>Trying Position</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-muted bg-slate-500/40"></div>
+                            <span class="text-theme-muted font-semibold">Threatened (Not Safe)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-muted bg-slate-400/60"></div>
+                            <span class="text-theme-muted font-semibold text-shadow">Backtracking</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent bg-theme-accent/10"></div>
+                            <span class="text-theme-text font-bold">Solution ✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    READY</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6 overflow-hidden">
+
+                <div class="flex gap-4 font-code text-[0.65rem] text-theme-muted">
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Row <span id="h-row" class="text-theme-accent font-bold">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Col <span id="h-col" class="text-theme-text font-bold">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        isSafe() <span id="h-safe" class="text-theme-accent font-bold">—</span>
+                    </div>
+                </div>
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col justify-center items-center gap-8 relative shadow-inner min-h-[360px]">
+
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="flex" id="col-labels" style="padding-left: 20px;"></div>
+                        <div id="board-rows" class="flex flex-col gap-1"></div>
+                    </div>
+
+                    <div class="w-full flex flex-col gap-2 mt-2">
+                        <div
+                            class="font-code text-[0.65rem] text-theme-muted uppercase tracking-widest border-t border-theme-border pt-4">
+                            Solutions (<span id="sol-total">?</span> Total) : Click to view</div>
+                        <div class="flex flex-wrap gap-2 overflow-y-auto max-h-32 p-2 bg-theme-bg border border-theme-border rounded-lg"
+                            id="sol-strip">
+                            <span class="font-code text-xs text-theme-muted">none yet</span>
+                        </div>
+                    </div>
+
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    <div>
+                        <div class="font-code text-[0.6rem] tracking-widest uppercase text-theme-accent mb-3">solve(row,
+                            n)</div>
+                        <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">void</span> <span
+                                class="text-theme-accent">solve</span>(<span class="text-pink-400">int</span> row, <span
+                                class="text-pink-400">int</span> n) {</div>
+                        <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">if</span> (row == n) { <span class="text-theme-muted italic">//
+                                All queens placed</span></div>
+                        <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;solutions.<span
+                                class="text-theme-accent">push_back</span>(board);</div>
+                        <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-pink-400">return</span>;</div>
+                        <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                        <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">for</span> (<span class="text-pink-400">int</span> col = 0; col
+                            &lt; n; col++) {</div>
+                        <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-pink-400">if</span> (<span class="text-theme-accent">isSafe</span>(row,
+                            col)) {</div>
+                        <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;board[row]
+                            = col; <span class="text-theme-muted italic">// Place ♛</span></div>
+                        <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-theme-accent">solve</span>(row + 1, n); &nbsp;<span
+                                class="text-theme-muted italic">// Recurse ↓</span></div>
+                        <div id="p10" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;board[row]
+                            = -1; &nbsp;<span class="text-theme-muted italic">// Backtrack ←</span></div>
+                        <div id="p11" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                        <div id="p12" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                        <div id="p13" class="px-2 rounded transition-all">}</div>
+                    </div>
+
+                    <div>
+                        <div class="font-code text-[0.6rem] tracking-widest uppercase text-theme-accent mb-3">
+                            isSafe(row, col)</div>
+                        <div id="q1" class="px-2 rounded transition-all"><span class="text-pink-400">bool</span> <span
+                                class="text-theme-accent">isSafe</span>(<span class="text-pink-400">int</span> row,
+                            <span class="text-pink-400">int</span> col) {</div>
+                        <div id="q2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-theme-muted italic">// Check column ↑</span></div>
+                        <div id="q3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">for</span> (<span class="text-pink-400">int</span> r = 0; r &lt;
+                            row; r++) {</div>
+                        <div id="q4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-pink-400">if</span> (board[r] == col) <span class="text-pink-400">return
+                                false</span>;</div>
+                        <div id="q5" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                        <div id="q6" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-theme-muted italic">// Check both diagonals ↖ ↗</span></div>
+                        <div id="q7" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                class="text-pink-400">for</span> (<span class="text-pink-400">int</span> r = 0; r &lt;
+                            row; r++) {</div>
+                        <div id="q8" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-pink-400">if</span> (<span class="text-theme-accent">abs</span>(board[r] -
+                            col) == <span class="text-theme-accent">abs</span>(r - row)) {</div>
+                        <div id="q9" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                class="text-pink-400">return false</span>;</div>
+                        <div id="q10" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                        <div id="q11" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                        <div id="q12" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">return
+                                true</span>;</div>
+                        <div id="q13" class="px-2 rounded transition-all">}</div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = (id, isBacktrack = false) => {
+            document.querySelectorAll('[id^="p"], [id^="q"]').forEach(e => {
+                e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4', 'bg-slate-500/20', 'border-slate-500');
+            });
+            if (id) {
+                if (isBacktrack) {
+                    $(id).classList.add('bg-slate-500/20', 'border-l-4', 'border-slate-500', 'text-theme-text', 'pl-4');
+                } else {
+                    $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+                }
+            }
+        };
+
+        let N = 6, spd = 200, running = false;
+        let board = [], solutions = [];
+        let calls = 0, placed = 0, backs = 0;
+
+        const TOTALS = { 4: 2, 5: 10, 6: 4, 7: 40, 8: 92 };
+
+        function setStat(id, v) { $(id).textContent = v; }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else if (state === 'back') p.classList.add('bg-slate-500/10', 'border-slate-500', 'text-theme-text');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function initBoard() {
+            board = new Array(N).fill(-1);
+            solutions = []; calls = 0; placed = 0; backs = 0;
+
+            setStat('s-calls', 0); setStat('s-placed', 0); setStat('s-backs', 0); setStat('s-sols', 0);
+            $('sol-total').textContent = TOTALS[N] ?? '?';
+            $('sol-strip').innerHTML = '<span class="font-code text-xs text-theme-muted w-full text-center">none yet</span>';
+
+            ['h-row', 'h-col', 'h-safe'].forEach(id => $(id).textContent = '—');
+
+            setSpill('idle', 'READY');
+            hl(null);
+
+            buildBoardDOM();
+            buildLabels();
+        }
+
+        function buildBoardDOM() {
+            const cellSz = Math.min(Math.floor(320 / N), 56);
+            const rowsEl = $('board-rows');
+            rowsEl.innerHTML = '';
+
+            for (let r = 0; r < N; r++) {
+                const rowWrap = document.createElement('div');
+                rowWrap.className = 'flex items-center gap-1';
+
+                const rlbl = document.createElement('div');
+                rlbl.className = 'font-code text-[0.6rem] text-theme-muted w-4 text-center';
+                rlbl.textContent = r; // Changed to 0-index for C++ logic match
+                rowWrap.appendChild(rlbl);
+
+                const grid = document.createElement('div');
+                grid.id = 'board-grid';
+                grid.style.gridTemplateColumns = `repeat(${N}, ${cellSz}px)`;
+
+                for (let c = 0; c < N; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell ' + ((r + c) % 2 === 0 ? 'light-sq' : 'dark-sq');
+                    cell.style.cssText = `width:${cellSz}px;height:${cellSz}px;`;
+                    cell.id = `c-${r}-${c}`;
+                    grid.appendChild(cell);
+                }
+                rowWrap.appendChild(grid);
+                rowsEl.appendChild(rowWrap);
+            }
+        }
+
+        function buildLabels() {
+            const cellSz = Math.min(Math.floor(320 / N), 56);
+            const colEl = $('col-labels');
+            colEl.innerHTML = '';
+
+            for (let c = 0; c < N; c++) {
+                const l = document.createElement('div');
+                l.className = 'font-code text-[0.6rem] text-theme-muted text-center';
+                l.style.width = cellSz + 'px';
+                l.textContent = c; // 0-indexed
+                colEl.appendChild(l);
+            }
+        }
+
+        function renderBoard(curR = -1, curC = -1, threatened = [], backR = -1, backC = -1, finalMode = false) {
+            for (let r = 0; r < N; r++) {
+                for (let c = 0; c < N; c++) {
+                    const cell = $(`c-${r}-${c}`);
+                    if (!cell) continue;
+
+                    cell.className = 'cell ' + ((r + c) % 2 === 0 ? 'light-sq' : 'dark-sq');
+                    cell.innerHTML = '';
+
+                    const key = r * N + c;
+
+                    if (threatened.includes(key)) cell.classList.add('threatened');
+                    if (r === curR && c === curC) cell.classList.add('placing');
+                    if (r === backR && c === backC) cell.classList.add('backtrack');
+                    if (finalMode) cell.classList.add('solution');
+
+                    if (board[r] === c) {
+                        const q = document.createElement('div');
+                        q.className = 'queen';
+                        if (r === curR && c === curC) q.classList.add('placed');
+                        if (r === backR && c === backC) q.classList.add('removing');
+                        if (finalMode) q.classList.add('solved');
+                        q.textContent = '♛';
+                        cell.appendChild(q);
+                    }
+                }
+            }
+        }
+
+        function isSafe(row, col) {
+            for (let r = 0; r < row; r++) {
+                if (board[r] === col) return false;
+                if (Math.abs(board[r] - col) === Math.abs(r - row)) return false;
+            }
+            return true;
+        }
+
+        function getThreatened(row, col) {
+            const cells = [];
+            for (let r = 0; r < row; r++) cells.push(r * N + col);
+            for (let r = row - 1, c1 = col - 1, c2 = col + 1; r >= 0; r--, c1--, c2++) {
+                if (c1 >= 0) cells.push(r * N + c1);
+                if (c2 < N) cells.push(r * N + c2);
+            }
+            // highlight the current row being tested
+            for (let c = 0; c < N; c++) if (c !== col) cells.push(row * N + c);
+            return cells;
+        }
+
+        function addSolMini(snap) {
+            const strip = $('sol-strip');
+            if (solutions.length === 1) strip.innerHTML = '';
+
+            const cellSz = 8;
+            const mini = document.createElement('div');
+            mini.className = 'sol-mini';
+            mini.style.gridTemplateColumns = `repeat(${N},${cellSz}px)`;
+            mini.title = `Solution #${solutions.length}`;
+
+            for (let r = 0; r < N; r++) {
+                for (let c = 0; c < N; c++) {
+                    const sc = document.createElement('div');
+                    sc.className = 'sol-mini-cell';
+                    if (snap[r] === c) sc.classList.add('q');
+                    sc.style.cssText = `width:${cellSz}px;height:${cellSz}px;background:${snap[r] === c ? 'var(--accent)' : 'var(--bg)'}; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);`;
+                    mini.appendChild(sc);
+                }
+            }
+
+            mini.addEventListener('click', () => {
+                if (running) return;
+                const saved = [...board];
+                board = [...snap];
+                renderBoard(-1, -1, [], -1, -1, true);
+                setTimeout(() => { board = saved; renderBoard(); }, 2000);
+            });
+            strip.appendChild(mini);
+        }
+
+        async function solve(row) {
+            calls++; setStat('s-calls', calls);
+            $('h-row').textContent = row;
+            hl('p1'); await sleep(spd * .15);
+
+            hl('p2'); await sleep(spd * .2);
+            if (row === N) {
+                hl('p3');
+                const snap = [...board];
+                solutions.push(snap);
+                setStat('s-sols', solutions.length);
+                addSolMini(snap);
+                renderBoard(-1, -1, [], -1, -1, true);
+                await sleep(spd * 1.5);
+                hl('p4'); await sleep(spd * .1);
+                return;
+            }
+
+            hl('p6'); await sleep(spd * .15);
+
+            for (let col = 0; col < N; col++) {
+                $('h-col').textContent = col;
+                hl('p7'); await sleep(spd * .12);
+
+                // isSafe tracing
+                hl('q1'); await sleep(spd * .08);
+                hl('q3'); await sleep(spd * .08);
+                hl('q4'); await sleep(spd * .08);
+                hl('q7'); await sleep(spd * .08);
+                hl('q8'); await sleep(spd * .08);
+                hl('q12'); await sleep(spd * .08);
+
+                const safe = isSafe(row, col);
+                $('h-safe').textContent = safe ? 'TRUE' : 'FALSE';
+                hl('p7');
+
+                if (safe) {
+                    hl('p8');
+                    board[row] = col; placed++; setStat('s-placed', placed);
+                    renderBoard(row, col, getThreatened(row, col));
+                    await sleep(spd * .6);
+
+                    renderBoard(row, col, []);
+                    await sleep(spd * .2);
+
+                    hl('p9'); setSpill('run', `RECURSE ROW ${row + 1} ↓`); await sleep(spd * .12);
+                    await solve(row + 1);
+
+                    // BACKTRACK
+                    hl('p10', true); setSpill('back', 'BACKTRACKING ↑');
+                    backs++; setStat('s-backs', backs);
+
+                    renderBoard(-1, -1, [], row, col);
+                    await sleep(spd * .55);
+
+                    board[row] = -1;
+                    renderBoard(); await sleep(spd * .12);
+
+                } else {
+                    renderBoard(row, col, getThreatened(row, col));
+                    await sleep(spd * .3);
+                    renderBoard(); await sleep(spd * .06);
+                }
+            }
+
+            hl('p13'); await sleep(spd * .1);
+        }
+
+        async function runNQueens() {
+            if (running) return;
+            running = true;
+
+            $('btn-run').disabled = true; $('btn-reset').disabled = true;
+            document.querySelectorAll('.n-btn').forEach(b => b.disabled = true);
+
+            board = new Array(N).fill(-1);
+            solutions = []; calls = 0; placed = 0; backs = 0;
+
+            setStat('s-calls', 0); setStat('s-placed', 0); setStat('s-backs', 0); setStat('s-sols', 0);
+            $('sol-strip').innerHTML = '';
+
+            ['h-row', 'h-col', 'h-safe'].forEach(id => $(id).textContent = '—');
+
+            setSpill('run', 'STARTING ALGORITHM...');
+            renderBoard();
+
+            await solve(0);
+
+            hl(null); renderBoard();
+            setSpill('found', `COMPLETE ✓ (${solutions.length} SOLS)`);
+
+            $('btn-run').disabled = false; $('btn-reset').disabled = false;
+            document.querySelectorAll('.n-btn').forEach(b => b.disabled = false);
+            running = false;
+        }
+
+        $('btn-reset').onclick = () => { if (!running) initBoard(); };
+        $('btn-run').onclick = runNQueens;
+        $('spd').oninput = function () { spd = 720 - parseInt(this.value); }; // Reverse for UI 
+
+        document.querySelectorAll('.n-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (running) return;
+                document.querySelectorAll('.n-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-theme-accent', 'text-theme-bg');
+                    b.classList.add('text-theme-muted');
+                });
+                btn.classList.add('active', 'bg-theme-accent', 'text-theme-bg');
+                btn.classList.remove('text-theme-muted');
+                N = parseInt(btn.dataset.n);
+                initBoard();
+            });
+        });
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        // Initialize
+        initBoard();
+    </script>
+</body>
+
+</html>

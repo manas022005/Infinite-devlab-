@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Prefix Sum Pattern — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        /* Element Box Animation */
+        .el-box {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+        }
+
+        /* Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Number Inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">O(1)
+                Range Queries</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Pattern · Dynamic
+                    Programming Basics</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">PREFIX <span
+                        class="text-theme-accent">SUM</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Precomputes cumulative
+                    totals to answer range sum queries [L, R] in O(1) time instead of O(n). Build once, query instantly.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent hover:text-theme-accent transition-all">↺
+                    New Array</button>
+                <button id="btn-build"
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-surf border border-theme-accent text-theme-accent hover:bg-theme-accent hover:text-theme-bg transition-all">▶
+                    1. Build P[]</button>
+
+                <div class="w-px h-6 bg-theme-border mx-2 hidden sm:block"></div>
+
+                <div class="flex items-center gap-2 border border-theme-border bg-theme-surf px-3 py-1.5 rounded-lg">
+                    <span class="font-code text-xs text-theme-muted font-bold">L:</span>
+                    <input id="inp-l" type="number" min="0" max="9" value="2"
+                        class="w-8 bg-transparent text-theme-accent font-code text-sm outline-none text-center" />
+                </div>
+                <div class="flex items-center gap-2 border border-theme-border bg-theme-surf px-3 py-1.5 rounded-lg">
+                    <span class="font-code text-xs text-theme-muted font-bold">R:</span>
+                    <input id="inp-r" type="number" min="0" max="9" value="6"
+                        class="w-8 bg-transparent text-theme-accent font-code text-sm outline-none text-center" />
+                </div>
+
+                <button id="btn-query" disabled
+                    class="font-ui text-sm font-bold px-6 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)] disabled:opacity-40 disabled:cursor-not-allowed">▶
+                    2. Query Sum</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="100" max="1000" value="400" step="50"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-n" class="font-display text-3xl text-theme-accent leading-none">10</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Array Size</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-ops" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Operations</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent bg-theme-bg"></div>
+                            <span>Building / Active</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent/50 bg-theme-accent/15"></div>
+                            <span class="text-theme-text">Prefix P[] Computed</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent bg-theme-accent/30"></div>
+                            <span class="text-theme-text font-semibold">Query Range [L, R]</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">P[R] (Total Sum)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border-2 border-theme-text bg-theme-surf"></div>
+                            <span class="text-theme-text font-bold">P[L-1] (Subtract)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">The
+                        Math</span>
+                    <div
+                        class="bg-theme-bg border border-theme-border rounded-lg p-4 font-code text-[0.75rem] text-theme-muted leading-relaxed shadow-inner">
+                        <strong class="text-theme-accent">Sum(L, R)</strong> = P[R] - P[L-1]<br><br>
+                        We take the total sum from index 0 to R, and subtract the sum of the elements before L.
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    IDLE — Build First</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6 overflow-hidden">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col justify-center gap-8 relative shadow-inner min-h-[300px] overflow-x-auto">
+
+                    <div>
+                        <div class="font-code text-xs font-bold text-theme-muted mb-3 flex items-center gap-2">
+                            <span class="text-theme-accent">A[]</span> Original Array
+                        </div>
+                        <div class="flex flex-wrap gap-2" id="row-a"></div>
+                    </div>
+
+                    <div>
+                        <div class="font-code text-xs font-bold text-theme-text mb-3 flex items-center gap-2">
+                            <span class="text-theme-accent">P[]</span> Prefix Sum Array
+                        </div>
+                        <div class="flex flex-wrap gap-2" id="row-p"></div>
+                    </div>
+
+                    <div id="result"
+                        class="flex flex-col gap-2 font-code text-sm p-4 rounded-lg border border-theme-border bg-theme-bg text-theme-muted transition-all mt-2">
+                        <span id="res-txt">// Build the prefix array first...</span>
+                        <span id="res-math" class="text-lg font-bold text-theme-accent"></span>
+                    </div>
+
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 rounded transition-all"><span class="text-theme-muted italic">// Phase 1:
+                            Build Prefix Array O(n)</span></div>
+                    <div id="p2" class="px-2 rounded transition-all"><span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt; P(n);
+                    </div>
+                    <div id="p3" class="px-2 rounded transition-all">P[0] = A[0];</div>
+                    <div id="p4" class="px-2 rounded transition-all"><span class="text-pink-400">for</span> (<span
+                            class="text-pink-400">int</span> i = 1; i &lt; n; i++) {</div>
+                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;P[i] = P[i-1] + A[i];</div>
+                    <div id="p6" class="px-2 rounded transition-all">}</div>
+                    <br>
+                    <div id="p7" class="px-2 rounded transition-all"><span class="text-theme-muted italic">// Phase 2:
+                            Range Query O(1)</span></div>
+                    <div id="p8" class="px-2 rounded transition-all"><span class="text-pink-400">int</span> <span
+                            class="text-theme-accent">querySum</span>(<span class="text-pink-400">int</span> L, <span
+                            class="text-pink-400">int</span> R, <span class="text-theme-accent">vector</span>&lt;<span
+                            class="text-pink-400">int</span>&gt;&amp; P) {</div>
+                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">if</span>
+                        (L == 0) <span class="text-pink-400">return</span> P[R];</div>
+                    <div id="p10" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">return</span> P[R] - P[L-1];</div>
+                    <div id="p11" class="px-2 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ── LOGIC ── */
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], P = [], elsA = [], elsP = [], N = 10, spd = 400, isBuilt = false, running = false;
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else if (state === 'error') p.classList.add('bg-theme-bg', 'border-theme-muted', 'text-theme-muted', 'opacity-60');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        // Sets individual element visual states
+        function setElState(el, state) {
+            el.box.className = 'el-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold transition-all duration-300 relative';
+            el.idx.className = 'absolute -bottom-5 text-[0.55rem] font-code text-theme-muted transition-opacity';
+
+            if (state === 'empty') {
+                el.box.classList.add('bg-transparent', 'border-2', 'border-dashed', 'border-slate-600', 'text-transparent');
+            } else if (state === 'idle') {
+                el.box.classList.add('bg-theme-accent/5', 'border-2', 'border-slate-500', 'text-theme-muted');
+                el.idx.classList.add('opacity-70');
+            } else if (state === 'active') {
+                el.box.classList.add('bg-theme-bg', 'border-2', 'border-theme-accent', 'text-theme-text', 'scale-110');
+                el.idx.classList.add('text-theme-accent');
+            } else if (state === 'built') {
+                el.box.classList.add('bg-theme-accent/15', 'border-2', 'border-theme-accent/50', 'text-theme-text');
+                el.idx.classList.add('opacity-70');
+            } else if (state === 'q-range') {
+                el.box.classList.add('bg-theme-accent/30', 'border-2', 'border-theme-accent', 'text-theme-text');
+            } else if (state === 'q-add') {
+                el.box.classList.add('bg-theme-accent', 'border-2', 'border-theme-accent', 'text-theme-bg', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.5)]', 'z-10');
+                el.idx.classList.add('text-theme-accent');
+            } else if (state === 'q-sub') {
+                el.box.classList.add('bg-theme-surf', 'border-2', 'border-theme-text', 'text-theme-muted', 'scale-105', 'opacity-80', 'z-10');
+            } else if (state === 'dim') {
+                el.box.classList.add('bg-theme-accent/5', 'border-2', 'border-slate-700/50', 'text-theme-muted', 'opacity-30');
+                el.idx.classList.add('opacity-30');
+            }
+        }
+
+        function createCell(val, index, isEmpty) {
+            const wrap = document.createElement('div');
+            wrap.className = 'relative flex flex-col items-center pb-5';
+
+            const box = document.createElement('div');
+            box.textContent = isEmpty ? '0' : val;
+
+            const idxLbl = document.createElement('span');
+            idxLbl.textContent = `[${index}]`;
+
+            wrap.appendChild(box);
+            wrap.appendChild(idxLbl);
+
+            return { wrap, box, idx: idxLbl };
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; P = []; elsA = []; elsP = []; isBuilt = false;
+
+            const rowA = $('row-a'); rowA.innerHTML = '';
+            const rowP = $('row-p'); rowP.innerHTML = '';
+
+            for (let i = 0; i < N; i++) {
+                const val = Math.floor(Math.random() * 9) + 1; // 1 to 9
+                A.push(val); P.push(0);
+
+                const elA = createCell(val, i, false);
+                rowA.appendChild(elA.wrap); elsA.push(elA);
+                setElState(elA, 'idle');
+
+                const elP = createCell(0, i, true);
+                rowP.appendChild(elP.wrap); elsP.push(elP);
+                setElState(elP, 'empty');
+            }
+
+            $('s-ops').textContent = '0';
+            $('btn-query').disabled = true;
+            $('btn-build').disabled = false;
+
+            $('result').className = 'flex flex-col gap-2 font-code text-sm p-4 rounded-lg border border-theme-border bg-theme-bg text-theme-muted transition-all mt-2';
+            $('res-txt').textContent = '// Ready to build Prefix Array...';
+            $('res-math').textContent = '';
+
+            setSpill('idle', 'IDLE — Press Build');
+            hl(null);
+        }
+
+        async function buildPrefix() {
+            if (running || isBuilt) return;
+            running = true; $('btn-gen').disabled = true; $('btn-build').disabled = true;
+
+            setSpill('run', 'BUILDING P[]...');
+            $('res-txt').textContent = '// Computing P[i] = P[i-1] + A[i]';
+            let ops = 0;
+
+            hl('p2'); await sleep(spd / 2);
+
+            // Base case P[0] = A[0]
+            hl('p3');
+            setElState(elsA[0], 'active');
+            await sleep(spd);
+
+            P[0] = A[0];
+            elsP[0].box.textContent = P[0];
+            setElState(elsP[0], 'built');
+            setElState(elsA[0], 'idle');
+
+            ops++; $('s-ops').textContent = ops;
+            await sleep(spd);
+
+            // Loop
+            hl('p4'); await sleep(spd / 2);
+
+            for (let i = 1; i < N; i++) {
+                hl('p5');
+                setElState(elsP[i - 1], 'active'); // Previous sum
+                setElState(elsA[i], 'active');     // Current value
+                await sleep(spd);
+
+                P[i] = P[i - 1] + A[i];
+                elsP[i].box.textContent = P[i];
+
+                // Highlight new computation briefly
+                setElState(elsP[i], 'active');
+                ops++; $('s-ops').textContent = ops;
+                await sleep(spd);
+
+                // Revert and settle
+                setElState(elsP[i - 1], 'built');
+                setElState(elsA[i], 'idle');
+                setElState(elsP[i], 'built');
+            }
+
+            isBuilt = true; running = false;
+            $('btn-gen').disabled = false; $('btn-query').disabled = false;
+
+            setSpill('found', 'BUILD COMPLETE ✓');
+            $('res-txt').textContent = '// Prefix Array built. Ready for O(1) queries.';
+            $('result').classList.add('border-theme-accent', 'text-theme-text');
+            hl(null);
+        }
+
+        async function querySum() {
+            if (running || !isBuilt) return;
+
+            let L = parseInt($('inp-l').value);
+            let R = parseInt($('inp-r').value);
+
+            // Subtle validation error handling (No pure red)
+            if (isNaN(L) || isNaN(R) || L < 0 || R >= N || L > R) {
+                setSpill('error', 'INVALID RANGE');
+                $('inp-l').parentElement.style.borderColor = 'var(--muted)';
+                $('inp-r').parentElement.style.borderColor = 'var(--muted)';
+                setTimeout(() => {
+                    $('inp-l').parentElement.style.borderColor = '';
+                    $('inp-r').parentElement.style.borderColor = '';
+                    setSpill('found', 'BUILD COMPLETE ✓');
+                }, 1000);
+                return;
+            }
+
+            running = true; $('btn-gen').disabled = true; $('btn-query').disabled = true;
+            setSpill('run', `QUERYING [${L}, ${R}]...`);
+
+            $('result').className = 'flex flex-col gap-2 font-code text-sm p-4 rounded-lg border border-theme-accent bg-theme-surf text-theme-text transition-all mt-2 shadow-[0_0_15px_rgba(45,212,191,0.1)]';
+            $('res-math').textContent = '';
+
+            // Reset visuals to dimmed state
+            elsA.forEach((e) => setElState(e, 'dim'));
+            elsP.forEach((e) => setElState(e, 'dim'));
+
+            // Highlight Range in A
+            for (let i = L; i <= R; i++) {
+                setElState(elsA[i], 'q-range');
+            }
+
+            hl('p8'); await sleep(spd);
+
+            let sum = 0;
+
+            if (L === 0) {
+                hl('p9');
+                $('res-txt').textContent = `// L is 0, so Sum(0, ${R}) is directly P[${R}]`;
+
+                setElState(elsP[R], 'q-add');
+                await sleep(spd);
+
+                sum = P[R];
+                $('res-math').textContent = `= ${sum}`;
+            } else {
+                hl('p10');
+                $('res-txt').textContent = `// Sum(${L}, ${R}) = P[${R}] - P[${L}-1]`;
+
+                setElState(elsP[R], 'q-add');
+                await sleep(spd);
+
+                setElState(elsP[L - 1], 'q-sub');
+                await sleep(spd);
+
+                sum = P[R] - P[L - 1];
+                $('res-math').textContent = `${P[R]} - ${P[L - 1]} = ${sum}`;
+            }
+
+            setSpill('found', `SUM IS ${sum} ✓`);
+
+            // Cleanup states after a brief moment
+            setTimeout(() => {
+                if (!running) {
+                    elsA.forEach((e) => setElState(e, 'idle'));
+                    elsP.forEach((e) => setElState(e, 'built'));
+                }
+            }, 3000);
+
+            running = false; $('btn-gen').disabled = false; $('btn-query').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-build').onclick = buildPrefix;
+        $('btn-query').onclick = querySum;
+        $('spd').oninput = function () { spd = 1100 - parseInt(this.value); }; // Reversed mapping
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        // Init
+        genData();
+    </script>
+</body>
+
+</html>

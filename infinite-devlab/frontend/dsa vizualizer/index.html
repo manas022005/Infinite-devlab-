@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>DSA Visualizer — Infinite DevLab</title>
+
+    <!-- Infinite DevLab Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ═══════════════════════════════════════════
+        TOKENS (INFINITE DEVLAB THEME)
+        ═══════════════════════════════════════════ */
+        :root {
+            --bg: #0B0F19;
+            --surf: #111827;
+            --border: #1F2937;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --accent: #3B82F6;
+            --accent2: #2563EB;
+            --devlab-yellow: #FBBF24;
+
+            /* Category Colors: Blue Variants */
+            --algo: #6366F1;
+            /* Indigo */
+            --ds: #3B82F6;
+            /* Primary Blue */
+            --pat: #0EA5E9;
+            /* Sky Blue */
+            --qn: #06B6D4;
+            /* Cyan */
+
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-ui: 'Poppins', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+
+            --nav-height: 70px;
+        }
+
+        /* ─── LIGHT THEME ─── */
+        html.light {
+            --bg: #F3F4F6;
+            --surf: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #111827;
+            --muted: #4B5563;
+            --accent: #2563EB;
+            --accent2: #1D4ED8;
+
+            /* Light mode blue variants */
+            --algo: #4F46E5;
+            --ds: #2563EB;
+            --pat: #0284C7;
+            --qn: #0891B2;
+        }
+
+        /* ─── BASE RESET ─── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        /* ─── SUBTLE GRADIENT BACKGROUND ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+        }
+
+        /* ═══════════════════════════════════════════
+           GLOBAL NAVBAR
+        ═══════════════════════════════════════════ */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-infinite {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-devlab {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--devlab-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .nav-links a {
+            font-family: var(--font-ui);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-login {
+            font-family: var(--font-ui);
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: var(--surf);
+        }
+
+        .btn-register {
+            font-family: var(--font-ui);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-register:hover {
+            background: var(--accent2);
+        }
+
+        /* Theme Toggle */
+        .th-btn {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surf);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .th-btn .kn {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        html.light .th-btn .kn {
+            transform: translateX(18px);
+            background: var(--accent);
+        }
+
+        @media (max-width: 950px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .btn-login,
+            .btn-register {
+                display: none;
+            }
+
+            .global-nav {
+                padding: 0 12px;
+            }
+        }
+
+        /* ─── LAYOUT ─── */
+        .wrap {
+            position: relative;
+            z-index: 1;
+            padding-top: var(--nav-height);
+        }
+
+        /* ═══════════════════════════════════════════
+           HERO
+        ═══════════════════════════════════════════ */
+        .hero {
+            min-height: calc(100vh - var(--nav-height));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-code);
+            font-size: .8rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fade-up .6s .2s forwards;
+            font-weight: bold;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 12vw, 9rem);
+            line-height: .95;
+            letter-spacing: .02em;
+            color: var(--text);
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fade-up .7s .35s forwards;
+        }
+
+        .hero-title .accent {
+            color: var(--accent);
+        }
+
+        .hero-subtitle-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fade-up .7s .5s forwards;
+        }
+
+        .hero-line {
+            height: 1px;
+            width: 60px;
+            background: var(--border);
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-ui);
+            font-size: 1.1rem;
+            color: var(--muted);
+            font-weight: 500;
+            letter-spacing: .01em;
+        }
+
+        .hero-desc {
+            max-width: 580px;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: fade-up .7s .62s forwards;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+            animation: fade-up .7s .75s forwards;
+        }
+
+        .btn-primary {
+            padding: 1rem 2.2rem;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
+            font-family: var(--font-ui);
+            font-size: .95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .2s, transform .15s, box-shadow .2s;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, .3);
+        }
+
+        .btn-ghost {
+            padding: 1rem 2.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--text);
+            background: var(--surf);
+            font-family: var(--font-ui);
+            font-size: .95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: border-color .2s, color .2s;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════
+           STATS ROW
+        ═══════════════════════════════════════════ */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            padding: 2.5rem 2rem;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--surf);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            flex: 1;
+            max-width: 200px;
+            text-align: center;
+            padding: 1rem 2rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat:last-child {
+            border-right: none;
+        }
+
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            letter-spacing: .02em;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: .4rem;
+        }
+
+        .stat-lbl {
+            font-family: var(--font-code);
+            font-size: .7rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: bold;
+        }
+
+        /* ═══════════════════════════════════════════
+           SECTION HEADER
+        ═══════════════════════════════════════════ */
+        .section-header {
+            text-align: center;
+            padding: 6rem 2rem 3.5rem;
+        }
+
+        .section-tag {
+            font-family: var(--font-code);
+            font-size: .8rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 5rem);
+            letter-spacing: .03em;
+            color: var(--text);
+            margin-bottom: .8rem;
+            line-height: 1;
+        }
+
+        .section-title span {
+            color: var(--accent);
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.65;
+        }
+
+        /* ═══════════════════════════════════════════
+           CATEGORY HERO CARDS
+        ═══════════════════════════════════════════ */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            padding: 0 2.5rem 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cat-card {
+            position: relative;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surf);
+            padding: 2.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            overflow: hidden;
+            transition: transform .22s, border-color .22s, box-shadow .22s;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 280px;
+        }
+
+        .cat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .3);
+        }
+
+        .cat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--glow-color, rgba(59, 130, 246, .05)), transparent 60%);
+            opacity: 0;
+            transition: opacity .3s;
+            border-radius: inherit;
+        }
+
+        .cat-card:hover::before {
+            opacity: 1;
+        }
+
+        .cat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 100% 0%, var(--glow-color, rgba(59, 130, 246, .15)), transparent 70%);
+            border-radius: 0 12px 0 0;
+            transition: opacity .3s;
+        }
+
+        /* BLUE VARIANT GLOWS & BORDERS */
+        .cat-card.algo {
+            --glow-color: rgba(99, 102, 241, .12);
+        }
+
+        .cat-card.algo:hover {
+            border-color: rgba(99, 102, 241, .4);
+            box-shadow: 0 24px 60px rgba(99, 102, 241, .1);
+        }
+
+        .cat-card.ds {
+            --glow-color: rgba(59, 130, 246, .12);
+        }
+
+        .cat-card.ds:hover {
+            border-color: rgba(59, 130, 246, .4);
+            box-shadow: 0 24px 60px rgba(59, 130, 246, .1);
+        }
+
+        .cat-card.pat {
+            --glow-color: rgba(14, 165, 233, .12);
+        }
+
+        .cat-card.pat:hover {
+            border-color: rgba(14, 165, 233, .4);
+            box-shadow: 0 24px 60px rgba(14, 165, 233, .1);
+        }
+
+        .cat-card.qn {
+            --glow-color: rgba(6, 182, 212, .12);
+        }
+
+        .cat-card.qn:hover {
+            border-color: rgba(6, 182, 212, .4);
+            box-shadow: 0 24px 60px rgba(6, 182, 212, .1);
+        }
+
+        .cat-num {
+            font-family: var(--font-display);
+            font-size: 7rem;
+            line-height: 1;
+            letter-spacing: .02em;
+            color: var(--border);
+            position: absolute;
+            right: 1.5rem;
+            top: 1rem;
+            transition: color .3s;
+            user-select: none;
+        }
+
+        .cat-card:hover .cat-num {
+            color: rgba(255, 255, 255, .05);
+        }
+
+        .cat-label {
+            font-family: var(--font-code);
+            font-size: .7rem;
+            font-weight: bold;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            margin-bottom: .2rem;
+        }
+
+        .cat-card.algo .cat-label {
+            color: var(--algo);
+        }
+
+        .cat-card.ds .cat-label {
+            color: var(--ds);
+        }
+
+        .cat-card.pat .cat-label {
+            color: var(--pat);
+        }
+
+        .cat-card.qn .cat-label {
+            color: var(--qn);
+        }
+
+        .cat-title {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            letter-spacing: .03em;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .cat-desc {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 360px;
+            font-weight: 500;
+        }
+
+        .cat-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            margin-top: auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .chip {
+            font-family: var(--font-code);
+            font-size: .65rem;
+            letter-spacing: .04em;
+            padding: .3rem .6rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            transition: border-color .2s, color .2s;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .cat-card:hover .chip {
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .cat-arrow {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.75rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 1.2rem;
+            transition: all .22s;
+            background: var(--bg);
+            z-index: 2;
+        }
+
+        .cat-card:hover .cat-arrow {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateX(3px) translateY(-3px);
+        }
+
+        /* ═══════════════════════════════════════════
+           HOW IT WORKS
+        ═══════════════════════════════════════════ */
+        .howto {
+            padding: 6rem 2.5rem;
+            background: var(--surf);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+        }
+
+        .howto-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .howto-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            margin-top: 3.5rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            gap: .8rem;
+        }
+
+        .step-num {
+            font-family: var(--font-display);
+            font-size: 4.5rem;
+            color: var(--border);
+            line-height: 1;
+        }
+
+        .step-title {
+            font-family: var(--font-ui);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .step-desc {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════════ */
+        footer {
+            padding: 2rem 2.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+            background: var(--bg);
+        }
+
+        .footer-logo {
+            font-family: var(--font-ui);
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .footer-logo span {
+            color: var(--devlab-yellow);
+        }
+
+        /* ═══════════════════════════════════════════
+           ANIMATIONS
+        ═══════════════════════════════════════════ */
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════
+           MODAL OVERLAY
+        ═══════════════════════════════════════════ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 15, 25, .85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 640px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(.95);
+            transition: transform .25s;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+        }
+
+        .modal-close:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            letter-spacing: .04em;
+            margin-bottom: .5rem;
+        }
+
+        .modal-desc {
+            font-size: .95rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: .8rem;
+        }
+
+        .modal-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            text-decoration: none;
+            color: var(--text);
+            font-family: var(--font-ui);
+            font-size: .9rem;
+            font-weight: 600;
+            transition: all .18s;
+        }
+
+        .modal-link:hover {
+            border-color: var(--accent);
+            background: var(--surf);
+            transform: translateX(3px);
+        }
+
+        .modal-link-arrow {
+            font-size: .8rem;
+            color: var(--muted);
+            transition: all .18s;
+        }
+
+        .modal-link:hover .modal-link-arrow {
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════
+           SCROLLBAR
+        ═══════════════════════════════════════════ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .categories {
+                grid-template-columns: 1fr;
+                padding: 0 1.25rem 4rem;
+            }
+
+            .howto-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 5rem;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+            }
+
+            .stat {
+                min-width: 50%;
+            }
+
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- GLOBAL NAVBAR -->
+    <!-- <nav class="global-nav">
+        <div class="nav-left">
+            <a href="#" class="logo-link">
+                <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+                </svg>
+                <span class="logo-infinite">INFINITE</span>
+                <span class="logo-devlab">DEVLAB</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">CSS Lab</a>
+                <a href="#">Codebreaker</a>
+                <a href="#" class="active">DSA Visualizer</a>
+                <a href="#">Problem Solver</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-login">Login</button>
+            <button class="btn-register">Register</button>
+            <button class="th-btn" id="thbtn" aria-label="Toggle theme">
+                <span class="kn" id="thkn">🌙</span>
+            </button>
+        </div>
+    </nav> -->
+
+    <div class="wrap">
+
+        <!-- HERO -->
+        <section class="hero">
+            <p class="hero-eyebrow">step-by-step · animated · pseudocode-synced</p>
+            <h1 class="hero-title">
+                LEARN HOW<br /><span class="accent">DSA</span><br />IMPLEMENTED
+            </h1>
+            <div class="hero-subtitle-row">
+                <div class="hero-line"></div>
+                <p class="hero-subtitle">Data Structures &amp; Algorithms — Visualized</p>
+                <div class="hero-line"></div>
+            </div>
+            <p class="hero-desc">
+                Every algorithm animated frame-by-frame. Watch pseudocode highlight in sync,
+                live stats update, and concepts click into place — without reading a wall of text.
+            </p>
+            <div class="hero-cta">
+                <a href="#explore" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    Start Exploring
+                </a>
+                <a href="#howto" class="btn-ghost">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    How It Works
+                </a>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <div class="stats fade-in-section">
+            <div class="stat">
+                <div class="stat-num">20+</div>
+                <div class="stat-lbl">Visualizers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">4</div>
+                <div class="stat-lbl">Categories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">O(1)</div>
+                <div class="stat-lbl">Click to Learn</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">∞</div>
+                <div class="stat-lbl">Replays</div>
+            </div>
+        </div>
+
+        <!-- CATEGORY HERO CARDS -->
+        <section id="explore">
+            <div class="section-header fade-in-section">
+                <p class="section-tag">explore by category</p>
+                <h2 class="section-title">CHOOSE YOUR <span>PATH</span></h2>
+                <p class="section-desc">
+                    Four distinct worlds. Each packed with interactive animations, live pseudocode,
+                    and step-by-step dry-runs.
+                </p>
+            </div>
+
+            <div class="categories fade-in-section">
+
+                <!-- ALGORITHMS -->
+                <a href="#algorithms" class="cat-card algo" onclick="openModal('algo');return false;">
+                    <span class="cat-num">01</span>
+                    <div>
+                        <div class="cat-label">Category 01</div>
+                        <div class="cat-title">ALGORITHMS</div>
+                    </div>
+                    <p class="cat-desc">
+                        Classic algorithmic patterns — animated step-by-step with pseudocode sync.
+                    </p>
+                    <div class="cat-chips">
+                        <span class="chip">Bubble Sort</span>
+                        <span class="chip">Quick Sort</span>
+                        <span class="chip">Dijkstra's</span>
+                        <span class="chip">Binary Search</span>
+                        <span class="chip">Kadane's</span>
+                        <span class="chip">Backtracking</span>
+                    </div>
+                    <div class="cat-arrow">↗</div>
+                </a>
+
+                <!-- DATA STRUCTURES -->
+                <a href="#datastructures" class="cat-card ds" onclick="openModal('ds');return false;">
+                    <span class="cat-num">02</span>
+                    <div>
+                        <div class="cat-label">Category 02</div>
+                        <div class="cat-title">DATA STRUCTURES</div>
+                    </div>
+                    <p class="cat-desc">
+                        Build, manipulate, and destroy — see every pointer move, every swap, every heap sift rendered
+                        live.
+                    </p>
+                    <div class="cat-chips">
+                        <span class="chip">Stack & Queue</span>
+                        <span class="chip">Priority Queue</span>
+                        <span class="chip">Hash Map</span>
+                        <span class="chip">BST</span>
+                        <span class="chip">LinkedList</span>
+                        <span class="chip">Graph</span>
+                    </div>
+                    <div class="cat-arrow">↗</div>
+                </a>
+
+                <!-- PATTERNS -->
+                <a href="#patterns" class="cat-card pat" onclick="openModal('pat');return false;">
+                    <span class="cat-num">03</span>
+                    <div>
+                        <div class="cat-label">Category 03</div>
+                        <div class="cat-title">PATTERNS</div>
+                    </div>
+                    <p class="cat-desc">
+                        Master interview-winning patterns that solve entire problem families at once.
+                    </p>
+                    <div class="cat-chips">
+                        <span class="chip">Sliding Window</span>
+                        <span class="chip">Prefix Sum</span>
+                        <span class="chip">Bitwise XOR</span>
+                        <span class="chip">Island DFS/BFS</span>
+                        <span class="chip">Top-K Elements</span>
+                        <span class="chip">Two Pointers</span>
+                    </div>
+                    <div class="cat-arrow">↗</div>
+                </a>
+
+                <!-- QUESTIONS -->
+                <a href="#questions" class="cat-card qn" onclick="openModal('qn');return false;">
+                    <span class="cat-num">04</span>
+                    <div>
+                        <div class="cat-label">Category 04</div>
+                        <div class="cat-title">QUESTIONS</div>
+                    </div>
+                    <p class="cat-desc">
+                        Classic interview problems animated end-to-end so you can internalize the approach.
+                    </p>
+                    <div class="cat-chips">
+                        <span class="chip">Matrix Multiply</span>
+                        <span class="chip">Tree Traversal</span>
+                        <span class="chip">Reversal</span>
+                        <span class="chip">Single Number</span>
+                        <span class="chip">Missing Number</span>
+                        <span class="chip">Count Islands</span>
+                    </div>
+                    <div class="cat-arrow">↗</div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="howto fade-in-section" id="howto">
+            <div class="howto-inner">
+                <div class="section-header" style="padding:0 0 0">
+                    <p class="section-tag">how it works</p>
+                    <h2 class="section-title">THE <span>METHOD</span></h2>
+                </div>
+                <div class="howto-steps">
+                    <div class="step">
+                        <div class="step-num">01</div>
+                        <div class="step-title">Pick a visualizer</div>
+                        <p class="step-desc">Choose any algorithm or data structure from the four categories above. Each
+                            opens as a standalone visual workspace.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">02</div>
+                        <div class="step-title">Generate &amp; Run</div>
+                        <p class="step-desc">Hit "Generate" for a fresh random input, then "Run" to watch the animation.
+                            Speed slider lets you slow it down or fly through.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">03</div>
+                        <div class="step-title">Read the pseudocode</div>
+                        <p class="step-desc">Every step highlights the exact pseudocode line being executed in sync.
+                            Watch the HUD stats update live.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-logo">INFINITE<span>DEVLAB</span></div>
+        </footer>
+
+    </div><!-- /wrap -->
+
+    <!-- ═══ MODALS ═══ -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" id="modal-box">
+            <button class="modal-close" onclick="closeModalDirect()">✕</button>
+            <div class="modal-title" id="modal-title">—</div>
+            <p class="modal-desc" id="modal-desc">—</p>
+            <div class="modal-grid" id="modal-links"></div>
+        </div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════
+           DATA
+        ═══════════════════════════ */
+        const DATA = {
+            algo: {
+                title: 'ALGORITHMS',
+                desc: 'Classic algorithms animated frame-by-frame with pseudocode highlighting and live stats.',
+                color: 'var(--algo)',
+                items: [
+                    { name: 'Bubble Sort', sub: 'Compare adjacent · swap if out of order', badge: 'O(n²)', file: 'Algorithms/sorting/bubble.html' },
+                    { name: 'Insertion Sort', sub: 'Build sorted array one element at a time', badge: 'O(n²)', file: 'Algorithms/sorting/insertion.html' },
+                    { name: 'Selection Sort', sub: 'Find minimum · place in correct position', badge: 'O(n²)', file: 'Algorithms/sorting/selection.html' },
+                    { name: 'Quick Sort', sub: 'Pivot partition · Lomuto scheme', badge: 'O(n log n)', file: 'Algorithms/sorting/quicksort.html' },
+                    { name: "Dijkstra's", sub: 'Greedy shortest path · priority queue', badge: 'O((V+E)logV)', file: 'Algorithms/Greedy/dijkstra.html' },
+                    { name: 'Binary Search', sub: 'Halve search space each step', badge: 'O(log n)', file: 'Algorithms/searching/binarysearch.html' },
+                    { name: 'Linear Search', sub: 'Scan each element until found', badge: 'O(n)', file: 'Algorithms/searching/linearsearch.html' },
+                    { name: "Kadane's Algo", sub: 'Max subarray sum · greedy accumulation', badge: 'O(n)', file: 'Algorithms/Dp/kadane.html' },
+                ]
+            },
+            ds: {
+                title: 'DATA STRUCTURES',
+                desc: 'Build and manipulate real data structures — every pointer, swap and heap-sift shown live.',
+                color: 'var(--ds)',
+                items: [
+                    { name: 'Stack & Queue', sub: 'LIFO/FIFO · push, pop, enqueue, dequeue', badge: 'O(1)', file: 'Datastructure/stackandqueue.html' },
+                    { name: 'Priority Queue', sub: 'Min-heap & max-heap · sift-up/down', badge: 'O(log n)', file: 'Datastructure/priorityqueue.html' },
+                    { name: 'Hash Map', sub: 'hash(key)%size · chaining · CRUD ops', badge: 'O(1) avg', file: 'Datastructure/hashmap.html' },
+                    { name: 'Binary Search Tree', sub: 'Left < root < right · insert/search/del', badge: 'O(h)', file: 'Datastructure/bst.html' },
+                    { name: 'LinkedList Reversal', sub: '3-pointer in-place reversal', badge: 'O(n) O(1)', file: 'Datastructure/linkedlist.html' },
+                    { name: 'Graph', sub: 'BFS & DFS · adjacency list traversal', badge: 'O(V+E)', file: 'Datastructure/graph.html' },
+                ]
+            },
+            pat: {
+                title: 'PATTERNS',
+                desc: 'Interview-winning coding patterns that solve entire problem families at once.',
+                color: 'var(--pat)',
+                items: [
+                    { name: 'Sliding Window', sub: 'Fixed & variable window · 4 problems', badge: 'O(n)', file: 'pattern/slidingwindow.html' },
+                    { name: 'Prefix Sum', sub: 'Build once O(n) · query any range O(1)', badge: 'O(1) query', file: 'pattern/prefixsum.html' },
+                    { name: 'Bitwise XOR', sub: 'Single number · missing num · two singles', badge: 'O(n) O(1)', file: 'pattern/bitwisexor.html' },
+                    { name: 'Island Traversal', sub: 'Matrix BFS/DFS · flood-fill count', badge: 'O(R×C)', file: 'pattern/islandmatrix.html' },
+                    { name: 'Top K Elements', sub: 'Min-heap of size K · eviction strategy', badge: 'O(n log k)', file: 'pattern/topk.html' },
+                    { name: 'Backtracking', sub: 'N-Queens · Subsets · decision tree', badge: 'O(2ⁿ)', file: 'pattern/backtracking.html' },
+                ]
+            },
+            qn: {
+                title: 'QUESTIONS',
+                desc: 'Classic interview questions animated end-to-end so you can internalize the approach.',
+                color: 'var(--qn)',
+                items: [
+                    { name: 'Matrix Multiply', sub: 'C[i][j] = Σ A[i][k]×B[k][j] · cell-by-cell', badge: 'O(n³)', file: 'Question/matrixmulti.html' },
+                    { name: 'Tree Traversal', sub: 'Pre · In · Post order DFS side-by-side', badge: 'O(n)', file: 'Question/treedfs.html' },
+                    { name: 'Count Islands', sub: 'BFS/DFS flood-fill · 4-directional', badge: 'O(R×C)', file: 'Question/islandmatrix.html' },
+                    { name: 'Single Number', sub: 'XOR all elements · duplicates cancel', badge: 'O(n) O(1)', file: 'Question/bitwisexor.html' },
+                    { name: 'Max Subarray', sub: "Kadane's · currentSum = max(n, cur+n)", badge: 'O(n)', file: 'Question/maxsubarray.html' },
+                ]
+            }
+        };
+
+        /* ═══════════════════════════
+           MODAL
+        ═══════════════════════════ */
+        function openModal(cat) {
+            const d = DATA[cat];
+            document.getElementById('modal-title').textContent = d.title;
+            document.getElementById('modal-title').style.color = d.color;
+            document.getElementById('modal-desc').textContent = d.desc;
+            const linksEl = document.getElementById('modal-links');
+            linksEl.innerHTML = '';
+            d.items.forEach(item => {
+                const a = document.createElement('a');
+                a.className = 'modal-link';
+                a.href = item.file;
+                a.innerHTML = `<span>${item.name}</span><span class="modal-link-arrow">↗</span>`;
+                a.onclick = () => {
+                    const token = localStorage.getItem("token");
+                    if (token) {
+                        fetch('/api/progress', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ module: 'dsa-visualizer', level: 1, score: 25 })
+                        }).catch(e => console.error(e));
+                        
+                        fetch('/api/history', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ 
+                                action: 'Launched DSA Visualizer', 
+                                detail: `Opened the visualizer workspace for ${item.name}.` 
+                            })
+                        }).catch(e => console.error(e));
+                    }
+                };
+                linksEl.appendChild(a);
+            });
+            document.getElementById('modal-overlay').classList.add('open');
+        }
+
+        function closeModal(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+        }
+        function closeModalDirect() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+        /* ═══════════════════════════
+           SCROLL OBSERVER
+        ═══════════════════════════ */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    const children = e.target.querySelectorAll('.cat-card, .step, .stat');
+                    children.forEach((c, i) => {
+                        c.style.transitionDelay = (i * 55) + 'ms';
+                    });
+                }
+            });
+        }, { threshold: 0.07 });
+
+        document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+
+        /* ═══════════════════════════
+           THEME TOGGLE
+        ═══════════════════════════ */
+        (function () {
+            const html = document.documentElement;
+            const btn = document.getElementById('thbtn');
+            const knob = document.getElementById('thkn');
+            const STORAGE = 'idl_theme';
+
+            function applyTheme(isLight) {
+                if (isLight) {
+                    html.classList.add('light');
+                    knob.textContent = '☀️';
+                } else {
+                    html.classList.remove('light');
+                    knob.textContent = '🌙';
+                }
+                localStorage.setItem(STORAGE, isLight ? 'light' : 'dark');
+            }
+
+            const saved = localStorage.getItem(STORAGE);
+            applyTheme(saved === 'light');
+
+            btn.addEventListener('click', () => {
+                applyTheme(!html.classList.contains('light'));
+            });
+        })();
+    </script>
+</body>
+
+</html>

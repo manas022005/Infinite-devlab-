@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Quest — Infinite DevLab</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            theme: {
+              bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+              text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+            }
+          },
+          fontFamily: {
+            display: ['"Bebas Neue"', 'sans-serif'],
+            ui: ['Poppins', 'sans-serif'],
+            code: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── 1. CSS VARIABLES (INFINITE DEVLAB THEME) ─── */
+    :root {
+      /* Deep dark blue theme from images */
+      --bg: #0B0F19;
+      --surf: #111827;
+      --border: #1F2937;
+      --text: #F9FAFB;
+      --text-dim: #9CA3AF;
+      --muted: #4B5563;
+      --accent: #3B82F6;
+      /* Primary Blue from buttons/nav */
+      --accent-glow: rgba(59, 130, 246, 0.2);
+      --accent-dim: rgba(59, 130, 246, 0.1);
+      --teal-accent: #2DD4BF;
+      /* Visually Text Color */
+      --devlab-yellow: #FBBF24;
+
+      --code-bg: #090D14;
+      --code-text: #F9FAFB;
+      --success: #34D399;
+      --error: #F87171;
+
+      --ff-head: 'Bebas Neue', sans-serif;
+      --ff-ui: 'Poppins', sans-serif;
+      --ff-code: 'JetBrains Mono', monospace;
+
+      --r-sm: 6px;
+      --r-md: 8px;
+      --r-lg: 12px;
+      --sh: 0 4px 20px rgba(0, 0, 0, 0.4);
+      --neon-border: inset 0 0 0 1px var(--border);
+
+      --nav-height: 70px;
+    }
+
+    html.light {
+      --bg: #F3F4F6;
+      --surf: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111827;
+      --text-dim: #4B5563;
+      --muted: #9CA3AF;
+      --accent: #2563EB;
+      --accent-glow: rgba(37, 99, 235, 0.2);
+      --accent-dim: rgba(37, 99, 235, 0.1);
+      --teal-accent: #0D9488;
+      --devlab-yellow: #D97706;
+      --code-bg: #F8FAFC;
+      --code-text: #111827;
+      --sh: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ── 2. RESET & BASE ──────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--ff-ui);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-top: var(--nav-height);
+      /* Offset for fixed nav */
+      transition: background .35s, color .35s;
+      overflow-x: hidden;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    code,
+    kbd {
+      font-family: var(--ff-code);
+      font-size: 0.85em;
+      background: var(--code-bg);
+      color: var(--teal-accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Subtle Background Gradient instead of heavy bubbles */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+    }
+
+    /* ── 3. GLOBAL NAVBAR ─────────────────────────────────── */
+    .global-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .logo-infinite {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-devlab {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--devlab-yellow);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: var(--r-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    .btn-login:hover {
+      background: var(--surf);
+    }
+
+    .btn-register {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: var(--r-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn-register:hover {
+      background: #2563EB;
+    }
+
+    /* Responsive Nav Hiding */
+    @media (max-width: 950px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 500px) {
+
+      .btn-login,
+      .btn-register {
+        display: none;
+      }
+
+      .logo-infinite,
+      .logo-devlab {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      border-radius: 20px;
+      border: 1px solid var(--muted);
+      background: var(--surf);
+      flex-shrink: 0;
+    }
+
+    .theme-knob {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: transform 0.3s;
+    }
+
+    html.light .theme-knob {
+      transform: translateX(18px);
+      background: var(--accent);
+    }
+
+    /* ── 4. SCREENS ───────────────────────────────────────── */
+    .screen {
+      display: none;
+      min-height: calc(100vh - var(--nav-height));
+      flex-direction: column;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #game-screen.active {
+      height: calc(100vh - var(--nav-height));
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── 5. HOME SCREEN ───────────────────────────────────── */
+    .center-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card-box {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 50px 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: var(--sh);
+      position: relative;
+      margin-top: -4vh;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .game-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 15px;
+    }
+
+    .game-title span {
+      color: var(--teal-accent);
+    }
+
+    .sub-title {
+      color: var(--text-dim);
+      font-weight: 400;
+      margin-bottom: 30px;
+      font-size: 1rem;
+      max-width: 90%;
+      margin-inline: auto;
+    }
+
+    .mod-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 20px;
+      text-align: left;
+      transition: all 0.3s;
+      margin-bottom: 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mod-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px var(--accent-dim);
+    }
+
+    .mod-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mod-icon {
+      font-size: 2.2rem;
+    }
+
+    .mod-info b {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .mod-info span {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .diff-tags {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .diff-tag {
+      font-family: var(--ff-code);
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* ── 6. GAME TOPBAR (Sub-header) ──────────────────────── */
+    .game-subheader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 0 20px;
+      height: 50px;
+      background: var(--surf);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .pip-track {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding: 10px 5px;
+      scrollbar-width: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .pip {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid var(--muted);
+      flex-shrink: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pip.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: scale(1.4);
+    }
+
+    .pip.done {
+      background: var(--success);
+      border-color: var(--success);
+      transform: scale(0.9);
+    }
+
+    /* ── 7. GAME LAYOUT ───────────────────────────────────── */
+    .game-body {
+      display: flex;
+      flex-direction: column-reverse;
+      height: calc(100% - 50px);
+    }
+
+    .left-col {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: var(--bg);
+    }
+
+    .right-col {
+      height: 40vh;
+      min-height: 280px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surf);
+      border-bottom: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      position: relative;
+      flex-shrink: 0;
+      transition: height 0.3s ease;
+    }
+
+    @media (min-width: 900px) {
+      .game-body {
+        flex-direction: row;
+      }
+
+      .left-col {
+        width: 450px;
+        flex: none;
+      }
+
+      .right-col {
+        flex: 1;
+        height: 100% !important;
+        border-bottom: none;
+      }
+    }
+
+    /* ── 8. EDITOR PANELS ─────────────────────────────────── */
+    .lvl-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-btn {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--r-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .lvl-badge {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diff-label {
+      font-family: var(--ff-code);
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--teal-accent);
+      color: var(--teal-accent);
+      letter-spacing: 1px;
+    }
+
+    .panel {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 15px;
+      position: relative;
+    }
+
+    .panel-title {
+      font-family: var(--ff-code);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+
+    .instr-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      color: var(--text);
+    }
+
+    .options-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+    }
+
+    .opt-line {
+      font-family: var(--ff-code);
+      font-size: 0.75rem;
+      color: var(--teal-accent);
+      letter-spacing: 0.05em;
+      user-select: text;
+    }
+
+    .opt-line::before {
+      content: "• ";
+      color: var(--text-dim);
+    }
+
+    .html-preview {
+      font-family: var(--ff-code);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: var(--code-bg);
+      padding: 10px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      white-space: pre-wrap;
+      margin-bottom: 5px;
+      opacity: 0.8;
+    }
+
+    .code-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      background: var(--code-bg);
+      transition: border-color 0.2s;
+    }
+
+    .code-wrap:focus-within {
+      border-color: var(--accent);
+    }
+
+    .ed-line {
+      font-family: var(--ff-code);
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+    }
+
+    .ed-line:last-child {
+      border-bottom: none;
+    }
+
+    .css-ta {
+      width: 100%;
+      min-height: 80px;
+      background: transparent;
+      color: var(--code-text);
+      font-family: var(--ff-code);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      border: none;
+      outline: none;
+      padding: 8px 12px 8px 24px;
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 10px;
+      font-weight: 600;
+      border-radius: var(--r-sm);
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      font-family: var(--ff-ui);
+    }
+
+    .btn-run {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-run:hover {
+      background: #2563EB;
+      transform: translateY(-1px);
+    }
+
+    .btn-alt {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-alt:hover {
+      border-color: var(--text-dim);
+    }
+
+    .btn-ans {
+      background: transparent;
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .btn-ans:hover {
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .feedback {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: var(--r-sm);
+      font-size: 0.8rem;
+      display: none;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      font-family: var(--ff-code);
+      text-align: center;
+    }
+
+    .feedback.show {
+      display: block;
+      animation: shake 0.4s;
+    }
+
+    /* ── 9. PLAYGROUND ────────────────────────────────────── */
+    .pg-wrap {
+      flex: 1;
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      background: var(--bg);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #stage-bg,
+    #stage {
+      position: absolute;
+      inset: 15px;
+      width: calc(100% - 30px);
+      height: calc(100% - 30px);
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    #stage-bg {
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    #stage {
+      z-index: 2;
+    }
+
+    #stage-bg .item {
+      visibility: hidden;
+    }
+
+    .player,
+    .goal,
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      font-size: 1.8rem;
+      transition: all 0.5s ease;
+      user-select: none;
+    }
+
+    .player {
+      background: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+      z-index: 10;
+      border: 2px solid var(--surf);
+    }
+
+    .goal {
+      border: 2px dashed var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .goal.reached {
+      border: 2px solid var(--success);
+      background: rgba(52, 211, 153, 0.1);
+      transform: scale(1.05);
+    }
+
+    .item {
+      background: var(--surf);
+      color: var(--text-dim);
+      font-size: 1.2rem;
+      border: 1px solid var(--border);
+    }
+
+    /* MOBILE CONTROLS */
+    .mobile-resize-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .resize-btn {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text-dim);
+      padding: 6px 16px;
+      font-size: 0.75rem;
+      font-family: var(--ff-code);
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .resize-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    @media (min-width: 900px) {
+      .mobile-resize-controls {
+        display: none !important;
+      }
+    }
+
+    /* ── 10. WIN OVERLAY ──────────────────────────────────── */
+    .win-ol {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+
+    .win-ol.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .win-box {
+      background: var(--surf);
+      border: 1px solid var(--success);
+      border-radius: var(--r-md);
+      padding: 30px;
+      text-align: center;
+      transform: translateY(20px);
+      transition: 0.3s;
+      box-shadow: 0 10px 30px rgba(52, 211, 153, 0.1);
+    }
+
+    .win-ol.show .win-box {
+      transform: translateY(0);
+    }
+
+    .win-box h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+  </style>
+  
+</head>
+
+<body>
+
+  <!-- <nav class="global-nav">
+    <div class="nav-left">
+      <a href="#" class="logo-link" onclick="loadPage('home')">
+        <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+        </svg>
+        <span class="logo-infinite">INFINITE</span>
+        <span class="logo-devlab">DEVLAB</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#" onclick="loadPage('home')">Home</a>
+        <a href="#" class="active" >CSS Lab</a>
+        <a href="#">Codebreaker</a>
+        <a href="#">DSA Visualizer</a>
+        <a href="#">Problem Solver</a>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn-login">Login</button>
+      <button class="btn-register">Register</button>
+      <button class="theme-toggle" id="theme-btn-global">
+        <span class="theme-knob">🌙</span>
+      </button>
+    </div>
+  </nav> -->
+
+  <div id="home-screen" class="screen active">
+    <div class="center-wrap">
+      <div class="card-box">
+        
+        <div class="mod-info"><b>Flexbox Mastery</b><span>Master 1D Layout Alignments</span></div>
+
+        <button class="mod-btn" id="btn-flex">
+          <div class="mod-header">
+            <span class="mod-icon">🏎️</span>
+            <div class="mod-info"><b>Flexbox Mastery</b><span>Master 1D Layout Alignments</span></div>
+          </div>
+          <div class="diff-tags">
+            <span class="diff-tag">20 LEVELS</span>
+          </div>
+        </button>
+
+        <button class="mod-btn" id="btn-grid">
+          <div class="mod-header">
+            <span class="mod-icon">🌌</span>
+            <div class="mod-info"><b>Galaxy Grid</b><span>Master 2D Layout Architectures</span></div>
+          </div>
+          <div class="diff-tags">
+            <span class="diff-tag">20 LEVELS</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <header class="game-subheader">
+      <div style="width:80px;">
+        <button id="btn-home-logo" class="btn btn-alt"
+          style="padding: 4px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; height: 30px;">
+          ← Back
+        </button>
+      </div>
+      <div class="pip-track" id="pip-track"></div>
+      <div style="width:80px;"></div>
+    </header>
+
+    <div class="game-body">
+      <div class="left-col">
+        <div class="lvl-nav">
+          <button id="btn-prev" class="nav-btn">◀</button>
+          <div class="lvl-badge">
+            Lvl <span id="lvl-num">1</span> <span style="font-size:0.9rem; color:var(--muted)">/ 20</span>
+            <span id="diff-badge" class="diff-label">EASY</span>
+          </div>
+          <button id="btn-next" class="nav-btn">▶</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><span>Mission Briefing</span> <span id="mod-tag"
+              style="color:var(--accent);">FLEXBOX</span></div>
+          <p class="instr-text" id="instr"></p>
+          <div class="panel-title" style="border:none; margin-bottom:0; margin-top:15px;">Available Properties (Type
+            Manually)</div>
+          <div class="options-wrap" id="options-box">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">HTML Structure (Read-Only)</div>
+          <div class="html-preview" id="html-viewer"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Stylesheet.css</div>
+          <div class="code-wrap">
+            <div class="ed-line" id="ed-sel">#stage {</div>
+            <textarea id="css-ed" class="css-ta" spellcheck="false"
+              placeholder="/* Inject CSS rules here */"></textarea>
+            <div class="ed-line">}</div>
+          </div>
+
+          <div class="btn-row" style="grid-template-columns: 1fr;">
+            <button id="btn-reset" class="btn btn-alt">Clear Code</button>
+          </div>
+
+          <div class="btn-row full" id="reveal-container" style="grid-template-columns: 1fr;">
+            <button id="btn-answer" class="btn btn-ans">Reveal Final Answer</button>
+            <button id="btn-run-reveal" class="btn btn-run hidden">Run Revealed Code</button>
+          </div>
+
+          <div id="feedback" class="feedback">ERROR: The layout is unstable. Adjust properties.</div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="panel-title" style="border:none;">Live Render Terminal</div>
+        <div class="pg-wrap" id="stage-wrap">
+          <div id="stage-bg"></div>
+          <div id="stage"></div>
+
+          <div id="win-ol" class="win-ol">
+            <div class="win-box">
+              <h2>LEVEL CLEARED!</h2>
+              <button id="btn-next-lvl" class="btn btn-run" style="width: 100%; padding: 12px; font-size: 1rem;">Next
+                Level ➞</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-resize-controls">
+          <button id="btn-shrink-term" class="resize-btn">− Shrink View</button>
+          <button id="btn-grow-term" class="resize-btn">+ Expand View</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- LEVEL DATABASE ---
+    const levels = [
+      // FLEXBOX (20 Levels)
+      // EASY (1-7)
+      { id: 1, mod: 'flex', sel: '#stage', instr: `The nodes need a flexible layout. Initialize the flex container.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex' } },
+      { id: 2, mod: 'flex', sel: '#stage', instr: `Center the element horizontally. (Hint: Don't forget to define the layout model first!)`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'center' } },
+      { id: 3, mod: 'flex', sel: '#stage', instr: `Push the element all the way to the far right edge of the stage.`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'flex-end' } },
+      { id: 4, mod: 'flex', sel: '#stage', instr: `Center the element perfectly along the vertical axis.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center' } },
+      { id: 5, mod: 'flex', sel: '#stage', instr: `Distribute the space perfectly between these three nodes, pushing outer ones to the edges.`, html: '<div class="player"></div><div class="item"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between' } },
+      { id: 6, mod: 'flex', sel: '#stage', instr: `Distribute the nodes so they have equal space entirely around them.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%', 'align-items': 'center' }, bgCss: { 'display': 'flex', 'justify-content': 'space-around' } },
+      { id: 7, mod: 'flex', sel: '#stage', instr: `Align the element to the bottom right corner of the terminal.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'flex-end', 'justify-content': 'flex-end' } },
+      // INTERMEDIATE (8-14)
+      { id: 8, mod: 'flex', sel: '#stage', instr: `Change the main flow direction so the elements stack vertically.`, html: '<div class="player"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column' } },
+      { id: 9, mod: 'flex', sel: '#stage', instr: `Keep them horizontal, but reverse the visual order.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'row-reverse' } },
+      { id: 10, mod: 'flex', sel: '#stage', instr: `Stack the items vertically, and flip their order simultaneously.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column-reverse' } },
+      { id: 11, mod: 'flex', sel: '#stage', instr: `The items are squished together! Allow them to drop to a new row.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap' } },
+      { id: 12, mod: 'flex', sel: '#stage', instr: `Allow them to wrap, but force new lines to generate upward instead of downward.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap-reverse' } },
+      { id: 13, mod: 'flex', sel: '#stage', instr: `Use the compound shorthand to stack items vertically AND wrap them onto new columns.`, html: '<div class="item" style="height:40%"></div><div class="item" style="height:40%"></div><div class="player" style="height:40%"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-flow': 'column wrap' } },
+      { id: 14, mod: 'flex', sel: '#stage', instr: `Bring the multiple rows tightly together into the exact center.`, html: '<div class="player" style="width:40%"></div><div class="player" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { height: '100%', 'justify-content': 'center' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap', 'align-content': 'center' } },
+      // HARD (15-20)
+      { id: 15, mod: 'flex', sel: '.player', instr: `Target the specific player element and hijack its rendering priority to place it first.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', 'align-items': 'center', height: '100%' }, bgCss: { 'order': '-1' } },
+      { id: 16, mod: 'flex', sel: '.player', instr: `Break rank! Override the container's vertical alignment and force the player to the bottom.`, html: '<div class="item"></div><div class="player"></div><div class="item"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-start' }, bgCss: { 'align-self': 'flex-end' } },
+      { id: 17, mod: 'flex', sel: '.player', instr: `Independently center the target element vertically, leaving the others at the bottom.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-end' }, bgCss: { 'align-self': 'center' } },
+      { id: 18, mod: 'flex', sel: '.player', instr: `Command the player to absorb all remaining empty space in the container.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'center' }, bgCss: { 'flex-grow': '1' } },
+      { id: 19, mod: 'flex', sel: '.player', instr: `Hardcode the initial main-axis size of the player node to exactly 50%.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', width: '100%', 'align-items': 'center' }, bgCss: { 'flex-basis': '50%' } },
+      { id: 20, mod: 'flex', sel: '#stage', instr: `Final Challenge: Configure the layout model, change flow to vertical, and lock the nodes precisely in the dead center.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-direction': 'column', 'justify-content': 'center', 'align-items': 'center' } },
+
+      // GRID (20 Levels)
+      // EASY (1-7)
+      { id: 1, mod: 'grid', sel: '#stage', instr: `Establish a 2D matrix container and slice it into two identical columns.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr' } },
+      { id: 2, mod: 'grid', sel: '#stage', instr: `Construct a foundation using three equal-width columns.`, html: '<div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' } },
+      { id: 3, mod: 'grid', sel: '#stage', instr: `Keep two columns, but pry them apart with a 20px spatial gap.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'gap': '20px' } },
+      { id: 4, mod: 'grid', sel: '#stage', instr: `Configure the matrix to possess two rows, each taking up exactly 50% height.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-rows': '50% 50%' } },
+      { id: 5, mod: 'grid', sel: '.player', instr: `Make the target unit stretch its boundary across two column slots.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': 'span 2' } },
+      { id: 6, mod: 'grid', sel: '.player', instr: `Command the player element to stretch downward, covering two row slots.`, html: '<div class="player"></div><div class="item"></div><div class="item"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-template-rows': '1fr 1fr' }, bgCss: { 'grid-row': 'span 2' } },
+      { id: 7, mod: 'grid', sel: '.player', instr: `Use raw coordinates: Force the element to begin at vertical line 2 and end at vertical line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': '2 / 4' } },
+      // INTERMEDIATE (8-14)
+      { id: 8, mod: 'grid', sel: '.player', instr: `Use horizontal coordinate tracking: Map the item from row line 2 to row line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-row': '2 / 4' } },
+      { id: 9, mod: 'grid', sel: '#stage', instr: `Use functional syntax to procedurally generate exactly four identical columns.`, html: '<div class="item"></div><div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': 'repeat(4, 1fr)' } },
+      { id: 10, mod: 'grid', sel: '#stage', instr: `Centralize every item horizontally within their respective allocated grid sectors.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'justify-items': 'center' } },
+      { id: 11, mod: 'grid', sel: '#stage', instr: `Centralize every item vertically inside their designated grid slots.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'align-items': 'center' } },
+      { id: 12, mod: 'grid', sel: '#stage', instr: `Employ the global compound shorthand to center items on both axes internally.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'place-items': 'center center' } },
+      { id: 13, mod: 'grid', sel: '.player', instr: `Override the container protocol: Align only this individual horizontally to the right side of its cell.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'align-items': 'center' }, bgCss: { 'justify-self': 'end' } },
+      { id: 14, mod: 'grid', sel: '.player', instr: `Independently align this specific element to the absolute bottom of its grid slot.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'justify-items': 'center' }, bgCss: { 'align-self': 'end' } },
+      // HARD (15-20)
+      { id: 15, mod: 'grid', sel: '.player', instr: `Use the personal override shorthand to push the target to the bottom-right corner of its container cell.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%' }, bgCss: { 'place-self': 'end end' } },
+      { id: 16, mod: 'grid', sel: '#stage', instr: `Alter the matrix flow algorithm so newly populated elements fill downward via columns, not rows.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'grid-template-rows': '1fr 1fr' }, bgCss: { 'display': 'grid', 'grid-auto-flow': 'column' } },
+      { id: 17, mod: 'grid', sel: '#stage', instr: `Take the entire grid network structure and center it horizontally on the stage.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-columns': '50px' }, bgCss: { 'display': 'grid', 'justify-content': 'center' } },
+      { id: 18, mod: 'grid', sel: '#stage', instr: `Shift the whole combined grid layout firmly to the bottom of the visible stage.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-rows': '50px', 'justify-content': 'center' }, bgCss: { 'display': 'grid', 'align-content': 'end' } },
+      { id: 19, mod: 'grid', sel: '.player', instr: `Map the element to inhabit the pre-allocated template area identified as 'main'.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-areas': '"head head" "side main"', 'grid-template-columns': '1fr 2fr', 'grid-template-rows': '1fr 2fr' }, bgCss: { 'grid-area': 'main' } },
+      { id: 20, mod: 'grid', sel: '.player', instr: `Final Grid Boss: Execute a complex bounding box area. Anchor from Row 2, Col 2, spanning until Row 4, Col 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-columns': '1fr 1fr 1fr', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-area': '2 / 2 / 4 / 4' } },
+    ];
+
+    let curMod = 'flex', curLvl = 0, modLevels = [], done = new Set();
+    const $ = id => document.getElementById(id);
+
+    // Paging routing for basic navigation
+    function loadPage(pageId) {
+      if (pageId === 'home') {
+        $('game-screen').classList.remove('active');
+        $('home-screen').classList.add('active');
+      }
+    }
+
+    // Terminal Resize Logic for Mobile
+    let termVh = 40;
+    $('btn-grow-term').onclick = () => {
+      if (termVh < 80) {
+        termVh += 10;
+        document.querySelector('.right-col').style.height = termVh + 'vh';
+      }
+    };
+    $('btn-shrink-term').onclick = () => {
+      if (termVh > 25) {
+        termVh -= 10;
+        document.querySelector('.right-col').style.height = termVh + 'vh';
+      }
+    };
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 900) {
+        document.querySelector('.right-col').style.height = '100%';
+      } else {
+        document.querySelector('.right-col').style.height = termVh + 'vh';
+      }
+    });
+
+    // Theme Engine (Bound to Global Navbar)
+    const toggleTheme = () => {
+      const isLight = document.documentElement.classList.toggle('light');
+      document.querySelectorAll('.theme-knob').forEach(k => k.textContent = isLight ? '☀️' : '🌙');
+    };
+    const themeBtn = $('theme-btn-global');
+    if (themeBtn) themeBtn.onclick = toggleTheme;
+
+    // Get dynamic 6 snippet options for a level
+    function generateOptions(lvl) {
+      let correct = Object.entries(lvl.bgCss).map(([k, v]) => `${k}: ${v};`);
+      let pool = [
+        'display: flex;', 'display: grid;', 'justify-content: center;', 'justify-content: flex-end;',
+        'align-items: center;', 'align-items: flex-end;', 'flex-direction: column;', 'flex-direction: row-reverse;',
+        'grid-template-columns: 1fr 1fr;', 'grid-template-columns: repeat(3, 1fr);', 'gap: 20px;', 'grid-column: span 2;',
+        'justify-content: space-between;', 'align-self: flex-end;', 'flex-wrap: wrap;', 'order: 1;'
+      ].filter(d => !correct.includes(d));
+
+      let needed = 6 - correct.length;
+      let dist = pool.sort(() => 0.5 - Math.random()).slice(0, needed);
+      return [...correct, ...dist].sort(() => 0.5 - Math.random());
+    }
+
+    function getDifficulty(i) {
+      if (i < 7) return 'EASY';
+      if (i < 14) return 'INTERMEDIATE';
+      return 'HARD';
+    }
+
+    function startModule(mod) {
+      curMod = mod;
+      modLevels = levels.filter(l => l.mod === mod);
+      $('mod-tag').textContent = mod.toUpperCase();
+      $('home-screen').classList.remove('active');
+      $('game-screen').classList.add('active');
+      done.clear();
+      loadLevel(0);
+    }
+
+    $('btn-flex').onclick = () => startModule('flex');
+    $('btn-grid').onclick = () => startModule('grid');
+    $('btn-home-logo').onclick = () => loadPage('home');
+
+    function formatHTML(htmlStr) {
+      return `<div id="stage">\n  ${htmlStr.replace(/></g, '>\n  <')}\n</div>`;
+    }
+
+    function loadLevel(idx) {
+      curLvl = idx;
+      const lvl = modLevels[idx];
+
+      $('lvl-num').textContent = idx + 1;
+      $('diff-badge').textContent = getDifficulty(idx);
+
+      $('instr').innerHTML = lvl.instr;
+      $('ed-sel').textContent = lvl.sel + ' {';
+      $('css-ed').value = '';
+      $('html-viewer').textContent = formatHTML(lvl.html);
+
+      $('feedback').classList.remove('show');
+      $('win-ol').classList.remove('show');
+      $('btn-prev').disabled = idx === 0;
+      $('btn-next').disabled = idx === modLevels.length - 1;
+
+      const optBox = $('options-box');
+      optBox.innerHTML = '';
+      const opts = generateOptions(lvl);
+      opts.forEach(o => {
+        let line = document.createElement('div');
+        line.className = 'opt-line';
+        line.textContent = o;
+        optBox.appendChild(line);
+      });
+
+      $('reveal-container').style.gridTemplateColumns = '1fr';
+      $('btn-answer').classList.remove('hidden');
+      $('btn-run-reveal').classList.add('hidden');
+
+      renderPips(idx);
+
+      const stage = $('stage'), bg = $('stage-bg');
+      stage.style.cssText = bg.style.cssText = '';
+
+      if (lvl.baseCss) {
+        Object.entries(lvl.baseCss).forEach(([k, v]) => { stage.style[k] = v; bg.style[k] = v; });
+      }
+
+      stage.innerHTML = lvl.html.replace(/player/g, 'player').replace(/item/g, 'item');
+      bg.innerHTML = lvl.html.replace(/player/g, 'goal').replace(/item/g, 'item');
+
+      const pEmoji = curMod === 'flex' ? '🏎️' : '🌌';
+      const gEmoji = curMod === 'flex' ? '🎯' : '🔥';
+      const iEmoji = curMod === 'flex' ? '📦' : '💣';
+
+      stage.querySelectorAll('.player').forEach(el => el.textContent = pEmoji);
+      bg.querySelectorAll('.goal').forEach(el => el.textContent = gEmoji);
+      document.querySelectorAll('.item').forEach(el => el.textContent = iEmoji);
+
+      if (lvl.sel === '#stage') {
+        Object.entries(lvl.bgCss).forEach(([k, v]) => bg.style[k] = v);
+      } else {
+        bg.querySelectorAll('.goal').forEach(g => {
+          Object.entries(lvl.bgCss).forEach(([k, v]) => g.style[k] = v);
+        });
+      }
+    }
+
+    function renderPips(idx) {
+      const track = $('pip-track');
+      track.innerHTML = '';
+      modLevels.forEach((l, i) => {
+        const pip = document.createElement('div');
+        pip.className = 'pip' + (done.has(i) ? ' done' : (i === idx ? ' active' : ''));
+        pip.onclick = () => loadLevel(i);
+        track.appendChild(pip);
+      });
+    }
+
+    function applyUserCSS() {
+      const lvl = modLevels[curLvl];
+      const target = lvl.sel === '#stage' ? $('stage') : document.querySelectorAll(`#stage ${lvl.sel}`);
+
+      if (lvl.sel === '#stage') {
+        $('stage').style.cssText = '';
+        if (lvl.baseCss) Object.entries(lvl.baseCss).forEach(([k, v]) => $('stage').style[k] = v);
+      } else {
+        document.querySelectorAll(`#stage ${lvl.sel}`).forEach(el => el.style.cssText = '');
+        $('stage').style.cssText = '';
+        if (lvl.baseCss) Object.entries(lvl.baseCss).forEach(([k, v]) => $('stage').style[k] = v);
+      }
+
+      const userCssStr = $('css-ed').value.trim();
+      const rules = userCssStr.split(';').filter(r => r.includes(':'));
+      rules.forEach(r => {
+        let parts = r.split(':');
+        let prop = parts.shift().trim();
+        let val = parts.join(':').trim();
+        if (prop && val) {
+          if (lvl.sel === '#stage') {
+            $('stage').style[prop] = val;
+          } else {
+            document.querySelectorAll(`#stage ${lvl.sel}`).forEach(el => el.style[prop] = val);
+          }
+        }
+      });
+    }
+
+    function validateLevel() {
+      let pass = true;
+      const players = document.querySelectorAll('#stage .player');
+      const goals = document.querySelectorAll('#stage-bg .goal');
+
+      if (players.length === 0 || goals.length === 0) return;
+
+      players.forEach(p => {
+        const pr = p.getBoundingClientRect();
+        let matched = false;
+        goals.forEach(g => {
+          const gr = g.getBoundingClientRect();
+          if (Math.abs(pr.top - gr.top) < 5 && Math.abs(pr.left - gr.left) < 5) matched = true;
+        });
+        if (!matched) pass = false;
+      });
+
+      if (pass) {
+        done.add(curLvl);
+        goals.forEach(g => g.classList.add('reached'));
+        setTimeout(() => $('win-ol').classList.add('show'), 300);
+        renderPips(curLvl);
+
+        // Save progress and history to the database
+        const token = localStorage.getItem("token");
+        if (token) {
+          fetch('/api/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ module: 'css-lab', level: curLvl + 1, score: (curLvl + 1) * 10 })
+          }).catch(err => console.error(err));
+          
+          fetch('/api/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ 
+              action: `Cleared CSS Lab Level ${curLvl + 1}`, 
+              detail: `Successfully completed the layout alignment challenge using Flexbox/Grid properties.` 
+            })
+          }).catch(err => console.error(err));
+        }
+      }
+    }
+
+    let typingTimer;
+    $('css-ed').addEventListener('input', () => {
+      applyUserCSS();
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(validateLevel, 500);
+    });
+
+    $('btn-answer').onclick = () => {
+      const lvl = modLevels[curLvl];
+      const ans = Object.entries(lvl.bgCss).map(([k, v]) => `  ${k}: ${v};`).join('\n');
+      $('css-ed').value = ans;
+      applyUserCSS();
+      $('btn-answer').classList.add('hidden');
+      $('btn-run-reveal').classList.remove('hidden');
+    };
+
+    $('btn-run-reveal').onclick = () => validateLevel();
+    $('btn-reset').onclick = () => { $('css-ed').value = ''; loadLevel(curLvl); };
+    $('btn-prev').onclick = () => { if (curLvl > 0) loadLevel(curLvl - 1); };
+    $('btn-next').onclick = () => { if (curLvl < modLevels.length - 1) loadLevel(curLvl + 1); };
+    $('btn-next-lvl').onclick = () => { if (curLvl < modLevels.length - 1) loadLevel(curLvl + 1); else loadPage('home'); };
+
+  </script>
+  
+</body>
+
+</html>

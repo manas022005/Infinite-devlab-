@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Binary Search — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .el-box {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Pointer Gliders Fixed Logic */
+        .ptr-label {
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            transform: translateX(-50%);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+    
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <button id="theme-toggle"
+            class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+            <span id="theme-knob"
+                class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+        </button>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Search Algorithm ·
+                    Divide & Conquer</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">BINARY <span
+                        class="text-theme-accent">SEARCH</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Efficiently finds an
+                    element in a <b>sorted array</b> by repeatedly halving the search interval. Time Complexity: O(log
+                    n).</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <input id="tgt" type="number" placeholder="Target..."
+                    class="font-code text-sm px-4 py-2.5 rounded-lg border border-theme-border bg-theme-bg text-theme-text focus:outline-none focus:border-theme-accent transition-colors w-32" />
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Run C++ Search</button>
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent hover:text-theme-accent transition-all">↺
+                    New Sorted Array</button>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="100" max="1000" value="500" step="50"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Performance</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-comp" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Steps</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-idx" class="font-display text-3xl text-theme-accent leading-none">—</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Found Index</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div>
+                            <span>Active Range</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent bg-theme-bg"></div>
+                            <span class="text-theme-text font-semibold text-shadow">Current Mid</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Target Match</span>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-30">
+                            <div class="w-4 h-4 rounded border border-theme-border bg-theme-bg"></div>
+                            <span>Discarded Half</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all">
+                    Ready to divide</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <div class="flex gap-4 font-code text-[0.65rem] text-theme-muted">
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Low <span id="h-low" class="text-theme-accent font-bold">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        Mid <span id="h-mid" class="text-theme-text font-bold">—</span>
+                    </div>
+                    <div
+                        class="bg-theme-surf border border-theme-border px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        High <span id="h-high" class="text-theme-accent font-bold">—</span>
+                    </div>
+                </div>
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-10 flex flex-col justify-center items-center relative shadow-inner overflow-x-auto min-h-[300px]">
+
+                    <div id="array-wrapper" class="relative inline-block mt-8 mb-8">
+                        <div id="ptr-low"
+                            class="ptr-label absolute -top-10 opacity-0 font-code text-[0.6rem] text-theme-accent flex flex-col items-center">
+                            low<span class="mt-1">▼</span>
+                        </div>
+                        <div id="ptr-high"
+                            class="ptr-label absolute -top-10 opacity-0 font-code text-[0.6rem] text-theme-accent flex flex-col items-center">
+                            high<span class="mt-1">▼</span>
+                        </div>
+
+                        <div id="arr-row" class="flex gap-2">
+                        </div>
+
+                        <div id="ptr-mid"
+                            class="ptr-label absolute -bottom-10 opacity-0 font-code text-[0.6rem] text-theme-text flex flex-col items-center">
+                            <span class="mb-1">▲</span>mid
+                        </div>
+                    </div>
+
+                    <div id="result"
+                        class="absolute bottom-4 left-4 font-code text-[0.7rem] text-theme-muted opacity-60">// Array
+                        Sorted. Enter target.</div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">int</span> <span
+                            class="text-theme-accent">binarySearch</span>(<span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp;
+                        arr, <span class="text-pink-400">int</span> target) {</div>
+                    <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">int</span>
+                        low = 0, high = arr.size() - 1;</div>
+                    <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">while</span> (low &lt;= high) {</div>
+                    <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">int</span> mid = low + (high - low) / 2;</div>
+                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (arr[mid] == target) <span
+                            class="text-pink-400">return</span> mid;</div>
+                    <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">if</span> (arr[mid] &lt; target) low = mid + 1;</div>
+                    <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                            class="text-pink-400">else</span> high = mid - 1;</div>
+                    <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
+                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">return</span> -1;</div>
+                    <div id="p10" class="px-2 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], els = [], N = 12, spd = 500, running = false, comps = 0;
+
+        function updateStats(idx = '—') {
+            $('s-comp').textContent = comps;
+            $('s-idx').textContent = idx;
+        }
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        // FIX: The pointer calculation is now relative to #array-wrapper
+        function movePointer(id, index) {
+            const ptr = $(id);
+            if (index === null || index < 0 || index >= N) {
+                ptr.style.opacity = '0';
+                return;
+            }
+
+            const targetEl = els[index].wrap;
+            // offsetLeft of targetEl works perfectly since its parent is flex but the main wrapper is inline-block relative
+            const offsetLeft = targetEl.offsetLeft + (targetEl.offsetWidth / 2);
+
+            ptr.style.opacity = '1';
+            ptr.style.left = `${offsetLeft}px`;
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; els = []; comps = 0; updateStats();
+
+            const pool = [];
+            while (pool.length < N) {
+                let val = Math.floor(Math.random() * 95) + 5;
+                if (!pool.includes(val)) pool.push(val);
+            }
+            pool.sort((a, b) => a - b);
+            A = pool;
+
+            const container = $('arr-row');
+            container.innerHTML = '';
+            $('tgt').value = '';
+            $('h-low').textContent = '—'; $('h-mid').textContent = '—'; $('h-high').textContent = '—';
+            movePointer('ptr-low', null); movePointer('ptr-high', null); movePointer('ptr-mid', null);
+
+            A.forEach((v, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'relative flex flex-col items-center transition-opacity duration-300';
+
+                const el = document.createElement('div');
+                // High Visibility Skeleton
+                el.className = 'el-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold bg-theme-accent/10 border-2 border-slate-500 text-theme-text transition-all duration-300';
+                el.textContent = v;
+
+                const idxLbl = document.createElement('span');
+                idxLbl.className = 'absolute -bottom-5 text-[0.6rem] font-code text-theme-muted opacity-80';
+                idxLbl.textContent = `[${i}]`;
+
+                wrap.appendChild(el);
+                wrap.appendChild(idxLbl);
+                container.appendChild(wrap);
+                els.push({ box: el, wrap: wrap, idx: idxLbl });
+            });
+
+            setSpill('idle', 'READY (SORTED)');
+            hl(null);
+            $('result').textContent = '// Initialized sorted array. Ready for search.';
+        }
+
+        function setElState(index, state) {
+            const b = els[index].box;
+            const wrap = els[index].wrap;
+
+            // Clean
+            b.className = 'el-box w-12 h-12 rounded-lg flex items-center justify-center font-code text-sm font-bold transition-all duration-300';
+            wrap.classList.remove('opacity-20');
+
+            if (state === 'discard') {
+                b.classList.add('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-muted');
+                wrap.classList.add('opacity-20');
+            } else if (state === 'mid') {
+                b.classList.add('bg-theme-bg', 'border-2', 'border-theme-accent', 'text-theme-text', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.3)]');
+            } else if (state === 'found') {
+                b.classList.add('bg-theme-accent', 'text-theme-bg', 'border-2', 'border-theme-accent', 'scale-125', 'shadow-[0_0_20px_rgba(45,212,191,0.6)]', 'z-10');
+            } else {
+                b.classList.add('bg-theme-accent/10', 'border-2', 'border-slate-500', 'text-theme-text');
+            }
+        }
+
+        async function doSearch() {
+            if (running) return;
+            const raw = $('tgt').value.trim();
+            if (!raw) { $('tgt').focus(); return; }
+            const tgt = parseInt(raw, 10);
+
+            running = true;
+            $('btn-run').disabled = true; $('btn-gen').disabled = true;
+            comps = 0; updateStats();
+            els.forEach((_, i) => setElState(i, 'idle'));
+            setSpill('run', 'DIVIDING...');
+
+            hl('p1'); await sleep(spd);
+
+            hl('p2');
+            let low = 0, high = N - 1;
+            $('h-low').textContent = low; $('h-high').textContent = high;
+            movePointer('ptr-low', low); movePointer('ptr-high', high);
+            await sleep(spd);
+
+            while (low <= high) {
+                hl('p3'); await sleep(spd / 2);
+
+                hl('p4');
+                let mid = Math.floor(low + (high - low) / 2);
+                $('h-mid').textContent = mid;
+                movePointer('ptr-mid', mid);
+                setElState(mid, 'mid');
+                $('result').textContent = `// Mid is index ${mid} (value ${A[mid]})`;
+                await sleep(spd);
+
+                hl('p5');
+                comps++; updateStats();
+                if (A[mid] === tgt) {
+                    setElState(mid, 'found');
+                    updateStats(mid);
+                    setSpill('found', `FOUND AT INDEX ${mid} ✓`);
+                    $('result').textContent = `// Target ${tgt} == arr[${mid}]. Match!`;
+                    await sleep(spd);
+                    break;
+                }
+                await sleep(spd / 2);
+
+                if (A[mid] < tgt) {
+                    hl('p6');
+                    $('result').textContent = `// ${A[mid]} < ${tgt}. Discard left half.`;
+                    for (let k = low; k <= mid; k++) setElState(k, 'discard');
+                    low = mid + 1;
+                    $('h-low').textContent = low;
+                    movePointer('ptr-low', low);
+                } else {
+                    hl('p7');
+                    $('result').textContent = `// ${A[mid]} > ${tgt}. Discard right half.`;
+                    for (let k = mid; k <= high; k++) setElState(k, 'discard');
+                    high = mid - 1;
+                    $('h-high').textContent = high;
+                    movePointer('ptr-high', high);
+                }
+                movePointer('ptr-mid', null);
+                $('h-mid').textContent = '—';
+                await sleep(spd);
+            }
+
+            if (low > high) {
+                hl('p9');
+                setSpill('idle', 'NOT FOUND');
+                $('result').textContent = `// Target ${tgt} not in array. Range exhausted.`;
+                updateStats('—');
+            }
+
+            hl(null);
+            running = false;
+            $('btn-run').disabled = false; $('btn-gen').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = doSearch;
+        $('tgt').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+        // Reverse speed logic for intuitive slider
+        $('spd').oninput = function () { spd = 1100 - parseInt(this.value); };
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        // FIX: Handled NaN parsing so index 0 doesn't disappear on resize
+        window.onresize = () => {
+            let l = parseInt($('h-low').textContent);
+            let h = parseInt($('h-high').textContent);
+            let m = parseInt($('h-mid').textContent);
+            movePointer('ptr-low', isNaN(l) ? null : l);
+            movePointer('ptr-high', isNaN(h) ? null : h);
+            movePointer('ptr-mid', isNaN(m) ? null : m);
+        };
+
+        // Initialize with a slight delay so DOM dimensions are fully realized
+        setTimeout(genData, 50);
+    </script>
+</body>
+
+</html>

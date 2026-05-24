@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Matrix Algorithms — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .cell {
+            transition: all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Matrix
+                Operations</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Algorithm · 2D
+                    Arrays</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">MATRIX <span
+                        class="text-theme-accent">TRAVERSALS</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Choose between standard
+                    2D algorithms: Spiral Matrix traversal with boundary tracking, or counting connected components
+                    (Islands) using BFS.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <select id="algoSelect"
+                    class="bg-theme-bg border border-theme-border text-theme-accent font-code text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-theme-accent cursor-pointer transition-colors">
+                    <option value="spiral">Spiral Matrix</option>
+                    <option value="islands">Number of Islands (BFS)</option>
+                </select>
+
+                <div class="flex gap-2">
+                    <button id="btnStepB"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">⏮</button>
+                    <button id="btnPlay"
+                        class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                        Play</button>
+                    <button id="btnPause"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-accent text-theme-accent hover:bg-theme-accent/10 transition-all"
+                        disabled>⏸ Pause</button>
+                    <button id="btnStepF"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">⏭</button>
+                    <button id="btnReset"
+                        class="font-ui text-sm font-bold px-4 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:text-theme-accent transition-all ml-2">↺
+                        Reset</button>
+                </div>
+
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="700" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Info</span>
+                    <div class="bg-theme-bg border border-theme-border rounded-lg p-4 font-code text-xs text-theme-muted leading-relaxed"
+                        id="infoArea">
+                        Waiting to start...
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div id="legendArea" class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
+                    IDLE — Press Play</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col items-center justify-center relative shadow-inner min-h-[380px] overflow-hidden">
+                    <span class="absolute top-4 left-4 font-code text-[0.7rem] text-theme-muted" id="c-tag">// MATRIX
+                        VIEW</span>
+
+                    <div class="bg-theme-bg border border-theme-border rounded-xl p-4 shadow-lg inline-block mt-4">
+                        <div id="matrixGrid" class="flex flex-col gap-1.5 items-center">
+                        </div>
+                    </div>
+                </section>
+
+                <div
+                    class="flex items-center gap-3 min-h-[56px] px-5 py-3 bg-theme-surf border border-theme-border rounded-xl shadow-inner">
+                    <span class="font-code text-[0.8rem] text-theme-muted flex-shrink-0" id="outputLabel">Output:</span>
+                    <div id="outputArea" class="flex flex-wrap gap-2 w-full"></div>
+                </div>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div class="flex items-center gap-2 border-b border-theme-border pb-2 mb-2">
+                        <span class="text-xs text-theme-accent uppercase tracking-widest font-bold"
+                            id="codeTitle">code.cpp</span>
+                    </div>
+                    <div id="codeBlock" class="flex flex-col"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        const SPIRAL_MATRIX = [
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16]
+        ];
+
+        const ISLAND_MATRIX = [
+            [1, 1, 0, 0, 0],
+            [1, 1, 0, 0, 1],
+            [0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0],
+            [1, 0, 1, 1, 0]
+        ];
+
+        // Instead of rainbow colors, we use monochromatic variations for islands
+        const ISLAND_STYLES = [
+            'bg-theme-accent text-theme-bg border-theme-accent scale-95',
+            'bg-theme-accent/70 text-theme-bg border-theme-accent scale-95',
+            'bg-theme-text text-theme-bg border-theme-text scale-95',
+            'bg-theme-text/70 text-theme-bg border-theme-text scale-95'
+        ];
+
+        const CODES = {
+            spiral: {
+                title: 'spiral_matrix.cpp',
+                lines: [
+                    `<span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">int</span>&gt; <span class="text-theme-accent">spiralOrder</span>(<span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&gt;&amp; mat) {`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">int</span> top = 0, bottom = rows - 1;`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">int</span> left = 0, right = cols - 1;`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">while</span> (top <= bottom && left <= right) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = left; i <= right; i++) res.<span class="text-theme-accent">push_back</span>(mat[top][i]);`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;top++;`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = top; i <= bottom; i++) res.<span class="text-theme-accent">push_back</span>(mat[i][right]);`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;right--;`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> (top <= bottom) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = right; i >= left; i--) res.<span class="text-theme-accent">push_back</span>(mat[bottom][i]);`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bottom--;`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> (left <= right) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = bottom; i >= top; i--) res.<span class="text-theme-accent">push_back</span>(mat[i][left]);`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left++;`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;}`,
+                    `}`
+                ]
+            },
+            islands: {
+                title: 'num_islands_bfs.cpp',
+                lines: [
+                    `<span class="text-pink-400">int</span> <span class="text-theme-accent">numIslands</span>(<span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">vector</span>&lt;<span class="text-pink-400">char</span>&gt;&gt;&amp; grid) {`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">int</span> count = 0;`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> r = 0; r < rows; r++) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> c = 0; c < cols; c++) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> (grid[r][c] == <span class="text-orange-300">'1'</span>) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++; <span class="text-theme-muted italic">// New island found</span>`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid[r][c] = <span class="text-orange-300">'0'</span>; <span class="text-theme-muted italic">// Mark visited</span>`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-theme-accent">queue</span>&lt;<span class="text-theme-accent">pair</span>&lt;<span class="text-pink-400">int</span>,<span class="text-pink-400">int</span>&gt;&gt; q; q.<span class="text-theme-accent">push</span>({r,c});`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">while</span> (!q.<span class="text-theme-accent">empty</span>()) { <span class="text-theme-muted italic">// BFS Flood-fill</span>`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">auto</span> [x,y] = q.<span class="text-theme-accent">front</span>(); q.<span class="text-theme-accent">pop</span>();`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> (<span class="text-pink-400">int</span> d = 0; d < 4; d++) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">int</span> nx = x+dx[d], ny = y+dy[d];`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> (valid(nx,ny) && grid[nx][ny] == <span class="text-orange-300">'1'</span>) {`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid[nx][ny] = <span class="text-orange-300">'0'</span>; q.<span class="text-theme-accent">push</span>({nx,ny});`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;}`,
+                    `&nbsp;&nbsp;<span class="text-pink-400">return</span> count;`,
+                    `}`
+                ]
+            }
+        };
+
+        function renderCode(key, activeIdx = -1) {
+            const cfg = CODES[key];
+            $('codeTitle').textContent = cfg.title;
+            $('codeBlock').innerHTML = cfg.lines.map((l, i) =>
+                `<span class="cl ${i === activeIdx ? 'hl' : ''}" id="p${i}">${l}</span>`
+            ).join('');
+
+            if (activeIdx !== -1) {
+                const el = $(`p${activeIdx}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // ─── STEP GENERATION ───
+        function genSpiralSteps() {
+            const M = SPIRAL_MATRIX, R = 4, C = 4;
+            const steps = [];
+            const state = Array.from({ length: R }, () => new Array(C).fill('idle'));
+            let top = 0, bottom = R - 1, left = 0, right = C - 1;
+            const order = [];
+
+            steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 3, msg: `INIT: top=${top}, bottom=${bottom}, left=${left}, right=${right}`, active: [-1, -1] });
+
+            while (top <= bottom && left <= right) {
+                for (let i = left; i <= right; i++) {
+                    state[top][i] = 'active'; order.push(M[top][i]);
+                    steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 4, msg: `→ RIGHT: Mat[${top}][${i}] = ${M[top][i]}`, active: [top, i] });
+                    state[top][i] = 'done';
+                }
+                top++;
+                steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 5, msg: `Shrink top bound → ${top}`, active: [-1, -1] });
+
+                for (let i = top; i <= bottom; i++) {
+                    state[i][right] = 'active'; order.push(M[i][right]);
+                    steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 6, msg: `↓ DOWN: Mat[${i}][${right}] = ${M[i][right]}`, active: [i, right] });
+                    state[i][right] = 'done';
+                }
+                right--;
+                steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 7, msg: `Shrink right bound → ${right}`, active: [-1, -1] });
+
+                if (top <= bottom) {
+                    for (let i = right; i >= left; i--) {
+                        state[bottom][i] = 'active'; order.push(M[bottom][i]);
+                        steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 9, msg: `← LEFT: Mat[${bottom}][${i}] = ${M[bottom][i]}`, active: [bottom, i] });
+                        state[bottom][i] = 'done';
+                    }
+                    bottom--;
+                }
+                if (left <= right) {
+                    for (let i = bottom; i >= top; i--) {
+                        state[i][left] = 'active'; order.push(M[i][left]);
+                        steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 13, msg: `↑ UP: Mat[${i}][${left}] = ${M[i][left]}`, active: [i, left] });
+                        state[i][left] = 'done';
+                    }
+                    left++;
+                }
+            }
+            steps.push({ state: state.map(r => [...r]), order: [...order], codeLine: 17, msg: `✓ Spiral complete! ${order.length} elements visited.`, active: [-1, -1], done: true });
+            return steps;
+        }
+
+        function genIslandSteps() {
+            const G = ISLAND_MATRIX.map(r => [...r]);
+            const R = 5, C = 5;
+            const steps = [];
+            const cellIsland = Array.from({ length: R }, () => new Array(C).fill(-1));
+            let count = 0;
+            const dx = [0, 0, 1, -1], dy = [1, -1, 0, 0];
+
+            steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [-1, -1], codeLine: 2, msg: 'START: Scanning grid for land (1)...' });
+
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [r, c], codeLine: 4, msg: `CHECK [${r}][${c}]: value = ${G[r][c]}` });
+                    if (G[r][c] === 1) {
+                        const islandId = count;
+                        count++;
+                        cellIsland[r][c] = islandId;
+                        steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [r, c], codeLine: 5, msg: `! Found unvisited land at [${r}][${c}]. Island #${count}.` });
+                        G[r][c] = 0;
+                        const queue = [[r, c]];
+
+                        while (queue.length) {
+                            const [x, y] = queue.shift();
+                            steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [x, y], codeLine: 9, msg: `BFS: Processing [${x}][${y}], checking neighbors...` });
+                            for (let d = 0; d < 4; d++) {
+                                const nx = x + dx[d], ny = y + dy[d];
+                                if (nx >= 0 && nx < R && ny >= 0 && ny < C && G[nx][ny] === 1) {
+                                    cellIsland[nx][ny] = islandId;
+                                    G[nx][ny] = 0;
+                                    queue.push([nx, ny]);
+                                    steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [nx, ny], codeLine: 13, msg: `Flood-fill [${nx}][${ny}] → Mark as Island #${count}` });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            steps.push({ cellIsland: cellIsland.map(r => [...r]), count, active: [-1, -1], codeLine: 20, msg: `✓ Done! Total islands counted = ${count}`, done: true });
+            return steps;
+        }
+
+        // ─── RENDERERS ───
+        function renderMatrixSpiral(state, active, order) {
+            const M = SPIRAL_MATRIX;
+            const grid = $('matrixGrid');
+            grid.innerHTML = '';
+
+            state.forEach((row, r) => {
+                const rowEl = document.createElement('div'); rowEl.className = 'flex gap-1.5';
+                row.forEach((s, c) => {
+                    const isActive = active[0] === r && active[1] === c;
+                    const cell = document.createElement('div');
+
+                    let bg = 'bg-theme-accent/10 border-2 border-slate-500 text-theme-muted'; // Idle/Unvisited
+                    if (isActive || s === 'active') {
+                        bg = 'bg-theme-bg border-2 border-theme-accent text-theme-text scale-110 shadow-[0_0_15px_rgba(45,212,191,0.4)] z-10';
+                    } else if (s === 'done') {
+                        bg = 'bg-theme-accent text-theme-bg border-2 border-theme-accent shadow-[0_0_10px_rgba(45,212,191,0.2)]';
+                    }
+
+                    cell.className = `cell w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-lg font-code text-sm font-bold ${bg}`;
+                    cell.textContent = M[r][c];
+                    rowEl.appendChild(cell);
+                });
+                grid.appendChild(rowEl);
+            });
+
+            const out = $('outputArea');
+            out.innerHTML = '';
+            order.forEach(v => {
+                const chip = document.createElement('div');
+                chip.className = 'bg-theme-accent/20 border border-theme-accent text-theme-text px-2 py-1 rounded font-code text-xs font-bold shadow-sm';
+                chip.textContent = v;
+                out.appendChild(chip);
+            });
+        }
+
+        function renderMatrixIslands(cellIsland, count, active) {
+            const G = ISLAND_MATRIX;
+            const grid = $('matrixGrid');
+            grid.innerHTML = '';
+
+            cellIsland.forEach((row, r) => {
+                const rowEl = document.createElement('div'); rowEl.className = 'flex gap-1.5';
+                row.forEach((islandId, c) => {
+                    const isActive = active[0] === r && active[1] === c;
+                    const isWater = G[r][c] === 0 && islandId === -1;
+
+                    const cell = document.createElement('div');
+                    let bgClass = '';
+                    let text = '';
+
+                    if (isActive) {
+                        bgClass = 'bg-theme-bg border-2 border-theme-text text-theme-text scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)] z-10';
+                        text = isWater ? '0' : (islandId >= 0 ? `I${islandId + 1}` : '1');
+                    } else if (islandId >= 0) {
+                        // It's part of a found island
+                        bgClass = ISLAND_STYLES[islandId % ISLAND_STYLES.length] + ' border-2';
+                        text = `I${islandId + 1}`;
+                    } else if (isWater) {
+                        bgClass = 'bg-theme-bg border border-slate-700/60 text-theme-muted opacity-50';
+                        text = '0';
+                    } else {
+                        // Unvisited Land
+                        bgClass = 'bg-theme-accent/10 border-2 border-theme-accent/80 text-theme-accent';
+                        text = '1';
+                    }
+
+                    cell.className = `cell w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-md font-code text-sm font-bold ${bgClass}`;
+                    cell.textContent = text;
+                    rowEl.appendChild(cell);
+                });
+                grid.appendChild(rowEl);
+            });
+            $('infoArea').innerHTML = `<b>Islands Counted:</b> <span class="text-theme-accent text-lg ml-2">${count}</span>`;
+        }
+
+        // ─── ENGINE ───
+        let steps = [], stepIdx = 0, playing = false, timer = null;
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'done') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function applyStep(i) {
+            if (i < 0 || i >= steps.length) return;
+            const s = steps[i];
+            const algo = $('algoSelect').value;
+
+            renderCode(algo, s.codeLine);
+
+            if (s.done) setSpill('done', 'COMPLETE ✓');
+            else setSpill('run', s.msg || 'RUNNING...');
+
+            if (algo === 'spiral') {
+                renderMatrixSpiral(s.state, s.active, s.order);
+                $('infoArea').innerHTML = `Current Bounds:<br>Top: ${s.state.filter(r => r[0] !== 'idle').length > 0 ? "..." : "..."} <br><i>(See array below)</i>`; // Simplified info
+            } else {
+                renderMatrixIslands(s.cellIsland, s.count, s.active);
+            }
+        }
+
+        function updateLegend(algo) {
+            const leg = $('legendArea');
+            leg.innerHTML = '';
+
+            if (algo === 'spiral') {
+                leg.innerHTML = `
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border-2 border-slate-500 bg-theme-accent/10"></div> <span>Unvisited</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border-2 border-theme-accent bg-theme-bg scale-110"></div> <span class="text-theme-text font-bold">Active Cell</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border-2 border-theme-accent bg-theme-accent"></div> <span class="text-theme-accent font-bold text-shadow">Processed</span></div>
+                `;
+                $('outputLabel').textContent = 'Spiral Output:';
+            } else {
+                leg.innerHTML = `
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border border-slate-700/60 bg-theme-bg opacity-50"></div> <span>Water (0)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border-2 border-theme-accent/80 bg-theme-accent/10"></div> <span class="text-theme-accent">Unvisited Land (1)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded border-2 border-theme-text bg-theme-bg scale-110"></div> <span class="text-theme-text font-bold">Scanning Cursor</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-theme-accent"></div> <span class="text-theme-accent font-bold">Claimed Island</span></div>
+                `;
+                $('outputLabel').textContent = 'BFS Trace:';
+                $('outputArea').innerHTML = '<span class="text-theme-muted font-code text-xs italic">Islands are mapped in real-time</span>';
+            }
+        }
+
+        function reset() {
+            clearInterval(timer); playing = false; stepIdx = 0;
+            const algo = $('algoSelect').value;
+
+            updateLegend(algo);
+            steps = algo === 'spiral' ? genSpiralSteps() : genIslandSteps();
+
+            if (algo === 'spiral') {
+                renderMatrixSpiral(Array.from({ length: 4 }, () => new Array(4).fill('idle')), [-1, -1], []);
+                $('infoArea').innerHTML = '4×4 Spiral Matrix Ready.';
+            } else {
+                renderMatrixIslands(Array.from({ length: 5 }, () => new Array(5).fill(-1)), 0, [-1, -1]);
+                $('infoArea').innerHTML = `Islands found: <span class="text-theme-accent font-black text-lg ml-1">0</span>`;
+            }
+
+            renderCode(algo, -1);
+            setSpill('idle', 'IDLE — Press Play');
+            updateBtns();
+        }
+
+        function updateBtns() {
+            $('btnPlay').disabled = playing;
+            $('btnPause').disabled = !playing;
+            $('btnStepF').disabled = playing || stepIdx >= steps.length;
+            $('btnStepB').disabled = playing || stepIdx <= 0;
+        }
+
+        function playNext() {
+            if (stepIdx >= steps.length) { playing = false; clearInterval(timer); updateBtns(); return; }
+            applyStep(stepIdx++); updateBtns();
+        }
+
+        $('btnPlay').addEventListener('click', () => {
+            if (stepIdx >= steps.length) reset();
+            playing = true; updateBtns();
+            timer = setInterval(playNext, 1700 - parseInt($('spd').value));
+        });
+        $('btnPause').addEventListener('click', () => {
+            playing = false; clearInterval(timer); updateBtns();
+            setSpill('idle', 'PAUSED');
+        });
+        $('btnStepF').addEventListener('click', () => { if (stepIdx < steps.length) applyStep(stepIdx++); updateBtns(); });
+        $('btnStepB').addEventListener('click', () => {
+            if (stepIdx > 1) { stepIdx -= 2; applyStep(stepIdx++); updateBtns(); }
+            else { stepIdx = 0; reset(); }
+        });
+        $('btnReset').addEventListener('click', reset);
+        $('algoSelect').addEventListener('change', reset);
+
+        $('spd').oninput = function () {
+            if (playing) {
+                clearInterval(timer);
+                timer = setInterval(playNext, 1700 - parseInt(this.value));
+            }
+        };
+
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+
+        // Init
+        reset();
+    </script>
+</body>
+
+</html>

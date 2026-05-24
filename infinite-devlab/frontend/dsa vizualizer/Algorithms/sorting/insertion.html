@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Insertion Sort Visualizer — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@400;500;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)',
+                            accent2: 'var(--accent2)', yellow: 'var(--devlab-yellow)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Poppins', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════════
+       TOKENS (INFINITE DEVLAB THEME - INDIGO VARIANT)
+    ═══════════════════════════════════════════ */
+        :root {
+            --bg: #0B0F19;
+            --surf: #111827;
+            --border: #1F2937;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --accent: #6366F1;
+            /* Indigo Variant for Algorithms */
+            --accent2: #4F46E5;
+            --devlab-yellow: #FBBF24;
+            --nav-height: 70px;
+        }
+
+        html.light {
+            --bg: #F3F4F6;
+            --surf: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #111827;
+            --muted: #4B5563;
+            --accent: #4F46E5;
+            --accent2: #4338CA;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background .35s, color .35s;
+        }
+
+        /* Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(99, 102, 241, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(99, 102, 241, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════
+       GLOBAL NAVBAR
+    ═══════════════════════════════════════════ */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-infinite {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-devlab {
+            font-family: var(--font-ui);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--devlab-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .nav-links a {
+            font-family: var(--font-ui);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-login {
+            font-family: var(--font-ui);
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: var(--surf);
+        }
+
+        .btn-register {
+            font-family: var(--font-ui);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-register:hover {
+            background: var(--accent2);
+        }
+
+        /* Theme Toggle */
+        .th-btn {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surf);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .th-btn .kn {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        html.light .th-btn .kn {
+            transform: translateX(18px);
+            background: var(--accent);
+        }
+
+        @media (max-width: 950px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .btn-login,
+            .btn-register {
+                display: none;
+            }
+
+            .global-nav {
+                padding: 0 12px;
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+       VISUALIZER SPECIFICS
+    ═══════════════════════════════════════════ */
+        .bar-visual {
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        #divider {
+            position: absolute;
+            bottom: 0;
+            top: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: left 0.3s ease, opacity 0.3s;
+            z-index: 10;
+        }
+
+        #divider.visible {
+            opacity: 0.6;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Fixed Opacity utility classes for custom hex variables (Mapped to Indigo: 99, 102, 241) */
+        .bg-theme-accent-10 {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .bg-theme-accent-20 {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .bg-theme-accent-30 {
+            background-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .border-theme-accent-60 {
+            border-color: rgba(99, 102, 241, 0.6);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300 pt-[70px]">
+    <div class="aurora"></div>
+
+    <!-- GLOBAL NAVBAR -->
+    <!-- <nav class="global-nav">
+        <div class="nav-left">
+            <a href="#" class="logo-link">
+                <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+                </svg>
+                <span class="logo-infinite">INFINITE</span>
+                <span class="logo-devlab">DEVLAB</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">CSS Lab</a>
+                <a href="#">Codebreaker</a>
+                <a href="#" class="active">DSA Visualizer</a>
+                <a href="#">Problem Solver</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-login">Login</button>
+            <button class="btn-register">Register</button>
+            <button class="th-btn" id="thbtn" aria-label="Toggle theme">
+                <span class="kn" id="thkn">🌙</span>
+            </button>
+        </div>
+    </nav> -->
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <a href="#"
+                    class="inline-flex items-center gap-2 text-theme-muted hover:text-theme-accent text-sm font-semibold mb-4 transition-colors">
+                    <span>←</span> Back to Algorithms
+                </a>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Sorting Algorithm
+                    · In-Place</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none">INSERTION <span
+                        class="text-theme-accent">SORT</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl font-medium leading-relaxed">Watch how the 'key'
+                    element searches for its correct position in the sorted left subarray.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <button id="btn-gen"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all">↺
+                    Randomize</button>
+                <button id="btn-run"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-white hover:bg-theme-accent2 transition-all shadow-[0_0_10px_rgba(99,102,241,0.2)]">▶
+                    Run C++ Logic</button>
+                <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="50" max="800" value="400" step="50" class="w-24 h-1" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-comp" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1 font-bold">Cmp</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-shift" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1 font-bold">Shift</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent-10"></div>
+                            <span class="text-theme-muted font-medium">Unsorted (Fixed Visibility)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-theme-accent-60 bg-theme-accent-30"></div>
+                            <span class="text-theme-text font-semibold">Sorted Portion</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(99,102,241,0.6)]"></div>
+                            <span class="text-theme-accent font-bold">Active Key Element</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider">
+                    Ready to sort</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6 bg-theme-bg">
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-6 h-[340px] flex items-end justify-center gap-2 relative overflow-hidden shadow-inner">
+                    <div id="divider"></div>
+                    <div id="key-display"
+                        class="absolute top-4 left-4 flex items-center gap-3 font-code text-xs text-theme-muted opacity-0 transition-opacity duration-300">
+                        <span class="font-bold">Current key:</span>
+                        <div id="key-box"
+                            class="w-10 h-10 rounded border border-theme-accent text-theme-accent flex items-center justify-center font-bold bg-theme-accent-20 shadow-sm">
+                            —
+                        </div>
+                    </div>
+                    <div id="bar-container"
+                        class="flex items-end justify-center gap-2 w-full h-full pt-12 pb-2 relative z-20">
+                    </div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div id="p1" class="px-2 py-0.5 rounded transition-all"><span class="text-pink-400">void</span>
+                        <span class="text-theme-accent">insertionSort</span>(<span
+                            class="text-theme-accent">vector</span>&lt;<span class="text-pink-400">int</span>&gt;&amp;
+                        arr) {</div>
+                    <div id="p2" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">int</span> n = arr.size();</div>
+                    <div id="p3" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;<span
+                            class="text-pink-400">for</span> (<span class="text-pink-400">int</span> i = 1; i < n; i++)
+                            {</div>
+                            <div id="p4" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-pink-400">int</span> key = arr[i];</div>
+                            <div id="p5" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-pink-400">int</span> j = i - 1;</div>
+                            <div id="p6" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-pink-400">while</span> (j >= 0 && arr[j] > key) {</div>
+                            <div id="p7" class="px-2 py-0.5 rounded transition-all">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j + 1] = arr[j]; <span
+                                    class="text-theme-muted italic">// Shift right</span></div>
+                            <div id="p8" class="px-2 py-0.5 rounded transition-all">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j--;</div>
+                            <div id="p9" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div id="p10" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;arr[j + 1]
+                                = key; <span class="text-theme-muted italic">// Insert key</span></div>
+                            <div id="p11" class="px-2 py-0.5 rounded transition-all">&nbsp;&nbsp;}</div>
+                            <div id="p12" class="px-2 py-0.5 rounded transition-all">}</div>
+                </section>
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent-20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent-20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let A = [], els = [], N = 12, spd = 400, running = false, comps = 0, shifts = 0;
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent-10', 'border-theme-accent', 'text-theme-accent');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function genData() {
+            if (running) return;
+            A = []; els = []; comps = 0; shifts = 0;
+            $('s-comp').textContent = '0'; $('s-shift').textContent = '0';
+            const container = $('bar-container');
+            container.innerHTML = '';
+            $('key-display').style.opacity = '0';
+
+            for (let i = 0; i < N; i++) {
+                let val = Math.floor(Math.random() * 75) + 15;
+                A.push(val);
+                const wrap = document.createElement('div');
+                wrap.className = 'flex flex-col items-center justify-end w-full h-full relative';
+                const bar = document.createElement('div');
+
+                bar.className = 'bar-visual w-full bg-theme-accent-10 border-2 border-slate-500 rounded-t-md flex justify-center pt-1';
+                bar.style.height = `${val}%`;
+
+                const lbl = document.createElement('div');
+                lbl.className = 'bar-val absolute -top-6 font-code text-[0.7rem] font-bold text-theme-text opacity-70';
+                lbl.textContent = val;
+
+                bar.appendChild(lbl); wrap.appendChild(bar); container.appendChild(wrap);
+                els.push({ wrap, bar, lbl });
+            }
+            setSpill('idle', 'READY TO SORT'); hl(null);
+        }
+
+        function setBarState(index, state) {
+            const b = els[index].bar; const l = els[index].lbl;
+            b.className = 'bar-visual w-full border-2 rounded-t-md flex justify-center pt-1';
+            l.className = 'bar-val absolute -top-6 font-code text-[0.7rem] font-bold';
+
+            if (state === 'sorted') {
+                b.classList.add('bg-theme-accent-30', 'border-theme-accent-60');
+                l.classList.add('text-theme-text');
+            } else if (state === 'key') {
+                b.classList.add('bg-theme-accent', 'border-theme-accent', 'shadow-[0_0_20px_rgba(99,102,241,0.6)]', '-translate-y-3');
+                l.classList.add('text-white', 'scale-110');
+            } else if (state === 'compare') {
+                b.classList.add('bg-theme-bg', 'border-white', 'scale-105');
+                l.classList.add('text-theme-text');
+            } else if (state === 'shifting') {
+                b.classList.add('bg-theme-accent-20', 'border-theme-accent', 'translate-x-1');
+                l.classList.add('text-theme-accent');
+            } else {
+                b.classList.add('bg-theme-accent-10', 'border-slate-500');
+                l.classList.add('text-theme-text', 'opacity-70');
+            }
+        }
+
+        async function insertionSort() {
+            if (running) return; running = true;
+            $('btn-gen').disabled = true; $('btn-run').disabled = true;
+            setSpill('run', 'SORTING...');
+            setBarState(0, 'sorted');
+
+            hl('p3'); await sleep(spd);
+
+            for (let i = 1; i < N; i++) {
+                hl('p4'); setBarState(i, 'key');
+                let keyVal = A[i];
+                let keyH = els[i].bar.style.height; let keyL = els[i].lbl.textContent;
+                $('key-display').style.opacity = '1'; $('key-box').textContent = keyVal;
+                await sleep(spd);
+
+                hl('p5'); let j = i - 1; await sleep(spd / 2);
+
+                while (j >= 0 && A[j] > keyVal) {
+                    hl('p6'); setBarState(j, 'compare');
+                    comps++; $('s-comp').textContent = comps;
+                    await sleep(spd);
+
+                    hl('p7'); setBarState(j, 'shifting');
+                    A[j + 1] = A[j];
+                    els[j + 1].bar.style.height = els[j].bar.style.height;
+                    els[j + 1].lbl.textContent = els[j].lbl.textContent;
+                    setBarState(j + 1, 'sorted');
+                    shifts++; $('s-shift').textContent = shifts;
+                    await sleep(spd);
+
+                    hl('p8'); j--; await sleep(spd / 2);
+                }
+
+                if (j >= 0) {
+                    setBarState(j, 'compare');
+                    comps++; $('s-comp').textContent = comps;
+                    await sleep(spd);
+                    setBarState(j, 'sorted');
+                }
+
+                hl('p10'); A[j + 1] = keyVal;
+                els[j + 1].bar.style.height = keyH; els[j + 1].lbl.textContent = keyL;
+                setBarState(j + 1, 'key'); await sleep(spd);
+                for (let k = 0; k <= i; k++) setBarState(k, 'sorted');
+            }
+            hl(null); setSpill('found', 'DONE ✓');
+            $('key-display').style.opacity = '0'; running = false;
+            $('btn-gen').disabled = false; $('btn-run').disabled = false;
+        }
+
+        $('btn-gen').onclick = genData;
+        $('btn-run').onclick = insertionSort;
+        $('spd').oninput = function () { spd = 1000 - parseInt(this.value); };
+
+        /* Theme Engine Integration */
+        (function () {
+            const html = document.documentElement, btn = document.getElementById('thbtn'), kn = document.getElementById('thkn');
+            function set(l) { html.classList.toggle('light', l); kn.textContent = l ? '☀️' : '🌙'; localStorage.setItem('idl_theme', l ? 'l' : 'd') }
+            set(localStorage.getItem('idl_theme') === 'l');
+            btn.addEventListener('click', () => set(!html.classList.contains('light')));
+        })();
+
+        genData();
+    </script>
+</body>
+
+</html>

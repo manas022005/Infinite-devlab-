@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Problem Solver — Infinite DevLab</title>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  /* Infinite DevLab Global Theme Variables */
+  --bg: #0B0F19; 
+  --surf: #111827; 
+  --surf2: #1F2937; 
+  --border: #1F2937;
+  --border2: #374151;
+  --text: #F9FAFB;
+  --muted: #9CA3AF;
+  --muted2: #4B5563;
+  
+  /* Primary Blues & Teals */
+  --accent: #3B82F6; 
+  --accent2: #2563EB; 
+  --accentB: rgba(59, 130, 246, 0.1); 
+  --teal-accent: #2DD4BF;
+  --devlab-yellow: #FBBF24;
+
+  /* Solver Specific Variables (Mapped to DevLab Theme) */
+  --bg2: var(--surf);
+  --bg3: var(--surf2);
+  --panel: var(--surf);
+  --blue: var(--accent);
+  --blue-dim: rgba(59, 130, 246, 0.15);
+  --blue-glow: rgba(59, 130, 246, 0.3);
+  --teal: var(--teal-accent);
+  --teal-dim: rgba(45, 212, 191, 0.15);
+  --amber: var(--devlab-yellow);
+  --amber-dim: rgba(251, 191, 36, 0.15);
+  --violet: #8B5CF6;
+  --violet-dim: rgba(139, 92, 246, 0.15);
+  --red: #F87171;
+  --red-dim: rgba(248, 113, 113, 0.15);
+  --pink: #EC4899;
+  --pink-dim: rgba(236, 72, 153, 0.15);
+  --text2: #D1D5DB;
+  --text3: #9CA3AF;
+
+  /* Fonts & Layout */
+  --F1: 'Bebas Neue', sans-serif;
+  --F2: 'Poppins', sans-serif;
+  --F3: 'JetBrains Mono', monospace;
+  --nav-height: 70px;
+}
+
+/* Basic Light Mode Support */
+html.light {
+  --bg: #F3F4F6;
+  --surf: #FFFFFF;
+  --surf2: #F9FAFB;
+  --border: #E5E7EB;
+  --border2: #D1D5DB;
+  --text: #111827;
+  --muted: #4B5563;
+  --text2: #4B5563;
+  --text3: #6B7280;
+  --accent: #2563EB;
+  --teal-accent: #0D9488;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; overflow:hidden; }
+body { 
+  height:100%; 
+  overflow:hidden; 
+  background:var(--bg); 
+  color:var(--text); 
+  font-family:var(--F2); 
+  font-size:14px; 
+  line-height:1.65; 
+}
+
+/* Subtle Grid Background */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(59, 130, 246, .03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, .03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none; z-index:0;
+}
+body::after {
+  content:''; position:fixed; inset:0;
+  background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+/* ════════════════ GLOBAL NAVBAR ════════════════ */
+/* .global-nav {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: var(--nav-height); background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 1000;
+}
+.nav-left { display: flex; align-items: center; gap: 20px; }
+.logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-infinite { font-family: var(--F2); font-weight: 800; font-size: 1.25rem; color: var(--text); letter-spacing: -0.5px; }
+.logo-devlab { font-family: var(--F2); font-weight: 800; font-size: 1.25rem; color: var(--devlab-yellow); letter-spacing: -0.5px; }
+
+.nav-links { display: flex; gap: 24px; align-items: center; margin-left: 10px; }
+.nav-links a { font-family: var(--F2); text-decoration: none; font-size: 0.9rem; font-weight: 500; color: var(--text); transition: color 0.2s; }
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
+
+.nav-right { display: flex; gap: 16px; align-items: center; }
+.btn-login { font-family: var(--F2); background: transparent; color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: 0.2s; cursor: pointer; }
+.btn-login:hover { background: var(--surf2); }
+.btn-register { font-family: var(--F2); background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: background 0.2s; cursor: pointer; }
+.btn-register:hover { background: var(--accent2); }
+
+.th-btn { position: relative; width: 44px; height: 24px; border-radius: 20px; border: 1px solid var(--border); background: var(--surf2); flex-shrink: 0; cursor: pointer; }
+.th-btn .kn { position: absolute; top: 2px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--text); display: flex; align-items: center; justify-content: center; font-size: 10px; transition: transform 0.3s; }
+html.light .th-btn .kn { transform: translateX(18px); background: var(--accent); } */
+
+@media (max-width: 950px) { .nav-links { display: none; } }
+@media (max-width: 600px) { .btn-login, .btn-register { display: none; } .global-nav { padding: 0 12px; } }
+
+
+/* ════════════════ SOLVER SHELL ════════════════ */
+.shell {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  height: calc(100vh - var(--nav-height));
+  margin-top: var(--nav-height);
+  overflow: hidden;
+  position: relative; z-index:1;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
+}
+
+.sb-section { padding: 18px 16px 10px; border-bottom: 1px solid var(--border); }
+.sb-label {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); font-family: var(--F3); font-weight: 700;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.sb-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.pattern-list { display: flex; flex-direction: column; gap: 4px; }
+.pattern-chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 6px; border: 1px solid transparent;
+  cursor: pointer; transition: all .15s;
+  font-family: var(--F2); font-size: 0.85rem; font-weight: 500; color: var(--text2);
+}
+.pattern-chip:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+.pattern-chip.active { background: var(--blue-dim); border-color: rgba(59,130,246,.3); color: var(--blue); }
+.pattern-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink:0; }
+
+.history-list { flex:1; overflow-y:auto; padding:10px 16px; scrollbar-width:thin; scrollbar-color: var(--border) transparent; }
+.history-item {
+  padding: 10px 12px; border-radius: 6px; border-left: 2px solid var(--border2);
+  margin-bottom: 8px; cursor: pointer; transition: all .15s;
+  font-size: 0.8rem; color: var(--text2); line-height: 1.5; font-family: var(--F2);
+}
+.history-item:hover { border-left-color: var(--blue); color: var(--text); background: var(--surf2); }
+.history-item .hi-tag { font-size: 0.65rem; color: var(--text3); margin-bottom: 4px; font-family: var(--F3); }
+
+.sb-footer { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.sb-btn {
+  flex:1; padding:8px 8px; border-radius:6px; border:1px solid var(--border2);
+  background:transparent; color:var(--text2);
+  font-family: var(--F2); font-size:0.8rem; font-weight:600;
+  cursor:pointer; transition:all .15s; text-align:center;
+}
+.sb-btn:hover { background:var(--bg3); color:var(--text); border-color:var(--text3); }
+.sb-btn.danger:hover { border-color:var(--red); color:var(--red); background:var(--red-dim); }
+
+/* Main Area */
+.main { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; background: transparent; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 26px; height: 56px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0; background: var(--bg2);
+}
+.tb-left { display:flex; align-items:center; gap:18px; }
+.tb-breadcrumb { display:flex; align-items:center; gap:6px; font-family: var(--F2); font-size:13px; color:var(--text3); font-weight: 500; }
+.tb-breadcrumb .sep { color:var(--border2); }
+.tb-breadcrumb .active { color:var(--blue); font-weight:600; }
+.tb-phase-track { display:flex; align-items:center; gap:5px; }
+.phase-pip { width:30px; height:4px; border-radius:2px; background:var(--border2); transition: background .3s; cursor:default; }
+.phase-pip.done { background:var(--blue); }
+.phase-pip.current { background:var(--blue); box-shadow:0 0 10px var(--blue-glow); animation: pipPulse 1.5s ease-in-out infinite; }
+@keyframes pipPulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+.tb-right { display:flex; align-items:center; gap:8px; }
+.tb-badge { padding:4px 12px; border-radius:4px; font-family: var(--F3); font-size:10px; font-weight:700; letter-spacing:1px; border:1px solid; }
+.tb-badge.blue { background:var(--blue-dim); border-color:rgba(59,130,246,.35); color:var(--blue); }
+.tb-badge.amber { background:var(--amber-dim); border-color:rgba(251,191,36,.35); color:var(--amber); }
+.tb-badge.teal { background:var(--teal-dim); border-color:rgba(45,212,191,.35); color:var(--teal); }
+.tb-badge.violet { background:var(--violet-dim); border-color:rgba(139,92,246,.35); color:var(--violet); }
+.tb-badge.red { background:var(--red-dim); border-color:rgba(248,113,113,.35); color:var(--red); }
+.tb-badge.pink { background:var(--pink-dim); border-color:rgba(236,72,153,.35); color:var(--pink); }
+
+.tb-icon-btn {
+  width:34px; height:34px; border-radius:6px; border:1px solid var(--border2); background:transparent;
+  color:var(--text2); font-size:15px; cursor:pointer; display:grid; place-items:center; transition:all .15s;
+}
+.tb-icon-btn:hover { background:var(--bg3); color:var(--text); border-color:var(--text3); }
+
+/* Canvas Area */
+.canvas-area { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 26px; display: block; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.canvas-area > * + * { margin-top: 18px; }
+.canvas-area::-webkit-scrollbar { width:6px; }
+.canvas-area::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+/* Welcome Screen */
+.welcome-canvas { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:26px; padding:40px 20px; animation: fadeUp .5s ease both; }
+.wc-terminal {
+  font-family: var(--F3); font-size:0.8rem; color:var(--text3); border:1px solid var(--border); border-radius:8px;
+  padding:20px 26px; background:var(--bg2); text-align:left; max-width:480px; width:100%; position:relative; overflow:hidden;
+}
+.wc-terminal::before { content:''; position:absolute; top:0; left:0; right:0; height:30px; background:var(--bg3); border-bottom:1px solid var(--border); }
+.wc-terminal .t-dots { position:absolute; top:10px; left:14px; display:flex; gap:6px; }
+.wc-terminal .t-dots span { width:10px;height:10px;border-radius:50%; }
+.wc-terminal .t-content { margin-top:24px; }
+.wc-terminal .t-line { margin:6px 0; }
+.wc-terminal .t-line .prompt { color:var(--blue); }
+.wc-terminal .t-line .cmd { color:var(--text); }
+.wc-terminal .t-line .out { color:var(--text2); }
+.wc-terminal .t-line .hi { color:var(--teal); }
+.wc-terminal .cursor { display:inline-block; width:8px; height:14px; background:var(--blue); animation: blink .8s steps(1) infinite; vertical-align:middle; }
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+.wc-title { font-family: var(--F1); font-size:3rem; letter-spacing:2px; color:var(--text); line-height: 1; }
+.wc-title em { color:var(--teal); font-style:normal; }
+.wc-sub { font-size:0.9rem; color:var(--text2); max-width:480px; line-height:1.8; }
+.wc-chips { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:540px; }
+.wc-chip { padding:8px 16px; border-radius:6px; border:1px solid var(--border2); background:var(--bg2); font-size:0.8rem; cursor:pointer; transition:all .18s; color:var(--text2); font-weight:500; }
+.wc-chip:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+
+/* Canvas Cards */
+.canvas-card { border-radius:10px; border:1px solid var(--border); background:var(--panel); overflow:hidden; animation: fadeUp .35s ease both; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.card-header { display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--border); background:var(--bg3); }
+.card-header .ch-icon { font-size:16px; }
+.card-header .ch-title { font-family: var(--F2); font-weight:600; font-size:0.85rem; letter-spacing:0.5px; text-transform:uppercase; }
+.card-header .ch-num { font-family: var(--F3); font-size:0.75rem; color:var(--text3); margin-left:auto; border:1px solid var(--border2); border-radius:4px; padding:2px 8px; }
+.card-body { padding:20px; }
+
+.card-user { border-color:rgba(45,212,191,.25); }
+.card-user .card-header { background:var(--teal-dim); border-color:rgba(45,212,191,.2); }
+.card-user .card-header .ch-title { color:var(--teal); }
+.card-user .card-body { font-size:0.9rem; color:var(--text); line-height:1.75; }
+
+.card-steps { border-color:rgba(59,130,246,.22); }
+.card-steps .card-header { border-color:rgba(59,130,246,.22); }
+.card-steps .card-header .ch-title { color:var(--blue); }
+
+.card-pattern { border-color:rgba(139,92,246,.22); }
+.card-pattern .card-header { background:var(--violet-dim); border-color:rgba(139,92,246,.22); }
+.card-pattern .card-header .ch-title { color:var(--violet); }
+
+.card-arch { border-color:rgba(251,191,36,.22); }
+.card-arch .card-header { background:var(--amber-dim); border-color:rgba(251,191,36,.22); }
+.card-arch .card-header .ch-title { color:var(--amber); }
+
+/* Internal Card UI */
+.step-item { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--border); animation:fadeUp .3s ease both; }
+.step-item:last-child { border-bottom:none; padding-bottom:0; }
+.step-num-wrap { display:flex; flex-direction:column; align-items:center; gap:0; flex-shrink:0; }
+.step-num { width:30px; height:30px; border-radius:50%; border:1px solid var(--blue); display:grid; place-items:center; font-size:0.8rem; font-weight:700; color:var(--blue); background:var(--blue-dim); font-family: var(--F3); }
+.step-connector { width:1px; flex:1; min-height:16px; background:var(--border2); margin:4px 0; }
+.step-content { flex:1; padding-top:4px; }
+.step-title { font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:6px; }
+.step-desc { font-size:0.85rem; color:var(--text2); line-height:1.65; }
+.step-tag { display:inline-block; margin-top:8px; padding:4px 10px; border-radius:4px; font-size:0.65rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; font-family: var(--F3); }
+
+.pattern-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.pattern-block { border-radius:8px; padding:14px 16px; border:1px solid; position:relative; overflow:hidden; }
+.pattern-block::before { content:''; position:absolute; top:0; left:0; bottom:0; width:4px; }
+.pb-name { font-weight:600; font-size:0.9rem; margin-bottom:6px; }
+.pb-desc { font-size:0.8rem; color:var(--text2); line-height:1.55; }
+.pb-confidence { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:0.65rem; color:var(--text3); font-family: var(--F3); letter-spacing:1px; text-transform:uppercase; }
+.pb-bar { flex:1; height:4px; background:var(--border2); border-radius:2px; overflow:hidden; }
+.pb-fill { height:100%; border-radius:2px; transition: width .6s ease; }
+.pb-pct { font-weight:700; min-width:30px; text-align:right; }
+
+.pb-blue { border-color:rgba(59,130,246,.25); background:linear-gradient(135deg,rgba(59,130,246,.06),transparent); }
+.pb-blue::before { background:var(--blue); } .pb-blue .pb-name { color:var(--blue); } .pb-blue .pb-fill { background:var(--blue); } .pb-blue .pb-pct { color:var(--blue); }
+.pb-teal { border-color:rgba(45,212,191,.25); background:linear-gradient(135deg,rgba(45,212,191,.06),transparent); }
+.pb-teal::before { background:var(--teal); } .pb-teal .pb-name { color:var(--teal); } .pb-teal .pb-fill { background:var(--teal); } .pb-teal .pb-pct { color:var(--teal); }
+.pb-amber { border-color:rgba(251,191,36,.25); background:linear-gradient(135deg,rgba(251,191,36,.06),transparent); }
+.pb-amber::before { background:var(--amber); } .pb-amber .pb-name { color:var(--amber); } .pb-amber .pb-fill { background:var(--amber); } .pb-amber .pb-pct { color:var(--amber); }
+.pb-violet { border-color:rgba(139,92,246,.25); background:linear-gradient(135deg,rgba(139,92,246,.06),transparent); }
+.pb-violet::before { background:var(--violet); } .pb-violet .pb-name { color:var(--violet); } .pb-violet .pb-fill { background:var(--violet); } .pb-violet .pb-pct { color:var(--violet); }
+.pb-red { border-color:rgba(248,113,113,.25); background:linear-gradient(135deg,rgba(248,113,113,.06),transparent); }
+.pb-red::before { background:var(--red); } .pb-red .pb-name { color:var(--red); } .pb-red .pb-fill { background:var(--red); } .pb-red .pb-pct { color:var(--red); }
+
+.arch-map { display:flex; flex-direction:column; gap:10px; }
+.arch-phase { display:flex; align-items:stretch; border-radius:8px; overflow:hidden; border:1px solid var(--border2); }
+.arch-phase-label { width:120px; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:12px 10px; font-family: var(--F3); font-size:0.7rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:center; border-right:1px solid var(--border2); background:var(--bg3); color:var(--text3); }
+.arch-phase-body { flex:1; padding:12px 16px; font-size:0.85rem; color:var(--text2); line-height:1.6; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.arch-token { padding:4px 12px; border-radius:4px; font-size:0.75rem; font-weight:600; font-family: var(--F3); border:1px solid; }
+.arch-arrow { color:var(--text3); font-size:15px; }
+
+.complexity-row { display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+.cx-box { flex:1; min-width:140px; border-radius:8px; padding:14px 18px; border:1px solid var(--border2); background:var(--bg3); text-align:center; }
+.cx-label { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:1.5px; font-family: var(--F3); margin-bottom:6px; }
+.cx-value { font-family: var(--F3); font-size:1.3rem; font-weight:700; }
+.cx-note { font-size:0.75rem; color:var(--text2); margin-top:4px; }
+
+.thinking-card { border-radius:10px; border:1px solid var(--border); background:var(--panel); padding:20px; animation:fadeUp .35s ease both; }
+.thinking-row { display:flex; align-items:center; gap:14px; }
+.thinking-dots { display:flex; gap:6px; }
+.tdot { width:8px; height:8px; border-radius:50%; background:var(--blue); animation:tdBounce 1.2s ease-in-out infinite; }
+.tdot:nth-child(2){animation-delay:.15s} .tdot:nth-child(3){animation-delay:.3s}
+@keyframes tdBounce { 0%,60%,100%{transform:translateY(0);opacity:.3} 30%{transform:translateY(-5px);opacity:1} }
+.thinking-text { font-size:0.9rem; color:var(--text2); }
+.thinking-phase { margin-left:auto; font-family: var(--F3); font-size:0.7rem; color:var(--blue); opacity:.8; }
+
+/* Input Zone */
+.input-zone { border-top:1px solid var(--border); background:var(--bg2); padding:20px 26px 24px; flex-shrink:0; }
+.input-label { font-size:0.7rem; color:var(--text3); letter-spacing:2px; text-transform:uppercase; font-family: var(--F3); margin-bottom:10px; display:flex; align-items:center; gap:8px; font-weight:700; }
+.input-label .il-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); animation: blink .8s steps(1) infinite; }
+.input-frame { border:1px solid var(--border2); border-radius:10px; background:var(--bg3); transition: border-color .2s, box-shadow .2s; overflow:hidden; }
+.input-frame:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.15); }
+.input-top { display:flex; align-items:flex-end; gap:12px; padding:14px 18px 12px; }
+.input-prompt { color:var(--blue); font-size:1.1rem; flex-shrink:0; padding-bottom:3px; font-family: var(--F3); }
+#problemInput { flex:1; background:transparent; border:none; outline:none; color:var(--text); font-family: var(--F2); font-size:0.9rem; resize:none; min-height:24px; max-height:120px; line-height:1.65; scrollbar-width:none; }
+#problemInput::placeholder { color:var(--text3); }
+.send-btn { width:42px; height:42px; border-radius:8px; border:none; background:var(--accent); color:#fff; cursor:pointer; display:grid; place-items:center; font-size:18px; flex-shrink:0; transition:all .2s; font-family: var(--F2); font-weight:bold; }
+.send-btn:hover { background:var(--accent2); transform:translateY(-1px); }
+.send-btn:disabled { opacity:.5; cursor:default; transform:none; }
+
+.input-actions { display:flex; gap:8px; padding:10px 18px 12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.ia-btn { padding:6px 14px; border-radius:6px; font-family: var(--F2); font-size:0.75rem; font-weight:600; cursor:pointer; transition:all .15s; border:1px solid; white-space:nowrap; background:transparent; }
+.ia-btn.blue { border-color:var(--border2); color:var(--blue); }
+.ia-btn.violet { border-color:var(--border2); color:var(--violet); }
+.ia-btn.amber { border-color:var(--border2); color:var(--amber); }
+.ia-btn.teal { border-color:var(--border2); color:var(--teal); }
+.ia-btn.red { border-color:var(--border2); color:var(--red); }
+.ia-btn:hover { background:var(--surf); border-color:currentColor; }
+
+.input-hints-row { display:flex; gap:16px; align-items:center; padding:8px 18px 0; font-size:0.7rem; color:var(--text3); font-family: var(--F3); }
+.kbd { padding:2px 6px; border:1px solid var(--border2); border-radius:4px; background:var(--bg); font-family: var(--F3); font-size:0.65rem; }
+
+/* Markdown Styles */
+.md h3 { font-family: var(--F1); font-size:1.2rem; color:var(--blue); margin:16px 0 8px; letter-spacing:0.5px;}
+.md h3:first-child { margin-top:0; }
+.md strong { color:var(--text); font-weight:600; }
+.md em { color:var(--text2); font-style:italic; }
+.md code { font-family: var(--F3); background:var(--bg); border:1px solid var(--border2); padding:2px 6px; border-radius:4px; font-size:0.8rem; color:var(--teal); }
+.md pre { background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:14px; overflow-x:auto; margin:10px 0; }
+.md pre code { background:none; border:none; padding:0; color:var(--text); }
+.md ul, .md ol { padding-left:22px; margin:8px 0; }
+.md li { margin:6px 0; color:var(--text2); font-size:0.85rem; }
+.md p { margin:8px 0; color:var(--text2); font-size:0.85rem; line-height:1.7; }
+.md blockquote { border-left:4px solid var(--blue); padding-left:14px; color:var(--text2); margin:12px 0; font-style:italic; }
+.md hr { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+@media(max-width:900px) {
+  .shell { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .canvas-area { padding:20px; }
+  .input-zone { padding:16px 20px 20px; }
+  .pattern-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<!-- 
+<nav class="global-nav">
+  <div class="nav-left">
+    <a href="#" class="logo-link">
+      <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
+      </svg>
+      <span class="logo-infinite">INFINITE</span> 
+      <span class="logo-devlab">DEVLAB</span>
+    </a>
+    
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">CSS Lab</a>
+      <a href="#">Codebreaker</a>
+      <a href="#">DSA Visualizer</a>
+      <a href="#" class="active">Problem Solver</a>
+    </div>
+  </div>
+  
+  <div class="nav-right">
+    <button class="btn-login">Login</button>
+    <button class="btn-register">Register</button>
+    <button class="th-btn" id="thbtn" aria-label="Toggle theme">
+      <span class="kn" id="thkn">🌙</span>
+    </button>
+  </div>
+</nav> -->
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="sb-section" style="padding-top: 24px;">
+      <div class="sb-label">Pattern Library</div>
+      <div class="pattern-list" id="patternLib">
+        <div class="pattern-chip" onclick="filterPattern('Sliding Window')"><span class="pattern-dot" style="background:var(--blue)"></span>Sliding Window</div>
+        <div class="pattern-chip" onclick="filterPattern('Two Pointers')"><span class="pattern-dot" style="background:var(--teal)"></span>Two Pointers</div>
+        <div class="pattern-chip" onclick="filterPattern('Binary Search')"><span class="pattern-dot" style="background:var(--amber)"></span>Binary Search</div>
+        <div class="pattern-chip" onclick="filterPattern('Dynamic Programming')"><span class="pattern-dot" style="background:var(--violet)"></span>Dynamic Programming</div>
+        <div class="pattern-chip" onclick="filterPattern('Graph / BFS / DFS')"><span class="pattern-dot" style="background:var(--red)"></span>Graph / BFS / DFS</div>
+        <div class="pattern-chip" onclick="filterPattern('Greedy')"><span class="pattern-dot" style="background:var(--pink)"></span>Greedy</div>
+        <div class="pattern-chip" onclick="filterPattern('Divide and Conquer')"><span class="pattern-dot" style="background:var(--blue)"></span>Divide &amp; Conquer</div>
+        <div class="pattern-chip" onclick="filterPattern('Backtracking')"><span class="pattern-dot" style="background:var(--teal)"></span>Backtracking</div>
+        <div class="pattern-chip" onclick="filterPattern('Segment Tree / BIT')"><span class="pattern-dot" style="background:var(--amber)"></span>Segment Tree / BIT</div>
+        <div class="pattern-chip" onclick="filterPattern('Heap / Priority Queue')"><span class="pattern-dot" style="background:var(--violet)"></span>Heap / Priority Queue</div>
+      </div>
+    </div>
+
+    <div class="sb-label" style="padding:16px 16px 4px; margin-bottom: 8px;">Problem History</div>
+    <div class="history-list" id="historyList">
+      <div style="color:var(--text3); font-size:0.8rem; padding:8px 10px;">No problems yet.</div>
+    </div>
+
+    <div class="sb-footer">
+      <button class="sb-btn" onclick="newSession()">+ New Canvas</button>
+      <button class="sb-btn danger" onclick="clearCanvas()">x Clear All</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="tb-breadcrumb">
+          <span>Blueprint AI</span>
+          <span class="sep">/</span>
+          <span class="active" id="tbPhaseLabel">Canvas</span>
+        </div>
+        <div class="tb-phase-track" id="phaseTrack">
+          <div class="phase-pip" title="Problem Intake"></div>
+          <div class="phase-pip" title="Step Decomposition"></div>
+          <div class="phase-pip" title="Pattern Detection"></div>
+          <div class="phase-pip" title="Architecture Map"></div>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div class="tb-badge blue" id="statusBadge">READY</div>
+        <button class="tb-icon-btn" onclick="copyLastOutput()" title="Copy last output">&#x229E;</button>
+        <button class="tb-icon-btn" onclick="clearCanvas()" title="Clear canvas">&#x2715;</button>
+      </div>
+    </div>
+
+    <div class="canvas-area" id="canvasArea">
+      <div class="welcome-canvas" id="welcomeScreen">
+        <div class="wc-terminal">
+          <div class="t-dots">
+            <span style="background:#ff5f56"></span>
+            <span style="background:#ffbd2e"></span>
+            <span style="background:#27c93f"></span>
+          </div>
+          <div class="t-content">
+            <div class="t-line"><span class="prompt">blueprint $</span> <span class="cmd">init --mode=cp-canvas</span></div>
+            <div class="t-line"><span class="out">&#x2713; Pattern engine loaded  </span><span class="hi">[10 algorithms]</span></div>
+            <div class="t-line"><span class="out">&#x2713; Step decomposer ready</span></div>
+            <div class="t-line"><span class="out">&#x2713; Architecture mapper   </span><span class="hi">[active]</span></div>
+            <div class="t-line"><span class="prompt">blueprint $</span> <span class="cursor"></span></div>
+          </div>
+        </div>
+        <div class="wc-title">DROP YOUR <em>PROBLEM</em></div>
+        <div class="wc-sub">Paste any competitive programming problem. Blueprint AI will break it into logical steps, detect algorithmic patterns, and map out the solution architecture — <em>before</em> you write a single line of code.</div>
+        <div class="wc-chips" id="welcomeChips">
+          <div class="wc-chip" onclick="useExample(this)">Find max subarray sum of size K</div>
+          <div class="wc-chip" onclick="useExample(this)">Shortest path in weighted graph</div>
+          <div class="wc-chip" onclick="useExample(this)">Count ways to climb N stairs</div>
+          <div class="wc-chip" onclick="useExample(this)">Find all permutations of string</div>
+          <div class="wc-chip" onclick="useExample(this)">Merge K sorted linked lists</div>
+          <div class="wc-chip" onclick="useExample(this)">Longest common subsequence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-zone">
+      <div class="input-label"><span class="il-dot"></span> Problem Input</div>
+      <div class="input-frame">
+        <div class="input-top">
+          <span class="input-prompt">&gt;_</span>
+          <textarea id="problemInput" rows="1" placeholder="Describe your problem or paste it here…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="submitProblem()" title="Analyze">&#x2191;</button>
+        </div>
+        <div class="input-actions">
+          <button class="ia-btn blue"   onclick="quickAction('decompose')">&#x229E; Decompose Steps</button>
+          <button class="ia-btn violet" onclick="quickAction('patterns')">&#x25C8; Detect Patterns</button>
+          <button class="ia-btn amber"  onclick="quickAction('arch')">&#x2B21; Architecture Map</button>
+          <button class="ia-btn teal"   onclick="quickAction('complexity')">&#x2211; Complexity</button>
+          <button class="ia-btn red"    onclick="quickAction('edge')">&#x26A0; Edge Cases</button>
+        </div>
+        <div class="input-hints-row">
+          <span><kbd class="kbd">Enter</kbd> analyze</span>
+          <span><kbd class="kbd">Shift+Enter</kbd> newline</span>
+          <span><kbd class="kbd">Tab</kbd> quick action</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* Theme Engine Integration */
+(function(){
+  const html=document.documentElement,btn=document.getElementById('thbtn'),kn=document.getElementById('thkn');
+  function set(l){
+    html.classList.toggle('light',l);
+    if (kn) kn.textContent=l?'☀️':'🌙';
+    localStorage.setItem('idl_theme',l?'l':'d');
+  }
+  set(localStorage.getItem('idl_theme')==='l');
+  if (btn) btn.addEventListener('click',()=>set(!html.classList.contains('light')));
+})();
+
+const API_KEYS = [
+  "AIzaSyBP3xmqGzH9eCP3Ve4e5wJLAVWRf840hMk", "AIzaSyAjRYZbeWtAxcq5t1m5mCmaXoXK1xZIKJo",
+  "AIzaSyBIqWFk5U3MYPfKeR3ocXp599v5U6eAzYA"
+];
+let currentKeyIndex = 0;
+
+function getActiveKey() { return API_KEYS[currentKeyIndex] || ""; }
+function rotateKey() {
+  if (API_KEYS.length <= 1) return false;
+  currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+  return true;
+}
+
+const QUOTA_ERROR_CODES = [429, 403, 503];
+const QUOTA_MESSAGES    = ["quota", "rate limit", "exhausted", "resource_exhausted", "too many", "limit exceeded"];
+function isQuotaError(status, message) {
+  if (QUOTA_ERROR_CODES.includes(status)) return true;
+  const msg = (message || "").toLowerCase();
+  return QUOTA_MESSAGES.some(kw => msg.includes(kw));
+}
+
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+let isGenerating = false;
+let sessionCount = 0;
+let currentProblem = "";
+let lastOutputText = "";
+let problemHistory = [];
+
+const SYSTEM = {
+  decompose: `You are Blueprint AI, an expert competitive programming coach and solution architect.
+The user will give you a CP problem. Your ONLY job is to break it into clear, logical sub-steps.
+
+Output format — respond with a JSON object ONLY, no markdown fences, no extra text:
+{
+  "problem_restate": "one-sentence restatement of the core task",
+  "difficulty": "Easy | Medium | Hard | Expert",
+  "steps": [
+    { "num": 1, "title": "Step title", "desc": "What to do and why", "tag": "Input Parsing | Core Logic | Optimization | Output" }
+  ],
+  "key_insight": "The single most important observation to solve this"
+}
+Be precise. Steps should be 4-8. Each step is a concrete algorithmic action, not vague advice.`,
+
+  patterns: `You are Blueprint AI's pattern recognition engine for competitive programming.
+Given a problem, identify which algorithmic patterns apply.
+
+Respond with JSON ONLY, no markdown, no extra text:
+{
+  "patterns": [
+    { "name": "Pattern Name", "confidence": 90, "reason": "Why this pattern fits in one sentence", "color": "blue|teal|amber|violet|red|pink" }
+  ],
+  "primary": "The single best pattern to use",
+  "anti_patterns": ["Patterns that seem applicable but are wrong and why"]
+}
+List 2-5 patterns ordered by confidence. Be specific.`,
+
+  arch: `You are Blueprint AI's solution architecture planner for competitive programming.
+Map out the complete solution structure before any code is written.
+
+Respond with JSON ONLY, no markdown, no extra text:
+{
+  "phases": [
+    { "name": "Phase name", "components": ["component1", "component2"], "note": "brief note" }
+  ],
+  "data_structures": ["DS1", "DS2"],
+  "time_complexity": "O(...)",
+  "space_complexity": "O(...)",
+  "complexity_note": "brief justification",
+  "pseudocode_outline": "3-5 line high-level pseudocode"
+}`,
+
+  complexity: `You are Blueprint AI's complexity analyzer for competitive programming.
+Analyze the problem and provide detailed complexity analysis.
+
+Respond with JSON ONLY:
+{
+  "time": "O(...)",
+  "space": "O(...)",
+  "time_explanation": "step by step why",
+  "space_explanation": "why this space is needed",
+  "bottleneck": "the slowest part of the solution",
+  "can_optimize": true,
+  "optimization_hint": "hint at a better approach if possible, else null"
+}`,
+
+  edge: `You are Blueprint AI's edge case detector for competitive programming.
+Given a problem, identify all edge cases and tricky inputs.
+
+Respond with JSON ONLY:
+{
+  "edge_cases": [
+    { "case": "Edge case description", "why_tricky": "why it breaks naive solutions", "severity": "Critical|Important|Minor" }
+  ],
+  "constraints_to_check": ["constraint 1", "constraint 2"],
+  "test_cases": [
+    { "input": "sample input", "expected": "expected output", "label": "Edge case label" }
+  ]
+}`
+};
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitProblem(); }
+}
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+function useExample(el) {
+  const input = document.getElementById("problemInput");
+  input.value = el.textContent;
+  autoResize(input);
+  input.focus();
+}
+function filterPattern(name) {
+  const input = document.getElementById("problemInput");
+  if (!input.value.trim()) {
+    input.value = `Explain the ${name} pattern and give a typical CP problem that uses it.`;
+    autoResize(input);
+    input.focus();
+  }
+}
+
+function quickAction(type) {
+  const input = document.getElementById("problemInput");
+  const problem = input.value.trim() || currentProblem;
+  if (!problem) { flashInput(); return; }
+  currentProblem = problem;
+  runPhase(type, problem);
+}
+
+function flashInput() {
+  const frame = document.querySelector(".input-frame");
+  frame.style.borderColor = "var(--red)";
+  frame.style.boxShadow = "0 0 0 3px var(--red-dim)";
+  setTimeout(() => { frame.style.borderColor = ""; frame.style.boxShadow = ""; }, 800);
+}
+
+async function submitProblem() {
+  if (isGenerating) return;
+  const input = document.getElementById("problemInput");
+  const text = input.value.trim();
+  if (!text) { flashInput(); return; }
+  if (!getActiveKey()) { appendErrorCard("No API key configured."); return; }
+
+  const welcome = document.getElementById("welcomeScreen");
+  if (welcome) welcome.remove();
+
+  currentProblem = text;
+  input.value = "";
+  input.style.height = "auto";
+
+  addToHistory(text);
+  sessionCount++;
+
+  appendProblemCard(text, sessionCount);
+
+  // Save progress and history to the database
+  const token = localStorage.getItem("token");
+  if (token) {
+    fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ module: 'problem-solver', level: sessionCount, score: sessionCount * 20 })
+    }).catch(err => console.error(err));
+    
+    fetch('/api/history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ 
+        action: 'Solved CP Problem', 
+        detail: `Analyzed CP problem: "${text.slice(0, 60)}${text.length > 60 ? '...' : ''}"` 
+      })
+    }).catch(err => console.error(err));
+  }
+
+  await runPhase("decompose", text);
+  await runPhase("patterns", text);
+  await runPhase("arch", text);
+}
+
+async function callGeminiWithRotation(systemPrompt, userMsg) {
+  let attemptsLeft = API_KEYS.length;
+
+  while (attemptsLeft > 0) {
+    const key = getActiveKey();
+    if (!key) break;
+
+    const response = await fetch(`${GEMINI_URL}?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: "user", parts: [{ text: userMsg }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 }
+      })
+    });
+
+    if (response.ok) return await response.json();
+
+    let errBody = {};
+    try { errBody = await response.json(); } catch(e) {}
+    const errMsg = errBody?.error?.message || "";
+
+    if (isQuotaError(response.status, errMsg)) {
+      const rotated = rotateKey();
+      attemptsLeft--;
+      if (!rotated || attemptsLeft <= 0) throw new Error("All API keys have reached their quota limit. Please try again later.");
+      continue;
+    }
+
+    throw new Error(errMsg || `HTTP ${response.status}`);
+  }
+
+  throw new Error("No available API keys. Please check your configuration.");
+}
+
+async function runPhase(type, problem) {
+  if (isGenerating) return;
+  if (!problem) { problem = currentProblem; }
+  if (!problem) return;
+
+  isGenerating = true;
+  document.getElementById("sendBtn").disabled = true;
+  setStatus("ANALYZING", "amber");
+
+  const thinkId = appendThinking(type);
+
+  const phaseNames = { decompose:"Step Decomposition", patterns:"Pattern Detection", arch:"Architecture Map", complexity:"Complexity Analysis", edge:"Edge Cases" };
+  updatePhaseLabel(phaseNames[type] || type);
+
+  try {
+    const data = await callGeminiWithRotation(SYSTEM[type], `Problem: ${problem}`);
+    removeThinking(thinkId);
+
+    let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    lastOutputText = rawText;
+    rawText = rawText.replace(/^```json?\n?/, "").replace(/```$/, "").trim();
+
+    let parsed;
+    try { parsed = JSON.parse(rawText); } catch(e) { parsed = null; }
+
+    if (type === "decompose")  renderDecomposeCard(parsed, rawText, sessionCount);
+    if (type === "patterns")   renderPatternCard(parsed, rawText, sessionCount);
+    if (type === "arch")       renderArchCard(parsed, rawText, sessionCount);
+    if (type === "complexity") renderComplexityCard(parsed, rawText, sessionCount);
+    if (type === "edge")       renderEdgeCard(parsed, rawText, sessionCount);
+
+    advancePhase(type);
+    setStatus("READY", "blue");
+  } catch(err) {
+    removeThinking(thinkId);
+    appendErrorCard(err.message);
+    setStatus("ERROR", "red");
+  }
+
+  isGenerating = false;
+  document.getElementById("sendBtn").disabled = false;
+}
+
+function appendProblemCard(text, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card card-user";
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="ch-icon">&#x2328;</span>
+      <span class="ch-title" style="color:var(--teal)">Problem Statement</span>
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">${escHtml(text)}</div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function renderDecomposeCard(data, raw, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card card-steps";
+
+  if (!data || !data.steps) {
+    card.innerHTML = `<div class="card-header"><span class="ch-icon">&#x229E;</span><span class="ch-title">Step Decomposition</span></div><div class="card-body md">${formatMd(raw)}</div>`;
+    ca.appendChild(card); setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50); return;
+  }
+
+  const diffColor = {Easy:"teal", Medium:"amber", Hard:"red", Expert:"violet"}[data.difficulty] || "blue";
+
+  let stepsHtml = data.steps.map((s, i) => {
+    const tagColor = {"Input Parsing":"teal","Core Logic":"blue","Optimization":"amber","Output":"violet"}[s.tag] || "blue";
+    const isLast = i === data.steps.length - 1;
+    return `
+      <div class="step-item">
+        <div class="step-num-wrap">
+          <div class="step-num">${s.num}</div>
+          ${!isLast ? `<div class="step-connector"></div>` : ""}
+        </div>
+        <div class="step-content">
+          <div class="step-title">${escHtml(s.title)}</div>
+          <div class="step-desc">${escHtml(s.desc)}</div>
+          <span class="step-tag" style="background:var(--${tagColor}-dim);color:var(--${tagColor});border:1px solid rgba(0,0,0,.15)">${escHtml(s.tag||"")}</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="ch-icon">&#x229E;</span>
+      <span class="ch-title">Step Decomposition</span>
+      <span class="tb-badge ${diffColor}" style="margin-left:8px;font-size:9px">${escHtml(data.difficulty||"")}</span>
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">
+      ${data.problem_restate ? `<div style="font-size:0.9rem;color:var(--text2);margin-bottom:15px;padding:12px 16px;border-left:3px solid var(--blue);background:var(--blue-dim);border-radius:0 6px 6px 0;">${escHtml(data.problem_restate)}</div>` : ""}
+      <div class="step-list">${stepsHtml}</div>
+      ${data.key_insight ? `<div style="margin-top:16px;padding:14px 16px;border-radius:6px;background:var(--amber-dim);border:1px solid rgba(251,191,36,.28);font-size:0.85rem;color:var(--amber);">
+        <span style="font-weight:700;letter-spacing:1px;font-size:0.65rem;font-family:var(--F3);text-transform:uppercase;display:block;margin-bottom:6px;">KEY INSIGHT</span>${escHtml(data.key_insight)}
+      </div>` : ""}
+    </div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function renderPatternCard(data, raw, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card card-pattern";
+
+  if (!data || !data.patterns) {
+    card.innerHTML = `<div class="card-header"><span class="ch-icon">&#x25C8;</span><span class="ch-title">Pattern Detection</span></div><div class="card-body md">${formatMd(raw)}</div>`;
+    ca.appendChild(card); setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50); return;
+  }
+
+  const blocksHtml = data.patterns.map(p => {
+    const c = p.color || "blue";
+    return `
+      <div class="pattern-block pb-${c}">
+        <div class="pb-name">${escHtml(p.name)}</div>
+        <div class="pb-desc">${escHtml(p.reason)}</div>
+        <div class="pb-confidence">
+          <span>CONFIDENCE</span>
+          <div class="pb-bar"><div class="pb-fill" style="width:${p.confidence}%"></div></div>
+          <span class="pb-pct">${p.confidence}%</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  const antiHtml = (data.anti_patterns||[]).map(a => `<div style="font-size:0.8rem;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);">x ${escHtml(a)}</div>`).join("");
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="ch-icon">&#x25C8;</span>
+      <span class="ch-title">Pattern Detection</span>
+      ${data.primary ? `<span style="margin-left:8px;font-size:0.75rem;font-family:var(--F2);font-weight:700;color:var(--violet);">PRIMARY: ${escHtml(data.primary)}</span>` : ""}
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">
+      <div class="pattern-grid">${blocksHtml}</div>
+      ${antiHtml ? `<div style="margin-top:18px;"><div style="font-size:0.65rem;font-family:var(--F3);letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:8px;">ANTI-PATTERNS (avoid these)</div>${antiHtml}</div>` : ""}
+    </div>`;
+  ca.appendChild(card);
+  setTimeout(() => { card.querySelectorAll(".pb-fill").forEach(bar => { bar.style.width = bar.style.width; }); }, 100);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function renderArchCard(data, raw, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card card-arch";
+
+  if (!data || !data.phases) {
+    card.innerHTML = `<div class="card-header"><span class="ch-icon">&#x2B21;</span><span class="ch-title">Architecture Map</span></div><div class="card-body md">${formatMd(raw)}</div>`;
+    ca.appendChild(card); setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50); return;
+  }
+
+  const colors = ["blue","teal","amber","violet","red","pink"];
+  const phasesHtml = data.phases.map((ph, i) => {
+    const c = colors[i % colors.length];
+    const compsHtml = (ph.components||[]).map((comp, ci) => {
+      const cc = colors[(i+ci+1) % colors.length];
+      return `<span class="arch-token" style="border-color:rgba(0,0,0,.15);background:var(--${cc}-dim);color:var(--${cc})">${escHtml(comp)}</span>${ci < ph.components.length-1 ? `<span class="arch-arrow">&#x2192;</span>` : ""}`;
+    }).join("");
+    return `
+      <div class="arch-phase">
+        <div class="arch-phase-label" style="color:var(--${c})">${escHtml(ph.name)}</div>
+        <div class="arch-phase-body">${compsHtml}${ph.note ? `<span style="font-size:0.75rem;color:var(--text3);margin-left:6px;font-style:italic;">// ${escHtml(ph.note)}</span>` : ""}</div>
+      </div>`;
+  }).join("");
+
+  const dsHtml = (data.data_structures||[]).map(ds =>
+    `<span class="arch-token" style="border-color:rgba(45,212,191,.3);background:var(--teal-dim);color:var(--teal)">${escHtml(ds)}</span>`
+  ).join(" ");
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="ch-icon">&#x2B21;</span>
+      <span class="ch-title">Architecture Map</span>
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">
+      <div class="arch-map">${phasesHtml}</div>
+      ${dsHtml ? `<div style="margin-top:16px;"><div style="font-size:0.65rem;font-family:var(--F3);letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:8px;">DATA STRUCTURES</div>${dsHtml}</div>` : ""}
+      ${data.time_complexity || data.space_complexity ? `
+        <div class="complexity-row">
+          ${data.time_complexity ? `<div class="cx-box"><div class="cx-label">Time</div><div class="cx-value" style="color:var(--blue)">${escHtml(data.time_complexity)}</div>${data.complexity_note ? `<div class="cx-note">${escHtml(data.complexity_note)}</div>` : ""}</div>` : ""}
+          ${data.space_complexity ? `<div class="cx-box"><div class="cx-label">Space</div><div class="cx-value" style="color:var(--teal)">${escHtml(data.space_complexity)}</div></div>` : ""}
+        </div>` : ""}
+      ${data.pseudocode_outline ? `
+        <div style="margin-top:16px;">
+          <div style="font-size:0.65rem;font-family:var(--F3);letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:8px;">PSEUDOCODE OUTLINE</div>
+          <pre style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;font-size:0.8rem;color:var(--text2);white-space:pre-wrap;font-family:var(--F3);">${escHtml(data.pseudocode_outline)}</pre>
+        </div>` : ""}
+    </div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function renderComplexityCard(data, raw, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card";
+  card.style.borderColor = "rgba(45,212,191,.22)";
+
+  if (!data) {
+    card.innerHTML = `<div class="card-header" style="background:var(--teal-dim);border-color:rgba(45,212,191,.2)"><span class="ch-icon">&#x2211;</span><span class="ch-title" style="color:var(--teal)">Complexity Analysis</span></div><div class="card-body md">${formatMd(raw)}</div>`;
+    ca.appendChild(card); setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50); return;
+  }
+
+  card.innerHTML = `
+    <div class="card-header" style="background:var(--teal-dim);border-color:rgba(45,212,191,.2)">
+      <span class="ch-icon">&#x2211;</span>
+      <span class="ch-title" style="color:var(--teal)">Complexity Analysis</span>
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">
+      <div class="complexity-row">
+        <div class="cx-box"><div class="cx-label">Time</div><div class="cx-value" style="color:var(--blue)">${escHtml(data.time||"—")}</div><div class="cx-note">${escHtml(data.time_explanation||"")}</div></div>
+        <div class="cx-box"><div class="cx-label">Space</div><div class="cx-value" style="color:var(--teal)">${escHtml(data.space||"—")}</div><div class="cx-note">${escHtml(data.space_explanation||"")}</div></div>
+      </div>
+      ${data.bottleneck ? `<div style="margin-top:14px;padding:12px 16px;border-radius:6px;background:var(--amber-dim);border:1px solid rgba(251,191,36,.28);font-size:0.85rem;color:var(--amber)">Bottleneck: ${escHtml(data.bottleneck)}</div>` : ""}
+      ${data.can_optimize && data.optimization_hint ? `<div style="margin-top:10px;padding:12px 16px;border-radius:6px;background:var(--blue-dim);border:1px solid rgba(59,130,246,.22);font-size:0.85rem;color:var(--blue)">Optimization: ${escHtml(data.optimization_hint)}</div>` : ""}
+    </div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function renderEdgeCard(data, raw, num) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card";
+  card.style.borderColor = "rgba(248,113,113,.22)";
+
+  if (!data || !data.edge_cases) {
+    card.innerHTML = `<div class="card-header" style="background:var(--red-dim);border-color:rgba(248,113,113,.2)"><span class="ch-icon">&#x26A0;</span><span class="ch-title" style="color:var(--red)">Edge Cases</span></div><div class="card-body md">${formatMd(raw)}</div>`;
+    ca.appendChild(card); setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50); return;
+  }
+
+  const sevColor = {Critical:"red", Important:"amber", Minor:"teal"};
+  const ecHtml = data.edge_cases.map(ec => {
+    const c = sevColor[ec.severity] || "teal";
+    return `
+      <div style="padding:14px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span class="tb-badge ${c}" style="font-size:0.6rem; padding:2px 8px;">${escHtml(ec.severity||"")}</span>
+          <span style="font-weight:600;font-size:0.9rem;color:var(--text)">${escHtml(ec.case)}</span>
+        </div>
+        <div style="font-size:0.85rem;color:var(--text2);">${escHtml(ec.why_tricky)}</div>
+      </div>`;
+  }).join("");
+
+  const tcHtml = (data.test_cases||[]).map(tc =>
+    `<div style="margin-bottom:8px;border-radius:8px;overflow:hidden;border:1px solid var(--border2);">
+      <div style="padding:6px 12px;background:var(--bg3);font-size:0.65rem;color:var(--text3);font-family:var(--F3);letter-spacing:1px;text-transform:uppercase;">${escHtml(tc.label)}</div>
+      <div style="padding:12px 14px;font-family:var(--F3);font-size:0.8rem;display:flex;gap:16px;flex-wrap:wrap; background:var(--bg);">
+        <span style="color:var(--text2)">IN: <span style="color:var(--teal)">${escHtml(tc.input)}</span></span>
+        <span style="color:var(--text2)">OUT: <span style="color:var(--blue)">${escHtml(tc.expected)}</span></span>
+      </div>
+    </div>`
+  ).join("");
+
+  card.innerHTML = `
+    <div class="card-header" style="background:var(--red-dim);border-color:rgba(248,113,113,.2)">
+      <span class="ch-icon">&#x26A0;</span>
+      <span class="ch-title" style="color:var(--red)">Edge Cases</span>
+      <span class="ch-num">#${num}</span>
+    </div>
+    <div class="card-body">
+      ${ecHtml}
+      ${tcHtml ? `<div style="margin-top:16px;"><div style="font-size:0.65rem;font-family:var(--F3);letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:10px;">TEST CASES</div>${tcHtml}</div>` : ""}
+    </div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+function appendThinking(type) {
+  const ca = document.getElementById("canvasArea");
+  const id = "think_" + Date.now();
+  const labels = { decompose:"Breaking into steps…", patterns:"Detecting patterns…", arch:"Mapping architecture…", complexity:"Analyzing complexity…", edge:"Finding edge cases…" };
+  const div = document.createElement("div");
+  div.id = id;
+  div.className = "thinking-card";
+  div.innerHTML = `
+    <div class="thinking-row">
+      <div class="thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
+      <span class="thinking-text">${labels[type] || "Analyzing…"}</span>
+      <span class="thinking-phase">${type.toUpperCase()}</span>
+    </div>`;
+  ca.appendChild(div);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+  return id;
+}
+function removeThinking(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+function appendErrorCard(msg) {
+  const ca = document.getElementById("canvasArea");
+  const card = document.createElement("div");
+  card.className = "canvas-card";
+  card.style.borderColor = "rgba(248,113,113,.3)";
+  card.innerHTML = `
+    <div class="card-header" style="background:var(--red-dim)">
+      <span class="ch-icon">&#x2715;</span>
+      <span class="ch-title" style="color:var(--red)">Error</span>
+    </div>
+    <div class="card-body" style="font-size:0.85rem;color:var(--text2)">${escHtml(msg)}<br><br>Check your configuration and try again.</div>`;
+  ca.appendChild(card);
+  setTimeout(() => { ca.scrollTop = ca.scrollHeight; }, 50);
+}
+
+const phaseMap = { decompose:1, patterns:2, arch:3, complexity:3, edge:3 };
+function advancePhase(type) {
+  const idx = phaseMap[type] || 0;
+  document.querySelectorAll(".phase-pip").forEach((pip, i) => {
+    pip.classList.remove("done","current");
+    if (i < idx) pip.classList.add("done");
+    else if (i === idx) pip.classList.add("current");
+  });
+}
+function updatePhaseLabel(label) { document.getElementById("tbPhaseLabel").textContent = label; }
+function setStatus(text, color) {
+  const b = document.getElementById("statusBadge");
+  b.textContent = text;
+  b.className = `tb-badge ${color}`;
+}
+
+function addToHistory(problem) {
+  problemHistory.unshift({ text: problem, time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }) });
+  renderHistory();
+}
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  if (!problemHistory.length) {
+    list.innerHTML = `<div style="color:var(--text3);font-size:0.8rem;padding:8px 10px">No problems yet.</div>`;
+    return;
+  }
+  list.innerHTML = problemHistory.slice(0,8).map((h,i) =>
+    `<div class="history-item" onclick="rerunProblem(${i})">
+      <div class="hi-tag">${h.time}</div>
+      ${escHtml(h.text.slice(0,60))}${h.text.length > 60 ? "…" : ""}
+    </div>`
+  ).join("");
+}
+function rerunProblem(idx) {
+  const h = problemHistory[idx];
+  if (!h) return;
+  const input = document.getElementById("problemInput");
+  input.value = h.text;
+  autoResize(input);
+  input.focus();
+}
+function clearCanvas() {
+  const ca = document.getElementById("canvasArea");
+  ca.innerHTML = "";
+  ca.scrollTop = 0;
+  sessionCount = 0;
+  currentProblem = "";
+  document.querySelectorAll(".phase-pip").forEach(p => p.classList.remove("done","current"));
+  setStatus("READY","blue");
+  updatePhaseLabel("Canvas");
+
+  const welcome = document.createElement("div");
+  welcome.className = "welcome-canvas";
+  welcome.id = "welcomeScreen";
+  welcome.innerHTML = `
+    <div class="wc-terminal">
+      <div class="t-dots"><span style="background:#ff5f56"></span><span style="background:#ffbd2e"></span><span style="background:#27c93f"></span></div>
+      <div class="t-content">
+        <div class="t-line"><span class="prompt">blueprint $</span> <span class="cmd">init --mode=cp-canvas</span></div>
+        <div class="t-line"><span class="out">&#x2713; Pattern engine loaded  </span><span class="hi">[10 algorithms]</span></div>
+        <div class="t-line"><span class="out">&#x2713; Step decomposer ready</span></div>
+        <div class="t-line"><span class="out">&#x2713; Architecture mapper   </span><span class="hi">[active]</span></div>
+        <div class="t-line"><span class="prompt">blueprint $</span> <span class="cursor"></span></div>
+      </div>
+    </div>
+    <div class="wc-title">DROP YOUR <em>PROBLEM</em></div>
+    <div class="wc-sub">Paste any competitive programming problem. Blueprint AI will break it into logical steps, detect algorithmic patterns, and map out the solution architecture — before you write a single line of code.</div>
+    <div class="wc-chips">
+      <div class="wc-chip" onclick="useExample(this)">Find max subarray sum of size K</div>
+      <div class="wc-chip" onclick="useExample(this)">Shortest path in weighted graph</div>
+      <div class="wc-chip" onclick="useExample(this)">Count ways to climb N stairs</div>
+      <div class="wc-chip" onclick="useExample(this)">Find all permutations of string</div>
+      <div class="wc-chip" onclick="useExample(this)">Merge K sorted linked lists</div>
+      <div class="wc-chip" onclick="useExample(this)">Longest common subsequence</div>
+    </div>`;
+  ca.appendChild(welcome);
+}
+function newSession() {
+  problemHistory = [];
+  renderHistory();
+  clearCanvas();
+}
+
+function copyLastOutput() {
+  if (!lastOutputText) return;
+  navigator.clipboard.writeText(lastOutputText).catch(()=>{});
+}
+
+function escHtml(str) {
+  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function formatMd(text) {
+  let t = escHtml(text);
+  t = t.replace(/```[\w]*\n?([\s\S]*?)```/g, (_,c) => `<pre><code>${c.trim()}</code></pre>`);
+  t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+  t = t.replace(/^### (.+)$/gm,"<h3>$1</h3>");
+  t = t.replace(/^## (.+)$/gm,"<h3>$1</h3>");
+  t = t.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  t = t.replace(/\*(.+?)\*/g,"<em>$1</em>");
+  t = t.replace(/^[-•] (.+)$/gm,(_,i)=>`<li>${i}</li>`);
+  t = t.replace(/(<li>.*<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
+  t = t.split(/\n\n+/).map(b => {
+    if(/<(h3|ul|ol|pre|div)/.test(b)) return b;
+    return `<p>${b.replace(/\n/g,"<br>")}</p>`;
+  }).join("\n");
+  return t;
+}
+</script>
+</body>
+</html>

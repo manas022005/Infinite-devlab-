@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Priority Queue (Max-Heap) — Infinite DevLab</title>
+
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
+                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Bebas Neue"', 'sans-serif'],
+                        ui: ['Syne', 'sans-serif'],
+                        code: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #060d0d;
+            --surf: #0b1616;
+            --border: #122020;
+            --text: #e2e8f0;
+            --muted: #4a6060;
+            --accent: #2dd4bf;
+        }
+
+        html.light {
+            --bg: #f0fafa;
+            --surf: #ffffff;
+            --border: #cce8e8;
+            --text: #0f2020;
+            --muted: #4a7070;
+            --accent: #0d9488;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background .35s, color .35s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aurora {
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 999px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Tree SVGs and nodes */
+        svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .edge {
+            stroke: var(--border);
+            stroke-width: 2.5;
+            transition: stroke .3s;
+        }
+
+        .t-node {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-code);
+            font-weight: bold;
+            font-size: 1.1rem;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+            transition: left 0.5s ease-in-out, top 0.5s ease-in-out, border-color 0.3s, background 0.3s, box-shadow 0.3s, color 0.3s;
+        }
+
+        .arr-el {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-code);
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all .3s;
+            z-index: 2;
+        }
+
+        .arr-el::after {
+            content: attr(data-i);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: .6rem;
+            color: var(--muted);
+            opacity: 0.8;
+            font-family: var(--font-code);
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1.15);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .anim-pop {
+            animation: popIn 0.4s ease forwards;
+        }
+
+        /* Extracted Fly-out */
+        .extracted {
+            background: var(--accent) !important;
+            border-color: var(--accent) !important;
+            color: var(--bg) !important;
+            transform: translate(-50%, -50%) scale(1.4) !important;
+            opacity: 0;
+            transition: all 0.6s !important;
+        }
+    </style>
+</head>
+
+<body class="bg-theme-bg text-theme-text font-ui min-h-screen flex flex-col relative transition-colors duration-300">
+
+    <div class="aurora"></div>
+
+    <nav
+        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
+        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
+                class="text-theme-text">Visualizer</span></a>
+        <div class="flex items-center gap-4">
+            <span
+                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Logarithmic
+                Queue</span>
+            <button id="theme-toggle"
+                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
+                <span id="theme-knob"
+                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap flex-1 flex flex-col relative z-10">
+
+        <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+            <div>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Data Structure ·
+                    Complete Binary Tree</p>
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">PRIORITY <span
+                        class="text-theme-accent">QUEUE</span></h1>
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Implemented as a
+                    Max-Heap. The largest element always bubbles up to the root (index 0). Watch how the tree structure
+                    maps perfectly to a flat array using simple index math.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <input
+                    class="bg-theme-bg border border-theme-border rounded-lg px-3 py-2 font-code text-sm text-theme-text outline-none focus:border-theme-accent transition-colors w-28 placeholder:text-theme-muted/50"
+                    id="inp-val" type="number" placeholder="Value..." min="1" max="99" />
+                <button id="btn-ins"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
+                    Insert (Heapify Up)</button>
+                <button id="btn-ext"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-accent text-theme-accent hover:bg-theme-accent/10 transition-all">▶
+                    Extract Max</button>
+                <button id="btn-clr"
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all ml-auto">↺
+                    Clear</button>
+
+                <div class="flex items-center gap-2 font-code text-xs text-theme-muted">
+                    Slow <input type="range" id="spd" min="200" max="1500" value="600" step="100"
+                        class="w-24 h-1 rounded-full" /> Fast
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
+
+            <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
+                        Stats</span>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-size" class="font-display text-3xl text-theme-accent leading-none">0</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Heap Size</div>
+                        </div>
+                        <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
+                            <div id="s-max" class="font-display text-3xl text-theme-accent leading-none">—</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Current Max</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span
+                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
+                        Legend</span>
+                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div>
+                            <span>Standard Node</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border-2 border-theme-accent bg-theme-bg scale-110"></div>
+                            <span class="text-theme-text font-bold text-shadow">Comparing / Swapping</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
+                            <span class="text-theme-accent font-bold text-shadow">Extracted Max</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">The
+                        Array Math</span>
+                    <div
+                        class="font-ui text-[0.75rem] text-theme-text leading-relaxed bg-theme-bg border border-theme-border rounded-lg p-3">
+                        For any node at index <b>i</b>:<br>
+                        Left Child = <b>2i + 1</b><br>
+                        Right Child = <b>2i + 2</b><br>
+                        Parent = <b>⌊(i - 1) / 2⌋</b>
+                    </div>
+                </div>
+
+                <div id="spill"
+                    class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
+                    IDLE — Insert a number</div>
+            </aside>
+
+            <div class="p-6 flex flex-col gap-6">
+
+                <section
+                    class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col gap-6 relative shadow-inner">
+                    <span class="font-code text-[0.7rem] text-theme-muted absolute top-4 left-4">// CONCEPTUAL: Complete
+                        Binary Tree</span>
+
+                    <div class="relative w-full h-[320px] mt-4" id="tree-container">
+                        <svg id="tree-svg"></svg>
+                    </div>
+
+                    <div class="w-3/4 h-[1px] bg-theme-border mx-auto my-2"></div>
+
+                    <span class="font-code text-[0.7rem] text-theme-muted absolute bottom-[105px] left-4">// ACTUAL
+                        MEMORY: Array Representation</span>
+
+                    <div class="flex flex-wrap justify-center gap-3 w-full min-h-[60px] pb-6" id="arr-container">
+                    </div>
+                </section>
+
+                <section
+                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">void</span>
+                                <span class="text-theme-accent">insert</span>(<span class="text-pink-400">int</span>
+                                val) {</div>
+                            <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;heap.<span
+                                    class="text-theme-accent">push_back</span>(val);
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-theme-muted italic">// Add to end</span></div>
+                            <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                    class="text-theme-accent">heapifyUp</span>(heap.size() - 1);
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-theme-muted italic">// Bubble up</span></div>
+                            <div id="p4" class="px-2 rounded transition-all">}</div>
+                        </div>
+                        <div>
+                            <div id="p5" class="px-2 rounded transition-all"><span class="text-pink-400">int</span>
+                                <span class="text-theme-accent">extractMax</span>() {</div>
+                            <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                    class="text-pink-400">int</span> max_val = heap[0];
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-theme-muted italic">// Root is max</span></div>
+                            <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;heap[0] = heap.<span
+                                    class="text-theme-accent">back</span>(); heap.<span
+                                    class="text-theme-accent">pop_back</span>();</div>
+                            <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                    class="text-theme-accent">heapifyDown</span>(0);
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="text-theme-muted italic">// Sink down</span></div>
+                            <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
+                                    class="text-pink-400">return</span> max_val;</div>
+                            <div id="p10" class="px-2 rounded transition-all">}</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const $ = id => document.getElementById(id);
+        const hl = id => {
+            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
+            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
+        };
+
+        let spd = 600, running = false, nextId = 0;
+        const MAX_NODES = 15; // To safely fit a 4-level tree
+        let heap = []; // Array of {id, val}
+        let domNodes = {}; // map id -> DOM Element
+
+        function setSpill(state, text) {
+            const p = $('spill');
+            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
+            else if (state === 'err') p.classList.add('bg-red-500/10', 'border-red-500', 'text-red-500');
+            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+            p.textContent = text;
+        }
+
+        function updateStats() {
+            $('s-size').textContent = heap.length;
+            $('s-max').textContent = heap.length > 0 ? heap[0].val : '—';
+        }
+
+        // Tree Coordinates Math
+        function getCoords(index) {
+            if (index === 0) return { x: 50, y: 12 };
+            const level = Math.floor(Math.log2(index + 1));
+            const levelWidth = Math.pow(2, level);
+            const posInLevel = index - (levelWidth - 1);
+
+            const segment = 100 / levelWidth;
+            const x = (segment * posInLevel) + (segment / 2);
+            const y = 12 + (level * 26);
+            return { x, y };
+        }
+
+        function drawEdges() {
+            const svg = $('tree-svg');
+            svg.innerHTML = '';
+            for (let i = 1; i < heap.length; i++) {
+                const parentIdx = Math.floor((i - 1) / 2);
+                const pCoord = getCoords(parentIdx);
+                const cCoord = getCoords(i);
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', 'edge');
+                line.setAttribute('x1', pCoord.x + '%');
+                line.setAttribute('y1', pCoord.y + '%');
+                line.setAttribute('x2', cCoord.x + '%');
+                line.setAttribute('y2', cCoord.y + '%');
+                svg.appendChild(line);
+            }
+        }
+
+        function renderArray() {
+            const container = $('arr-container');
+            container.innerHTML = '';
+
+            if (heap.length === 0) {
+                container.innerHTML = '<span class="font-code text-sm text-theme-muted opacity-50 h-11 flex items-center">Array is empty</span>';
+                return;
+            }
+
+            heap.forEach((item, i) => {
+                const el = document.createElement('div');
+                // High Visibility Skeleton setup
+                el.className = 'arr-el bg-theme-accent/10 border-2 border-slate-500 text-theme-muted';
+                el.textContent = item.val;
+                el.setAttribute('data-i', i);
+                el.id = 'arr_' + item.id;
+
+                // Highlight Max Element (index 0) subtly
+                if (i === 0) {
+                    el.classList.replace('bg-theme-accent/10', 'bg-theme-accent/20');
+                    el.classList.replace('border-slate-500', 'border-theme-accent/50');
+                    el.classList.replace('text-theme-muted', 'text-theme-accent');
+                }
+
+                container.appendChild(el);
+            });
+        }
+
+        function setNodeState(id, state, isNew = false) {
+            const node = domNodes[id];
+            const arrNode = $('arr_' + id);
+
+            // Base Class
+            let nodeClass = 't-node ' + (isNew ? 'anim-pop ' : '');
+            let arrClass = 'arr-el ';
+
+            if (state === 'comparing') {
+                nodeClass += 'bg-theme-bg border-2 border-theme-accent text-theme-text scale-110 shadow-[0_0_15px_rgba(45,212,191,0.4)] z-10';
+                arrClass += 'bg-theme-bg border-2 border-theme-accent text-theme-text scale-110 shadow-[0_0_15px_rgba(45,212,191,0.4)] z-10';
+            } else if (state === 'extracted') {
+                nodeClass += 'extracted';
+                arrClass += 'bg-theme-accent text-theme-bg scale-110 opacity-0';
+            } else {
+                // Idle Skeletons
+                nodeClass += 'bg-theme-accent/10 border-2 border-slate-500 text-theme-text';
+                arrClass += 'bg-theme-accent/10 border-2 border-slate-500 text-theme-muted';
+                // If it happens to be root, we give it a tiny boost
+                if (heap.length > 0 && heap[0].id === id) {
+                    arrClass = arrClass.replace('bg-theme-accent/10', 'bg-theme-accent/20').replace('border-slate-500', 'border-theme-accent/50').replace('text-theme-muted', 'text-theme-accent');
+                }
+            }
+
+            if (node) node.className = nodeClass;
+            if (arrNode) arrNode.className = arrClass;
+        }
+
+        function updatePositions() {
+            heap.forEach((item, index) => {
+                const node = domNodes[item.id];
+                const coords = getCoords(index);
+                node.style.left = coords.x + '%';
+                node.style.top = coords.y + '%';
+
+                // Clear any lingering animation classes so normal transition takes over
+                node.classList.remove('anim-pop');
+            });
+            drawEdges();
+            renderArray();
+        }
+
+        async function highlightSwap(i, j) {
+            const idI = heap[i].id;
+            const idJ = heap[j].id;
+
+            setNodeState(idI, 'comparing');
+            setNodeState(idJ, 'comparing');
+            await sleep(spd);
+
+            [heap[i], heap[j]] = [heap[j], heap[i]];
+            updatePositions();
+            await sleep(spd);
+
+            setNodeState(idI, 'idle');
+            setNodeState(idJ, 'idle');
+        }
+
+        async function insert(val) {
+            if (heap.length >= MAX_NODES) {
+                setSpill('err', 'HEAP FULL (MAX 15)');
+                return;
+            }
+
+            running = true;
+            $('btn-ins').disabled = true; $('btn-ext').disabled = true; $('btn-clr').disabled = true;
+            setSpill('run', 'INSERTING...');
+
+            hl('p2');
+
+            const newItem = { id: 'n_' + (++nextId), val: val };
+            heap.push(newItem);
+
+            // Create DOM
+            const node = document.createElement('div');
+            node.id = newItem.id;
+            node.textContent = val;
+            $('tree-container').appendChild(node);
+            domNodes[newItem.id] = node;
+
+            setNodeState(newItem.id, 'idle', true); // true = pop animation
+            updatePositions();
+            updateStats();
+            await sleep(spd * 1.5); // let pop finish
+
+            hl('p3');
+            let curr = heap.length - 1;
+            while (curr > 0) {
+                let parent = Math.floor((curr - 1) / 2);
+                if (heap[curr].val > heap[parent].val) {
+                    await highlightSwap(curr, parent);
+                    curr = parent;
+                } else {
+                    // Flash comparison briefly to show they checked it
+                    setNodeState(heap[curr].id, 'comparing');
+                    setNodeState(heap[parent].id, 'comparing');
+                    await sleep(spd / 2);
+                    setNodeState(heap[curr].id, 'idle');
+                    setNodeState(heap[parent].id, 'idle');
+                    break;
+                }
+            }
+
+            hl(null);
+            updateStats();
+            setSpill('found', `INSERTED ${val} ✓`);
+            running = false;
+            $('btn-ins').disabled = false; $('btn-ext').disabled = false; $('btn-clr').disabled = false;
+        }
+
+        async function extractMax() {
+            if (heap.length === 0) return;
+            running = true;
+            $('btn-ins').disabled = true; $('btn-ext').disabled = true; $('btn-clr').disabled = true;
+            setSpill('run', 'EXTRACTING MAX...');
+
+            hl('p6');
+            const maxItem = heap[0];
+
+            // Animate extract
+            setNodeState(maxItem.id, 'extracted');
+            await sleep(spd);
+            domNodes[maxItem.id].remove();
+            delete domNodes[maxItem.id];
+
+            hl('p7');
+            const lastItem = heap.pop();
+            if (heap.length > 0) {
+                heap[0] = lastItem;
+                updatePositions();
+                await sleep(spd);
+
+                hl('p8');
+                let curr = 0;
+                while (true) {
+                    let left = 2 * curr + 1;
+                    let right = 2 * curr + 2;
+                    let largest = curr;
+
+                    setNodeState(lastItem.id, 'comparing');
+
+                    if (left < heap.length && heap[left].val > heap[largest].val) largest = left;
+                    if (right < heap.length && heap[right].val > heap[largest].val) largest = right;
+
+                    if (largest !== curr) {
+                        setNodeState(lastItem.id, 'idle'); // Swap will highlight it again
+                        await highlightSwap(curr, largest);
+                        curr = largest;
+                    } else {
+                        await sleep(spd / 2);
+                        setNodeState(lastItem.id, 'idle');
+                        break;
+                    }
+                }
+            } else {
+                updatePositions();
+            }
+
+            hl('p9');
+            updateStats();
+            setSpill('found', `MAX = ${maxItem.val} ✓`);
+            await sleep(spd);
+
+            hl(null);
+            running = false;
+            $('btn-ins').disabled = false; $('btn-ext').disabled = false; $('btn-clr').disabled = false;
+        }
+
+        $('btn-ins').onclick = () => {
+            if (running) return;
+            const raw = $('inp-val').value.trim();
+            if (!raw) { $('inp-val').focus(); return; }
+            const val = parseInt(raw, 10);
+            if (!isNaN(val)) insert(val);
+            $('inp-val').value = '';
+        };
+
+        $('btn-ext').onclick = extractMax;
+
+        $('inp-val').addEventListener('keydown', e => {
+            if (e.key === 'Enter') $('btn-ins').click();
+        });
+
+        $('spd').oninput = function () { spd = 1700 - parseInt(this.value); };
+
+        $('btn-clr').onclick = () => {
+            if (running) return;
+            heap = []; domNodes = {}; nextId = 0;
+            $('tree-container').innerHTML = '<svg id="tree-svg"></svg>';
+            $('arr-container').innerHTML = '<span class="font-code text-sm text-theme-muted opacity-50 h-11 flex items-center">Array is empty</span>';
+            updateStats();
+            setSpill('idle', 'QUEUE CLEARED');
+        };
+
+        async function initHeap() {
+            let ogSpd = spd; spd = 200; // Fast initial build
+            const initialVals = [85, 60, 75, 40, 30, 50];
+            for (let v of initialVals) await insert(v);
+            spd = ogSpd;
+            setSpill('idle', 'READY');
+        }
+
+        setTimeout(initHeap, 200);
+
+        /* ── THEME TOGGLE ── */
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeKnob = document.getElementById('theme-knob');
+        themeBtn.addEventListener('click', () => {
+            html.classList.toggle('light');
+            if (html.classList.contains('light')) {
+                themeKnob.textContent = '☀️';
+                themeKnob.style.transform = 'translateX(20px)';
+            } else {
+                themeKnob.textContent = '🌙';
+                themeKnob.style.transform = 'translateX(0)';
+            }
+        });
+    </script>
+</body>
+
+</html>

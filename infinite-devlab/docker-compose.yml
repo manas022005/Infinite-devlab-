@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: devlab
+      MYSQL_USER: devlab
+      MYSQL_PASSWORD: devlab
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "devlab", "-pdevlab"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://devlab:devlab@db:3306/devlab
+      JWT_SECRET: change-me-to-a-long-random-string
+      JWT_EXPIRES_HOURS: 24
+      FRONTEND_DIR: /app/frontend
+      CORS_ORIGINS: "*"
+      PORT: 8000
+    ports:
+      - "8000:8000"
+
+volumes:
+  dbdata:
