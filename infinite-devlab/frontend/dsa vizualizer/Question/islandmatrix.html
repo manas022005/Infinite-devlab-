@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Number of Islands (DFS) — Infinite DevLab</title>
 
-    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
-
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
         rel="stylesheet" />
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -20,8 +19,12 @@
                 extend: {
                     colors: {
                         theme: {
-                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
-                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                            bg: 'var(--bg)',
+                            surf: 'var(--surf)',
+                            border: 'var(--border)',
+                            text: 'var(--text)',
+                            muted: 'var(--muted)',
+                            accent: 'var(--accent)'
                         }
                     },
                     fontFamily: {
@@ -41,16 +44,7 @@
             --border: #122020;
             --text: #e2e8f0;
             --muted: #4a6060;
-            --accent: #2dd4bf;
-        }
-
-        html.light {
-            --bg: #f0fafa;
-            --surf: #ffffff;
-            --border: #cce8e8;
-            --text: #0f2020;
-            --muted: #4a7070;
-            --accent: #0d9488;
+            --accent: #2d99d4;
         }
 
         *,
@@ -66,7 +60,7 @@
         }
 
         body {
-            font-family: var(--font-ui);
+            font-family: 'Syne', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -80,7 +74,9 @@
             content: '';
             position: fixed;
             inset: 0;
-            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-image:
+                linear-gradient(rgba(45, 153, 212, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 153, 212, .03) 1px, transparent 1px);
             background-size: 40px 40px;
             pointer-events: none;
             z-index: 0;
@@ -93,7 +89,9 @@
             transform: translateX(-50%);
             width: 900px;
             height: 600px;
-            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            background: radial-gradient(ellipse,
+                    rgba(45, 153, 212, .08) 0%,
+                    transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
@@ -128,12 +126,10 @@
             cursor: pointer;
         }
 
-        /* Cell specific transitions */
         .cell {
             transition: all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Shake animation for hitting water bounds */
         @keyframes shake {
 
             0%,
@@ -161,112 +157,81 @@
 
     <div class="aurora"></div>
 
-    <nav
-        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
-        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
-                class="text-theme-text">Visualizer</span></a>
-        <div class="flex items-center gap-4">
-            <span
-                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">Graph
-                / Matrix Traversal</span>
-            <button id="theme-toggle"
-                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
-                <span id="theme-knob"
-                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
-            </button>
-        </div>
-    </nav>
-
-    <div class="wrap flex-1 flex flex-col relative z-10">
+    <div class="wrap flex-1 flex flex-col relative z-10 pt-6">
 
         <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
+
             <div>
-                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Graph Algorithms ·
-                    Flood Fill DFS</p>
-                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">NUMBER OF <span
-                        class="text-theme-accent">ISLANDS</span></h1>
-                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Given a 2D grid of '1's
-                    (land) and '0's (water), count the number of islands. An island is surrounded by water and formed by
-                    connecting adjacent lands horizontally or vertically.</p>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">
+                    Graph Algorithms · Flood Fill DFS
+                </p>
+
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">
+                    NUMBER OF
+                    <span class="text-theme-accent">ISLANDS</span>
+                </h1>
+
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">
+                    Given a 2D grid of '1's (land) and '0's (water),
+                    count the number of islands.
+                </p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3 mt-2">
+
                 <button id="btn-run"
-                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
-                    Run Island Scan</button>
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all">
+                    ▶ Run Island Scan
+                </button>
+
                 <button id="btn-gen"
-                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent hover:text-theme-accent transition-all">↺
-                    Randomize Map</button>
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent hover:text-theme-accent transition-all">
+                    ↺ Randomize Map
+                </button>
 
                 <div class="ml-auto flex items-center gap-2 font-code text-xs text-theme-muted">
-                    Slow <input type="range" id="spd" min="50" max="1000" value="400" step="50"
-                        class="w-24 h-1 rounded-full" /> Fast
+                    Slow
+                    <input type="range" id="spd" min="50" max="1000" value="400" step="50"
+                        class="w-24 h-1 rounded-full" />
+                    Fast
                 </div>
+
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
 
             <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+
                 <div>
-                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
-                        Stats</span>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">
+                        Live Stats
+                    </span>
+
                     <div class="grid grid-cols-2 gap-3 text-center">
+
                         <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
                             <div id="s-islands" class="font-display text-3xl text-theme-accent leading-none">0</div>
-                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Islands Found</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">
+                                Islands Found
+                            </div>
                         </div>
+
                         <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
                             <div id="s-calls" class="font-display text-3xl text-theme-accent leading-none">0</div>
-                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">DFS Calls</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <span
-                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
-                        Map</span>
-                    <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded border border-slate-700/60 bg-theme-bg opacity-50"></div>
-                            <span>Water (0)</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded border-2 border-theme-accent/80 bg-theme-accent/10"></div>
-                            <span class="text-theme-text">Unvisited Land (1)</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded border border-theme-text bg-theme-bg scale-110"></div>
-                            <span class="text-theme-text font-bold">Scanning Cursor</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div
-                                class="w-4 h-4 rounded border-2 border-theme-accent bg-theme-bg shadow-[0_0_8px_rgba(45,212,191,0.5)]">
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">
+                                DFS Calls
                             </div>
-                            <span class="text-theme-text">Active DFS Pointer</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded bg-theme-accent"></div>
-                            <span class="text-theme-accent font-bold">Claimed Island (2)</span>
-                        </div>
-                    </div>
-                </div>
 
-                <div>
-                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">Key
-                        Insight</span>
-                    <div
-                        class="font-ui text-[0.75rem] text-theme-text leading-relaxed bg-theme-bg border border-theme-border rounded-lg p-3">
-                        Scan until you find a <b>'1'</b>. That's a new island! Immediately trigger DFS to infect all
-                        connected 1s and turn them into <b class="text-theme-accent">'2's (visited)</b> so they aren't
-                        double-counted.
                     </div>
                 </div>
 
                 <div id="spill"
                     class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
-                    IDLE — Press Run</div>
+                    IDLE — Press Run
+                </div>
+
             </aside>
 
             <div class="p-6 flex flex-col gap-6">
@@ -275,289 +240,280 @@
                     class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-8 flex flex-col items-center justify-center gap-6 relative shadow-inner min-h-[340px] overflow-hidden">
 
                     <div class="bg-theme-bg border border-theme-border rounded-xl p-4 shadow-lg inline-block">
-                        <div id="grid-wrap" class="grid gap-1.5">
-                        </div>
+                        <div id="grid-wrap" class="grid gap-1.5"></div>
                     </div>
 
-                    <div id="result" class="text-center font-code text-sm text-theme-muted mt-2">// Ready. Map loaded.
+                    <div id="result" class="text-center font-code text-sm text-theme-muted mt-2">
+                        // Ready. Map loaded.
                     </div>
+
                 </section>
 
-                <section
-                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">int</span>
-                                <span class="text-theme-accent">numIslands</span>(<span
-                                    class="text-theme-accent">vector</span>&lt;<span
-                                    class="text-theme-accent">vector</span>&lt;<span
-                                    class="text-pink-400">char</span>&gt;&gt;&amp; grid) {
-                            </div>
-                            <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-pink-400">int</span> count = 0;</div>
-                            <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-pink-400">for</span> (<span class="text-pink-400">int</span> r = 0; r
-                                &lt; ROWS; r++) {</div>
-                            <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="text-pink-400">for</span> (<span class="text-pink-400">int</span> c = 0; c
-                                &lt; COLS; c++) {</div>
-                            <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="text-pink-400">if</span> (grid[r][c] == <span
-                                    class="text-orange-300">'1'</span>) { <span class="text-theme-muted italic">//
-                                    Unvisited land</span></div>
-                            <div id="p6" class="px-2 rounded transition-all">
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++;</div>
-                            <div id="p7" class="px-2 rounded transition-all">
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="text-theme-accent">dfs</span>(grid, r, c); <span
-                                    class="text-theme-muted italic">// Flood fill</span></div>
-                            <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-                            <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-                            <div id="p10" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
-                            <div id="p11" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-pink-400">return</span> count;</div>
-                            <div id="p12" class="px-2 rounded transition-all">}</div>
-                        </div>
-
-                        <div>
-                            <div id="p13" class="px-2 rounded transition-all"><span class="text-pink-400">void</span>
-                                <span class="text-theme-accent">dfs</span>(<span
-                                    class="text-theme-accent">vector</span>&lt;<span
-                                    class="text-theme-accent">vector</span>&lt;<span
-                                    class="text-pink-400">char</span>&gt;&gt;&amp; grid, <span
-                                    class="text-pink-400">int</span> r, <span class="text-pink-400">int</span> c) {
-                            </div>
-                            <div id="p14" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-pink-400">if</span> (r &lt; 0 || c &lt; 0 || r >= ROWS || c >= COLS ||
-                                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid[r][c] != <span
-                                    class="text-orange-300">'1'</span>) <span class="text-pink-400">return</span>;
-                            </div>
-                            <div id="p15" class="px-2 rounded transition-all">&nbsp;&nbsp;grid[r][c] = <span
-                                    class="text-orange-300">'2'</span>; <span class="text-theme-muted italic">// Mark
-                                    visited</span></div>
-                            <div id="p16" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-theme-accent">dfs</span>(grid, r + 1, c); <span
-                                    class="text-theme-muted italic">// Down</span></div>
-                            <div id="p17" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-theme-accent">dfs</span>(grid, r - 1, c); <span
-                                    class="text-theme-muted italic">// Up</span></div>
-                            <div id="p18" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-theme-accent">dfs</span>(grid, r, c + 1); <span
-                                    class="text-theme-muted italic">// Right</span></div>
-                            <div id="p19" class="px-2 rounded transition-all">&nbsp;&nbsp;<span
-                                    class="text-theme-accent">dfs</span>(grid, r, c - 1); <span
-                                    class="text-theme-muted italic">// Left</span></div>
-                            <div id="p20" class="px-2 rounded transition-all">}</div>
-                        </div>
-                    </div>
-                </section>
             </div>
         </div>
     </div>
 
     <script>
+
         const sleep = ms => new Promise(res => setTimeout(res, ms));
+
         const $ = id => document.getElementById(id);
-        const hl = id => {
-            document.querySelectorAll('[id^="p"]').forEach(e => e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4'));
-            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
-        };
 
         let ROWS = 6;
-        let COLS = 12; // Wider for better visual ratio
+        let COLS = 12;
+
         let gridData = [];
         let els = [];
+
         let spd = 400;
         let running = false;
+
         let islands = 0;
         let dfsCalls = 0;
 
         function setSpill(state, text) {
+
             const p = $('spill');
-            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
-            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
-            else if (state === 'dfs') p.classList.add('bg-theme-accent/20', 'border-theme-text', 'text-theme-text');
-            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+
+            p.className =
+                'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+
+            if (state === 'run' || state === 'found') {
+
+                p.classList.add(
+                    'bg-theme-accent/10',
+                    'border-theme-accent',
+                    'text-theme-accent'
+                );
+
+            } else {
+
+                p.classList.add(
+                    'bg-theme-bg',
+                    'border-theme-border',
+                    'text-theme-muted'
+                );
+            }
+
             p.textContent = text;
         }
 
         function genMap() {
+
             if (running) return;
-            gridData = []; els = []; islands = 0; dfsCalls = 0;
+
+            gridData = [];
+            els = [];
+
+            islands = 0;
+            dfsCalls = 0;
 
             const wrap = $('grid-wrap');
-            wrap.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
+
+            wrap.style.gridTemplateColumns =
+                `repeat(${COLS}, minmax(0, 1fr))`;
+
             wrap.innerHTML = '';
 
             for (let r = 0; r < ROWS; r++) {
+
                 let rowData = [];
                 let rowEls = [];
+
                 for (let c = 0; c < COLS; c++) {
-                    // 35% chance of being land (1), 65% water (0)
+
                     let val = Math.random() < 0.35 ? 1 : 0;
+
                     rowData.push(val);
 
                     const el = document.createElement('div');
-                    el.className = 'cell w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center font-code text-sm font-bold transition-all duration-300';
+
+                    el.className =
+                        'cell w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center font-code text-sm font-bold';
+
                     el.textContent = val;
 
-                    // High Visibility Skeleton Setup
                     if (val === 1) {
-                        el.classList.add('bg-theme-accent/10', 'border-2', 'border-theme-accent/80', 'text-theme-accent');
+
+                        el.classList.add(
+                            'bg-theme-accent/10',
+                            'border-2',
+                            'border-theme-accent/80',
+                            'text-theme-accent'
+                        );
+
                     } else {
-                        el.classList.add('border', 'border-slate-700/60', 'text-theme-muted', 'opacity-50');
+
+                        el.classList.add(
+                            'border',
+                            'border-slate-700/60',
+                            'text-theme-muted',
+                            'opacity-50'
+                        );
                     }
 
                     wrap.appendChild(el);
+
                     rowEls.push(el);
                 }
+
                 gridData.push(rowData);
                 els.push(rowEls);
             }
 
             $('s-islands').textContent = '0';
             $('s-calls').textContent = '0';
-            const res = $('result');
-            res.className = 'text-center font-code text-sm text-theme-muted mt-2';
-            res.textContent = '// New matrix generated. Ready to scan.';
+
+            $('result').textContent =
+                '// New matrix generated. Ready to scan.';
+
             setSpill('idle', 'IDLE — Press Run');
-            hl(null);
         }
 
         function setCellState(r, c, state) {
+
             const el = els[r][c];
-            // Clear dynamic states, keep base logic visible
-            el.className = 'cell w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center font-code text-sm font-bold transition-all duration-300';
+
+            el.className =
+                'cell w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center font-code text-sm font-bold transition-all duration-300';
 
             if (state === 'scan') {
-                el.classList.add('bg-theme-bg', 'border', 'border-theme-text', 'scale-110', 'text-theme-text', 'z-10');
-            } else if (state === 'dfs-active') {
-                el.classList.add('bg-theme-bg', 'border-2', 'border-theme-accent', 'scale-110', 'text-theme-text', 'shadow-[0_0_15px_rgba(45,212,191,0.5)]', 'z-20');
+
+                el.classList.add(
+                    'bg-theme-bg',
+                    'border',
+                    'border-theme-text',
+                    'scale-110',
+                    'text-theme-text'
+                );
+
             } else if (state === 'visited') {
-                el.classList.add('bg-theme-accent', 'text-theme-bg', 'scale-95');
+
+                el.classList.add(
+                    'bg-theme-accent',
+                    'text-theme-bg',
+                    'scale-95'
+                );
+
                 el.textContent = '2';
-            } else if (state === 'hit-water') {
-                el.classList.add('hit-water', 'border', 'border-theme-muted', 'text-theme-muted');
-                if (gridData[r][c] === 0) el.classList.add('opacity-50');
-                if (gridData[r][c] === 2) {
-                    el.classList.add('bg-theme-accent', 'text-theme-bg'); // Keep it looking visited during shake
-                }
+
             } else {
-                // Idle Restore
+
                 if (gridData[r][c] === 1) {
-                    el.classList.add('bg-theme-accent/10', 'border-2', 'border-theme-accent/80', 'text-theme-accent');
+
+                    el.classList.add(
+                        'bg-theme-accent/10',
+                        'border-2',
+                        'border-theme-accent/80',
+                        'text-theme-accent'
+                    );
+
+                    el.textContent = '1';
+
                 } else if (gridData[r][c] === 2) {
-                    el.classList.add('bg-theme-accent', 'text-theme-bg', 'scale-95');
+
+                    el.classList.add(
+                        'bg-theme-accent',
+                        'text-theme-bg',
+                        'scale-95'
+                    );
+
+                    el.textContent = '2';
+
                 } else {
-                    el.classList.add('border', 'border-slate-700/60', 'text-theme-muted', 'opacity-50');
+
+                    el.classList.add(
+                        'border',
+                        'border-slate-700/60',
+                        'text-theme-muted',
+                        'opacity-50'
+                    );
+
+                    el.textContent = '0';
                 }
             }
-        }
-
-        async function runIslands() {
-            if (running) return;
-            running = true; $('btn-gen').disabled = true; $('btn-run').disabled = true;
-
-            setSpill('run', 'SCANNING MATRIX...');
-            const res = $('result');
-            res.className = 'text-center font-code text-sm text-theme-text mt-2';
-
-            hl('p2'); await sleep(spd / 2);
-
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    hl('p4');
-
-                    // Scanning effect
-                    setCellState(r, c, 'scan');
-                    res.textContent = `// Scanning cell [${r}][${c}]...`;
-                    await sleep(spd / 1.5);
-
-                    if (gridData[r][c] === 1) {
-                        hl('p5'); await sleep(spd / 2);
-                        hl('p6');
-                        islands++;
-                        $('s-islands').textContent = islands;
-
-                        res.className = 'text-center font-code text-sm text-theme-accent font-bold mt-2';
-                        res.textContent = `// Found unvisited land (1) at [${r}][${c}]! Triggering DFS...`;
-                        setSpill('dfs', `FLOOD FILL #${islands}`);
-
-                        hl('p7');
-                        await runDFS(r, c);
-
-                        setSpill('run', 'RESUMING SCAN...');
-                        res.className = 'text-center font-code text-sm text-theme-text mt-2';
-                    }
-
-                    // Remove scan effect
-                    setCellState(r, c, 'idle');
-                }
-            }
-
-            hl('p11');
-            res.className = 'text-center font-code text-sm text-theme-accent font-bold mt-2';
-            res.textContent = `✓ Scan complete. Total Islands Found: ${islands}.`;
-            setSpill('found', 'COMPLETE ✓');
-
-            running = false; $('btn-gen').disabled = false; $('btn-run').disabled = false;
         }
 
         async function runDFS(r, c) {
+
             dfsCalls++;
+
             $('s-calls').textContent = dfsCalls;
 
-            hl('p13'); await sleep(spd / 3);
-            hl('p14');
-
-            // Check Bounds & Water
-            if (r < 0 || c < 0 || r >= ROWS || c >= COLS || gridData[r][c] !== 1) {
-                // Valid bounds check for shake effect
-                if (r >= 0 && c >= 0 && r < ROWS && c < COLS) {
-                    setCellState(r, c, 'hit-water');
-                    await sleep(spd / 1.5);
-                    setCellState(r, c, 'idle');
-                }
+            if (
+                r < 0 ||
+                c < 0 ||
+                r >= ROWS ||
+                c >= COLS ||
+                gridData[r][c] !== 1
+            ) {
                 return;
             }
 
-            // Valid Unvisited Land
-            hl('p15');
             gridData[r][c] = 2;
-            setCellState(r, c, 'dfs-active');
+
+            setCellState(r, c, 'visited');
+
             await sleep(spd);
 
-            setCellState(r, c, 'visited'); // Set permanent visited style
-
-            // Recursive Calls
-            hl('p16'); await runDFS(r + 1, c); // Down
-            hl('p17'); await runDFS(r - 1, c); // Up
-            hl('p18'); await runDFS(r, c + 1); // Right
-            hl('p19'); await runDFS(r, c - 1); // Left
+            await runDFS(r + 1, c);
+            await runDFS(r - 1, c);
+            await runDFS(r, c + 1);
+            await runDFS(r, c - 1);
         }
 
-        $('btn-gen').onclick = genMap;
-        $('btn-run').onclick = runIslands;
-        $('spd').oninput = function () { spd = 1100 - parseInt(this.value); };
+        async function runIslands() {
 
-        // Theme Toggle
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const themeKnob = document.getElementById('theme-knob');
-        themeBtn.addEventListener('click', () => {
-            html.classList.toggle('light');
-            if (html.classList.contains('light')) {
-                themeKnob.textContent = '☀️';
-                themeKnob.style.transform = 'translateX(20px)';
-            } else {
-                themeKnob.textContent = '🌙';
-                themeKnob.style.transform = 'translateX(0)';
+            if (running) return;
+
+            running = true;
+
+            setSpill('run', 'SCANNING MATRIX...');
+
+            for (let r = 0; r < ROWS; r++) {
+
+                for (let c = 0; c < COLS; c++) {
+
+                    setCellState(r, c, 'scan');
+
+                    await sleep(spd / 2);
+
+                    if (gridData[r][c] === 1) {
+
+                        islands++;
+
+                        $('s-islands').textContent = islands;
+
+                        $('result').textContent =
+                            `// Found island at [${r}][${c}]`;
+
+                        await runDFS(r, c);
+                    }
+
+                    setCellState(r, c, 'idle');
+                }
             }
-        });
 
-        // Initialize
+            $('result').textContent =
+                `✓ Scan complete. Total Islands Found: ${islands}`;
+
+            setSpill('found', 'COMPLETE ✓');
+
+            running = false;
+        }
+
+        $('btn-run').onclick = runIslands;
+
+        $('btn-gen').onclick = genMap;
+
+        $('spd').oninput = function () {
+            spd = 1100 - parseInt(this.value);
+        };
+
         genMap();
+
     </script>
+
 </body>
 
 </html>
