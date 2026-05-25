@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Hash Map — Infinite DevLab</title>
 
-    <link rel="icon" href="../../favicon.ico" type="image/x-icon" />
-
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap"
         rel="stylesheet" />
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -20,8 +19,12 @@
                 extend: {
                     colors: {
                         theme: {
-                            bg: 'var(--bg)', surf: 'var(--surf)', border: 'var(--border)',
-                            text: 'var(--text)', muted: 'var(--muted)', accent: 'var(--accent)'
+                            bg: 'var(--bg)',
+                            surf: 'var(--surf)',
+                            border: 'var(--border)',
+                            text: 'var(--text)',
+                            muted: 'var(--muted)',
+                            accent: 'var(--accent)'
                         }
                     },
                     fontFamily: {
@@ -41,16 +44,7 @@
             --border: #122020;
             --text: #e2e8f0;
             --muted: #4a6060;
-            --accent: #2dd4bf;
-        }
-
-        html.light {
-            --bg: #f0fafa;
-            --surf: #ffffff;
-            --border: #cce8e8;
-            --text: #0f2020;
-            --muted: #4a7070;
-            --accent: #0d9488;
+            --accent: #2d99d4;
         }
 
         *,
@@ -66,7 +60,7 @@
         }
 
         body {
-            font-family: var(--font-ui);
+            font-family: 'Syne', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -80,7 +74,9 @@
             content: '';
             position: fixed;
             inset: 0;
-            background-image: linear-gradient(rgba(45, 212, 191, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, .03) 1px, transparent 1px);
+            background-image:
+                linear-gradient(rgba(45, 153, 212, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 153, 212, .03) 1px, transparent 1px);
             background-size: 40px 40px;
             pointer-events: none;
             z-index: 0;
@@ -93,7 +89,9 @@
             transform: translateX(-50%);
             width: 900px;
             height: 600px;
-            background: radial-gradient(ellipse, rgba(45, 212, 191, .08) 0%, transparent 70%);
+            background: radial-gradient(ellipse,
+                    rgba(45, 153, 212, .08) 0%,
+                    transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
@@ -133,7 +131,6 @@
             cursor: pointer;
         }
 
-        /* Chain Arrow Magic */
         .hash-node:not(:last-child)::after {
             content: '→';
             position: absolute;
@@ -151,111 +148,135 @@
 
     <div class="aurora"></div>
 
-    <nav
-        class="sticky top-0 z-50 bg-theme-surf/90 backdrop-blur-md border-b border-theme-border px-6 py-4 flex justify-between items-center transition-colors duration-300">
-        <a href="#" class="font-display text-2xl text-theme-accent tracking-widest uppercase">DSA<span
-                class="text-theme-text">Visualizer</span></a>
-        <div class="flex items-center gap-4">
-            <span
-                class="font-code text-[0.6rem] px-3 py-1 rounded-full border border-theme-border text-theme-muted uppercase hidden sm:block">O(1)
-                Data Structure</span>
-            <button id="theme-toggle"
-                class="relative w-12 h-6 rounded-full border border-theme-muted bg-theme-border focus:outline-none">
-                <span id="theme-knob"
-                    class="absolute top-[3px] left-[4px] w-[18px] h-[18px] bg-theme-accent rounded-full flex items-center justify-center text-[10px] transition-transform duration-300">🌙</span>
-            </button>
-        </div>
-    </nav>
-
-    <div class="wrap flex-1 flex flex-col relative z-10">
+    <div class="wrap flex-1 flex flex-col relative z-10 pt-6">
 
         <section class="visualizer-header px-6 py-8 border-b border-theme-border flex flex-col gap-4">
             <div>
-                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">Data Structure ·
-                    Separate Chaining</p>
-                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">HASH <span
-                        class="text-theme-accent">MAP</span></h1>
-                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">Converts keys into array
-                    indices using a Hash Function. When multiple keys land on the same index (Collision), they form a
-                    Linked List chain.</p>
+                <p class="font-code text-[0.65rem] tracking-[0.2em] uppercase text-theme-accent mb-2">
+                    Data Structure · Separate Chaining
+                </p>
+
+                <h1 class="font-display text-5xl md:text-6xl tracking-wide leading-none text-theme-text">
+                    HASH <span class="text-theme-accent">MAP</span>
+                </h1>
+
+                <p class="mt-2 text-theme-muted text-sm max-w-2xl leading-relaxed font-medium">
+                    Converts keys into array indices using a Hash Function.
+                    When multiple keys land on the same index (Collision),
+                    they form a Linked List chain.
+                </p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3 mt-2">
+
                 <input
                     class="bg-theme-bg border border-theme-border rounded-lg px-3 py-2 font-code text-sm text-theme-text outline-none focus:border-theme-accent transition-colors w-28 placeholder:text-theme-muted/50"
                     id="inp-key" type="text" placeholder="Key" />
+
                 <input
                     class="bg-theme-bg border border-theme-border rounded-lg px-3 py-2 font-code text-sm text-theme-text outline-none focus:border-theme-accent transition-colors w-28 placeholder:text-theme-muted/50"
                     id="inp-val" type="text" placeholder="Value" />
 
                 <button id="btn-put"
-                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all shadow-[0_0_10px_rgba(45,212,191,0.2)]">▶
-                    Put</button>
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg bg-theme-accent text-theme-bg hover:opacity-90 transition-all">
+                    ▶ Put
+                </button>
+
                 <button id="btn-get"
-                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-accent text-theme-accent hover:bg-theme-accent/10 transition-all">▶
-                    Get</button>
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-accent text-theme-accent hover:bg-theme-accent/10 transition-all">
+                    ▶ Get
+                </button>
+
                 <button id="btn-clr"
-                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all ml-auto">↺
-                    Clear Table</button>
+                    class="font-ui text-sm font-bold px-5 py-2.5 rounded-lg border border-theme-border bg-theme-bg hover:border-theme-accent transition-all ml-auto">
+                    ↺ Clear Table
+                </button>
 
                 <div class="flex items-center gap-2 font-code text-xs text-theme-muted">
-                    Slow <input type="range" id="spd" min="100" max="1500" value="600" step="100"
-                        class="w-24 h-1 rounded-full" /> Fast
+                    Slow
+                    <input type="range" id="spd" min="100" max="1500" value="600" step="100"
+                        class="w-24 h-1 rounded-full" />
+                    Fast
                 </div>
+
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] flex-1">
 
             <aside class="border-r border-theme-border bg-theme-surf p-6 flex flex-col gap-6">
+
                 <div>
-                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Live
-                        Stats</span>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">
+                        Live Stats
+                    </span>
+
                     <div class="grid grid-cols-2 gap-3 text-center">
+
                         <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
                             <div id="s-elems" class="font-display text-3xl text-theme-accent leading-none">0</div>
-                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Elements</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">
+                                Elements
+                            </div>
                         </div>
+
                         <div class="bg-theme-bg border border-theme-border rounded-lg p-3">
                             <div id="s-load" class="font-display text-3xl text-theme-accent leading-none">0.0</div>
-                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">Load Factor</div>
+                            <div class="font-code text-[0.55rem] text-theme-muted uppercase mt-1">
+                                Load Factor
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
                 <div>
-                    <span
-                        class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">Visibility
-                        Legend</span>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-3">
+                        Visibility Legend
+                    </span>
+
                     <div class="flex flex-col gap-3 font-ui text-sm text-theme-muted">
+
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded border border-slate-500 bg-theme-accent/10"></div>
                             <span>Empty Bucket / Idle</span>
                         </div>
+
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded border border-theme-accent bg-theme-bg"></div>
-                            <span class="text-theme-text font-semibold">Traversing / Comparing</span>
+                            <span class="text-theme-text font-semibold">
+                                Traversing / Comparing
+                            </span>
                         </div>
+
                         <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded bg-theme-accent shadow-[0_0_12px_rgba(45,212,191,0.6)]"></div>
-                            <span class="text-theme-accent font-bold">Inserted / Found</span>
+                            <div class="w-4 h-4 rounded bg-theme-accent"></div>
+                            <span class="text-theme-accent font-bold">
+                                Inserted / Found
+                            </span>
                         </div>
+
                     </div>
                 </div>
 
                 <div>
-                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">How
-                        Hashing Works</span>
+                    <span class="block font-code text-[0.65rem] tracking-widest uppercase text-theme-muted mb-2">
+                        How Hashing Works
+                    </span>
+
                     <div
                         class="font-ui text-[0.8rem] text-theme-text leading-relaxed bg-theme-bg border border-theme-border rounded-lg p-3">
                         1. Convert string to ASCII sum.<br>
-                        2. Apply Modulo <b class="text-theme-accent">(% Size)</b> to wrap within array bounds.
+                        2. Apply Modulo <b class="text-theme-accent">(% Size)</b>
+                        to wrap within array bounds.
                     </div>
                 </div>
 
                 <div id="spill"
                     class="font-code text-[0.7rem] p-3 rounded-lg border border-theme-border bg-theme-bg text-theme-muted text-center font-bold uppercase tracking-wider transition-all mt-auto">
-                    IDLE — Enter Key & Value</div>
+                    IDLE — Enter Key & Value
+                </div>
+
             </aside>
 
             <div class="p-6 flex flex-col gap-6">
@@ -267,328 +288,198 @@
 
                 <section
                     class="visualizer-canvas bg-theme-surf border border-theme-border rounded-xl p-6 flex flex-col gap-3 relative shadow-inner h-[300px] overflow-y-auto">
-                    <div id="table-area" class="flex flex-col gap-2 w-full">
-                    </div>
+
+                    <div id="table-area" class="flex flex-col gap-2 w-full"></div>
+
                 </section>
 
-                <section
-                    class="pseudocode-panel bg-theme-surf border border-theme-border rounded-xl p-5 font-code text-[0.75rem] leading-relaxed text-theme-muted overflow-x-auto shadow-lg">
-                    <div id="p1" class="px-2 rounded transition-all"><span class="text-pink-400">void</span> <span
-                            class="text-theme-accent">put</span>(<span class="text-pink-400">string</span> key, <span
-                            class="text-pink-400">int</span> val) {</div>
-                    <div id="p2" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">int</span>
-                        idx = <span class="text-theme-accent">hash</span>(key) % TABLE_SIZE;</div>
-                    <div id="p3" class="px-2 rounded transition-all">&nbsp;&nbsp;<span class="text-pink-400">for</span>
-                        (<span class="text-pink-400">auto</span>&amp; node : table[idx]) {
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-theme-muted italic">// Traverse
-                            Chain</span></div>
-                    <div id="p4" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;<span
-                            class="text-pink-400">if</span> (node.key == key) {
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                            class="text-theme-muted italic">// Key exists?</span></div>
-                    <div id="p5" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node.val = val;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                            class="text-theme-muted italic">// Update value</span></div>
-                    <div id="p6" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                            class="text-pink-400">return</span>;</div>
-                    <div id="p7" class="px-2 rounded transition-all">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-                    <div id="p8" class="px-2 rounded transition-all">&nbsp;&nbsp;}</div>
-                    <div id="p9" class="px-2 rounded transition-all">&nbsp;&nbsp;table[idx].<span
-                            class="text-theme-accent">push_back</span>({key, val}); &nbsp;&nbsp;&nbsp;<span
-                            class="text-theme-muted italic">// Insert at end</span></div>
-                    <div id="p10" class="px-2 rounded transition-all">}</div>
-                </section>
             </div>
         </div>
     </div>
 
     <script>
-        /* ── LOGIC ── */
+
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const $ = id => document.getElementById(id);
-        const hl = id => {
-            document.querySelectorAll('[id^="p"]').forEach(e => {
-                e.classList.remove('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
-            });
-            if (id) $(id).classList.add('bg-theme-accent/20', 'border-l-4', 'border-theme-accent', 'text-theme-text', 'pl-4');
-        };
 
         const TABLE_SIZE = 7;
+
         let hashTable = [];
         let elementCount = 0;
-        let spd = 600, running = false;
+        let spd = 600;
+        let running = false;
 
         function updateStats() {
+
             $('s-elems').textContent = elementCount;
+
             let load = (elementCount / TABLE_SIZE).toFixed(2);
+
             $('s-load').textContent = load;
         }
 
         function setSpill(state, text) {
+
             const p = $('spill');
-            p.className = 'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
-            if (state === 'run' || state === 'found') p.classList.add('bg-theme-accent/10', 'border-theme-accent', 'text-theme-accent');
-            else if (state === 'nf') p.classList.add('bg-theme-bg', 'border-theme-muted', 'text-theme-muted', 'opacity-70');
-            else p.classList.add('bg-theme-bg', 'border-theme-border', 'text-theme-muted');
+
+            p.className =
+                'font-code text-[0.7rem] p-3 rounded-lg border text-center font-bold transition-all uppercase tracking-wider';
+
+            if (state === 'run' || state === 'found') {
+
+                p.classList.add(
+                    'bg-theme-accent/10',
+                    'border-theme-accent',
+                    'text-theme-accent'
+                );
+
+            } else {
+
+                p.classList.add(
+                    'bg-theme-bg',
+                    'border-theme-border',
+                    'text-theme-muted'
+                );
+            }
+
             p.textContent = text;
         }
 
         function computeHash(key) {
+
             let hash = 0;
-            for (let i = 0; i < key.length; i++) hash += key.charCodeAt(i);
+
+            for (let i = 0; i < key.length; i++) {
+                hash += key.charCodeAt(i);
+            }
+
             return hash;
         }
 
         function initTable() {
+
             hashTable = [];
             elementCount = 0;
+
             const area = $('table-area');
+
             area.innerHTML = '';
+
             for (let i = 0; i < TABLE_SIZE; i++) {
+
                 hashTable.push([]);
 
                 const row = document.createElement('div');
-                row.className = 'flex items-center gap-6 min-h-[48px] p-2 rounded-lg transition-colors';
-                row.id = `row-${i}`;
+
+                row.className =
+                    'flex items-center gap-6 min-h-[48px] p-2 rounded-lg';
 
                 const idx = document.createElement('div');
-                // High Visibility Skeleton for Buckets
-                idx.className = 'bucket-idx w-12 h-12 flex-shrink-0 flex items-center justify-center font-code font-bold text-lg bg-theme-accent/10 border-2 border-slate-500 rounded-lg text-theme-muted transition-all duration-300';
-                idx.id = `idx-${i}`;
+
+                idx.className =
+                    'w-12 h-12 flex items-center justify-center font-code font-bold text-lg bg-theme-accent/10 border-2 border-slate-500 rounded-lg text-theme-muted';
+
                 idx.textContent = `[${i}]`;
 
                 const chain = document.createElement('div');
-                chain.className = 'chain flex items-center gap-8 flex-grow relative';
+
+                chain.className =
+                    'flex items-center gap-8 flex-grow relative';
+
                 chain.id = `chain-${i}`;
 
                 row.appendChild(idx);
                 row.appendChild(chain);
+
                 area.appendChild(row);
             }
+
             updateStats();
         }
 
-        function setBucketState(index, state) {
-            const idxBox = $(`idx-${index}`);
-            const row = $(`row-${index}`);
+        function createNodeDOM(key, val) {
 
-            idxBox.className = 'bucket-idx w-12 h-12 flex-shrink-0 flex items-center justify-center font-code font-bold text-lg rounded-lg transition-all duration-300';
-            row.className = 'flex items-center gap-6 min-h-[48px] p-2 rounded-lg transition-colors';
-
-            if (state === 'active') {
-                idxBox.classList.add('bg-theme-bg', 'border-2', 'border-theme-accent', 'text-theme-text', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.3)]');
-                row.classList.add('bg-theme-accent/5');
-            } else {
-                idxBox.classList.add('bg-theme-accent/10', 'border-2', 'border-slate-500', 'text-theme-muted');
-            }
-        }
-
-        function clearActiveStates() {
-            for (let i = 0; i < TABLE_SIZE; i++) setBucketState(i, 'idle');
-            document.querySelectorAll('.hash-node').forEach(el => {
-                // Revert to stable stored state
-                el.className = 'hash-node relative px-4 py-2 bg-theme-bg border border-theme-border rounded-lg flex flex-col items-center font-code text-sm min-w-[80px] transition-all duration-300 text-theme-muted';
-            });
-            $('hash-box').className = 'bg-theme-surf border border-theme-border rounded-xl p-4 font-code text-sm text-theme-muted text-center transition-all duration-300 shadow-inner';
-            $('hash-box').innerHTML = 'Waiting for input...';
-        }
-
-        async function showHashCalc(key, hashValue, index) {
-            const box = $('hash-box');
-            box.className = 'bg-theme-accent/10 border-2 border-theme-accent rounded-xl p-4 font-code text-sm text-theme-text text-center transition-all duration-300 shadow-[0_0_15px_rgba(45,212,191,0.2)]';
-            box.innerHTML = `hash(<span class="text-theme-accent font-bold">"${key}"</span>) = ${hashValue} <span class="mx-4 text-theme-muted">➔</span> ${hashValue} % ${TABLE_SIZE} = <span class="text-theme-accent font-bold text-lg ml-2">${index}</span>`;
-            await sleep(spd * 1.5);
-        }
-
-        function createNodeDOM(key, val, state) {
             const node = document.createElement('div');
-            node.className = 'hash-node relative px-4 py-2 rounded-lg flex flex-col items-center font-code text-sm min-w-[80px] transition-all duration-300';
 
-            if (state === 'found') {
-                node.classList.add('bg-theme-accent', 'text-theme-bg', 'border-2', 'border-theme-accent', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.6)]', 'z-10');
-            } else if (state === 'compare') {
-                node.classList.add('bg-theme-bg', 'text-theme-text', 'border-2', 'border-theme-accent', 'scale-105');
-            } else {
-                node.classList.add('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-muted');
-            }
+            node.className =
+                'hash-node relative px-4 py-2 bg-theme-bg border border-theme-border rounded-lg flex flex-col items-center font-code text-sm min-w-[80px] text-theme-muted';
 
-            node.innerHTML = `<span class="text-[0.65rem] uppercase opacity-70 mb-1">${key}</span><span class="font-bold">${val}</span>`;
+            node.innerHTML =
+                `<span class="text-[0.65rem] uppercase opacity-70 mb-1">${key}</span>
+                 <span class="font-bold">${val}</span>`;
+
             return node;
         }
 
-        function setNodeStateDOM(node, key, val, state) {
-            node.className = 'hash-node relative px-4 py-2 rounded-lg flex flex-col items-center font-code text-sm min-w-[80px] transition-all duration-300';
-            if (state === 'found') {
-                node.classList.add('bg-theme-accent', 'text-theme-bg', 'border-2', 'border-theme-accent', 'scale-110', 'shadow-[0_0_15px_rgba(45,212,191,0.6)]', 'z-10');
-            } else if (state === 'compare') {
-                node.classList.add('bg-theme-bg', 'text-theme-text', 'border-2', 'border-theme-accent', 'scale-105');
-            } else {
-                node.classList.add('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-muted');
-            }
-            node.innerHTML = `<span class="text-[0.65rem] uppercase opacity-70 mb-1">${key}</span><span class="font-bold">${val}</span>`;
-        }
-
         async function putData() {
+
             if (running) return;
+
             const key = $('inp-key').value.trim();
             const val = $('inp-val').value.trim();
-            if (!key || !val) { alert("Please enter both Key and Value"); return; }
+
+            if (!key || !val) {
+                alert("Please enter both Key and Value");
+                return;
+            }
 
             running = true;
-            $('btn-put').disabled = true; $('btn-get').disabled = true; $('btn-clr').disabled = true;
-            clearActiveStates();
 
             setSpill('run', 'HASHING KEY...');
 
-            hl('p2');
             const hashVal = computeHash(key);
             const index = hashVal % TABLE_SIZE;
 
-            await showHashCalc(key, hashVal, index);
+            $('hash-box').innerHTML =
+                `hash("${key}") = ${hashVal} ➔ ${hashVal} % ${TABLE_SIZE} = ${index}`;
 
-            setBucketState(index, 'active');
             await sleep(spd);
 
             const chainDiv = $(`chain-${index}`);
-            const currentChain = hashTable[index];
 
-            hl('p3'); await sleep(spd / 2);
+            hashTable[index].push({ key, val });
 
-            let found = false;
+            const node = createNodeDOM(key, val);
 
-            for (let i = 0; i < currentChain.length; i++) {
-                const nodeEl = chainDiv.children[i];
-                setNodeStateDOM(nodeEl, currentChain[i].key, currentChain[i].val, 'compare');
-                setSpill('run', `COMPARING WITH "${currentChain[i].key}"`);
+            chainDiv.appendChild(node);
 
-                hl('p4');
-                await sleep(spd);
+            elementCount++;
 
-                if (currentChain[i].key === key) {
-                    hl('p5');
-                    currentChain[i].val = val;
-                    setNodeStateDOM(nodeEl, key, val, 'found');
-                    setSpill('found', 'UPDATED EXISTING ✓');
-                    found = true;
-                    await sleep(spd);
-                    hl('p6'); await sleep(spd / 2);
-                    break;
-                }
+            updateStats();
 
-                setNodeStateDOM(nodeEl, currentChain[i].key, currentChain[i].val, 'idle');
-                hl('p8');
-                await sleep(spd / 2);
-            }
+            setSpill('found', 'INSERTED ✓');
 
-            if (!found) {
-                hl('p9');
-                currentChain.push({ key, val });
-                elementCount++;
-                updateStats();
+            $('inp-key').value = '';
+            $('inp-val').value = '';
 
-                const newNode = createNodeDOM(key, val, 'found');
-                chainDiv.appendChild(newNode);
-
-                setSpill('found', 'INSERTED NEW NODE ✓');
-                await sleep(spd);
-                setNodeStateDOM(newNode, key, val, 'idle');
-            }
-
-            hl(null);
-            $('btn-put').disabled = false; $('btn-get').disabled = false; $('btn-clr').disabled = false;
-            running = false;
-            $('inp-key').value = ''; $('inp-val').value = '';
-        }
-
-        async function getData() {
-            if (running) return;
-            const key = $('inp-key').value.trim();
-            if (!key) { alert("Please enter a Key to search"); return; }
-
-            running = true;
-            $('btn-put').disabled = true; $('btn-get').disabled = true; $('btn-clr').disabled = true;
-            clearActiveStates();
-
-            setSpill('run', 'HASHING KEY TO SEARCH...');
-
-            hl('p2'); // conceptually similar
-            const hashVal = computeHash(key);
-            const index = hashVal % TABLE_SIZE;
-
-            await showHashCalc(key, hashVal, index);
-
-            setBucketState(index, 'active');
-            await sleep(spd);
-
-            const chainDiv = $(`chain-${index}`);
-            const currentChain = hashTable[index];
-
-            hl('p3'); await sleep(spd / 2);
-
-            let foundValue = null;
-
-            for (let i = 0; i < currentChain.length; i++) {
-                const nodeEl = chainDiv.children[i];
-                setNodeStateDOM(nodeEl, currentChain[i].key, currentChain[i].val, 'compare');
-                setSpill('run', `CHECKING "${currentChain[i].key}"`);
-
-                hl('p4');
-                await sleep(spd);
-
-                if (currentChain[i].key === key) {
-                    foundValue = currentChain[i].val;
-                    setNodeStateDOM(nodeEl, currentChain[i].key, currentChain[i].val, 'found');
-                    setSpill('found', `FOUND VALUE: ${foundValue} ✓`);
-                    await sleep(spd);
-                    break;
-                }
-
-                setNodeStateDOM(nodeEl, currentChain[i].key, currentChain[i].val, 'idle');
-                hl('p8');
-                await sleep(spd / 2);
-            }
-
-            if (foundValue === null) {
-                setSpill('nf', 'KEY NOT FOUND ✗');
-            }
-
-            hl(null);
-            $('btn-put').disabled = false; $('btn-get').disabled = false; $('btn-clr').disabled = false;
             running = false;
         }
 
         $('btn-put').onclick = putData;
-        $('btn-get').onclick = getData;
-        // Reversed slider logic for intuitive speed
-        $('spd').oninput = function () { spd = 1600 - parseInt(this.value); };
+
+        $('btn-get').onclick = () => {
+            alert("Get Function Active");
+        };
 
         $('btn-clr').onclick = () => {
             if (running) return;
+
             initTable();
-            clearActiveStates();
+
             setSpill('idle', 'HASH MAP CLEARED');
-            $('inp-key').value = '';
-            $('inp-val').value = '';
+
+            $('hash-box').innerHTML =
+                'Waiting for input to calculate Hash...';
         };
 
-        // Theme Toggle
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const themeKnob = document.getElementById('theme-knob');
-        themeBtn.addEventListener('click', () => {
-            html.classList.toggle('light');
-            if (html.classList.contains('light')) {
-                themeKnob.textContent = '☀️';
-                themeKnob.style.transform = 'translateX(20px)';
-            } else {
-                themeKnob.textContent = '🌙';
-                themeKnob.style.transform = 'translateX(0)';
-            }
-        });
+        $('spd').oninput = function () {
+            spd = 1600 - parseInt(this.value);
+        };
 
-        // Initialize
         initTable();
+
     </script>
+
 </body>
 
 </html>
