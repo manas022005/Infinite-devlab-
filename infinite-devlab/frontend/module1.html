@@ -65,7 +65,7 @@
       --sh: 0 4px 20px rgba(0, 0, 0, 0.4);
       --neon-border: inset 0 0 0 1px var(--border);
 
-      --nav-height: 70px;
+      --nav-height: 0px;
     }
 
     html.light {
@@ -135,159 +135,7 @@
       background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
     }
 
-    /* ── 3. GLOBAL NAVBAR ─────────────────────────────────── */
-    .global-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: var(--nav-height);
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      z-index: 1000;
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-    }
-
-    .logo-link {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .logo-infinite {
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--text);
-      letter-spacing: -0.5px;
-    }
-
-    .logo-devlab {
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--devlab-yellow);
-      letter-spacing: -0.5px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--text);
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--accent);
-    }
-
-    .nav-links a.active {
-      color: var(--accent);
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .btn-login {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 8px 16px;
-      border-radius: var(--r-sm);
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: 0.2s;
-    }
-
-    .btn-login:hover {
-      background: var(--surf);
-    }
-
-    .btn-register {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: var(--r-sm);
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-
-    .btn-register:hover {
-      background: #2563EB;
-    }
-
-    /* Responsive Nav Hiding */
-    @media (max-width: 950px) {
-      .nav-links {
-        display: none;
-      }
-    }
-
-    @media (max-width: 500px) {
-
-      .btn-login,
-      .btn-register {
-        display: none;
-      }
-
-      .logo-infinite,
-      .logo-devlab {
-        font-size: 1.1rem;
-      }
-    }
-
-    /* Theme Toggle */
-    .theme-toggle {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      border-radius: 20px;
-      border: 1px solid var(--muted);
-      background: var(--surf);
-      flex-shrink: 0;
-    }
-
-    .theme-knob {
-      position: absolute;
-      top: 2px;
-      left: 3px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      transition: transform 0.3s;
-    }
-
-    html.light .theme-knob {
-      transform: translateX(18px);
-      background: var(--accent);
-    }
-
-    /* ── 4. SCREENS ───────────────────────────────────────── */
+    /* ── 3. SCREENS ───────────────────────────────────────── */
     .screen {
       display: none;
       min-height: calc(100vh - var(--nav-height));
@@ -316,7 +164,7 @@
       }
     }
 
-    /* ── 5. HOME SCREEN ───────────────────────────────────── */
+    /* ── 4. HOME SCREEN ───────────────────────────────────── */
     .center-wrap {
       flex: 1;
       display: flex;
@@ -438,7 +286,7 @@
       letter-spacing: 1px;
     }
 
-    /* ── 6. GAME TOPBAR (Sub-header) ──────────────────────── */
+    /* ── 5. GAME TOPBAR (Sub-header) ──────────────────────── */
     .game-subheader {
       display: flex;
       align-items: center;
@@ -485,7 +333,7 @@
       transform: scale(0.9);
     }
 
-    /* ── 7. GAME LAYOUT ───────────────────────────────────── */
+    /* ── 6. GAME LAYOUT ───────────────────────────────────── */
     .game-body {
       display: flex;
       flex-direction: column-reverse;
@@ -533,7 +381,7 @@
       }
     }
 
-    /* ── 8. EDITOR PANELS ─────────────────────────────────── */
+    /* ── 7. EDITOR PANELS ─────────────────────────────────── */
     .lvl-nav {
       display: flex;
       align-items: center;
@@ -635,6 +483,39 @@
       color: var(--text-dim);
     }
 
+    .hint-box {
+      font-family: var(--ff-ui);
+      font-size: 0.85rem;
+      color: var(--text);
+      background: rgba(59, 130, 246, 0.15);
+      padding: 12px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--accent);
+      margin-bottom: 10px;
+      line-height: 1.6;
+      min-height: 50px;
+      display: none;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .hint-box.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .html-preview {
       font-family: var(--ff-code);
       font-size: 0.75rem;
@@ -692,6 +573,7 @@
       display: grid;
       gap: 10px;
       margin-top: 10px;
+      grid-template-columns: 1fr 1fr 1fr;
     }
 
     .btn {
@@ -701,6 +583,16 @@
       transition: all 0.2s;
       font-size: 0.85rem;
       font-family: var(--ff-ui);
+    }
+
+    .btn-hint {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-hint:hover {
+      background: var(--accent-dim);
     }
 
     .btn-run {
@@ -714,24 +606,14 @@
       transform: translateY(-1px);
     }
 
-    .btn-alt {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-alt:hover {
-      border-color: var(--text-dim);
-    }
-
     .btn-ans {
       background: transparent;
-      border: 1px solid var(--error);
-      color: var(--error);
+      border: 1px solid var(--teal-accent);
+      color: var(--teal-accent);
     }
 
     .btn-ans:hover {
-      background: rgba(248, 113, 113, 0.1);
+      background: rgba(45, 212, 191, 0.1);
     }
 
     .feedback {
@@ -752,7 +634,7 @@
       animation: shake 0.4s;
     }
 
-    /* ── 9. PLAYGROUND ────────────────────────────────────── */
+    /* ── 8. PLAYGROUND ────────────────────────────────────── */
     .pg-wrap {
       flex: 1;
       position: relative;
@@ -855,7 +737,7 @@
       }
     }
 
-    /* ── 10. WIN OVERLAY ──────────────────────────────────── */
+    /* ── 9. WIN OVERLAY ──────────────────────────────────── */
     .win-ol {
       position: absolute;
       inset: 0;
@@ -914,43 +796,14 @@
       }
     }
   </style>
-  
 </head>
 
 <body>
 
-  <!-- <nav class="global-nav">
-    <div class="nav-left">
-      <a href="#" class="logo-link" onclick="loadPage('home')">
-        <svg width="22" height="24" viewBox="0 0 24 24" fill="var(--accent)" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7.77V16.22L12 22L22 16.22V7.77L12 2Z" />
-        </svg>
-        <span class="logo-infinite">INFINITE</span>
-        <span class="logo-devlab">DEVLAB</span>
-      </a>
-
-      <div class="nav-links">
-        <a href="#" onclick="loadPage('home')">Home</a>
-        <a href="#" class="active" >CSS Lab</a>
-        <a href="#">Codebreaker</a>
-        <a href="#">DSA Visualizer</a>
-        <a href="#">Problem Solver</a>
-      </div>
-    </div>
-
-    <div class="nav-right">
-      <button class="btn-login">Login</button>
-      <button class="btn-register">Register</button>
-      <button class="theme-toggle" id="theme-btn-global">
-        <span class="theme-knob">🌙</span>
-      </button>
-    </div>
-  </nav> -->
-
   <div id="home-screen" class="screen active">
     <div class="center-wrap">
       <div class="card-box">
-        
+
         <div class="mod-info"><b>Flexbox Mastery</b><span>Master 1D Layout Alignments</span></div>
 
         <button class="mod-btn" id="btn-flex">
@@ -979,7 +832,7 @@
   <div id="game-screen" class="screen">
     <header class="game-subheader">
       <div style="width:80px;">
-        <button id="btn-home-logo" class="btn btn-alt"
+        <button id="btn-home-logo" class="btn btn-hint"
           style="padding: 4px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; height: 30px;">
           ← Back
         </button>
@@ -1003,8 +856,11 @@
           <div class="panel-title"><span>Mission Briefing</span> <span id="mod-tag"
               style="color:var(--accent);">FLEXBOX</span></div>
           <p class="instr-text" id="instr"></p>
-          <div class="panel-title" style="border:none; margin-bottom:0; margin-top:15px;">Available Properties (Type
-            Manually)</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Hints & Tips</div>
+          <div class="hint-box" id="hint-box">Click the Hint button to reveal helpful tips! 💡</div>
           <div class="options-wrap" id="options-box">
           </div>
         </div>
@@ -1019,17 +875,14 @@
           <div class="code-wrap">
             <div class="ed-line" id="ed-sel">#stage {</div>
             <textarea id="css-ed" class="css-ta" spellcheck="false"
-              placeholder="/* Inject CSS rules here */"></textarea>
+              placeholder="/* Write your CSS rules here */"></textarea>
             <div class="ed-line">}</div>
           </div>
 
-          <div class="btn-row" style="grid-template-columns: 1fr;">
-            <button id="btn-reset" class="btn btn-alt">Clear Code</button>
-          </div>
-
-          <div class="btn-row full" id="reveal-container" style="grid-template-columns: 1fr;">
-            <button id="btn-answer" class="btn btn-ans">Reveal Final Answer</button>
-            <button id="btn-run-reveal" class="btn btn-run hidden">Run Revealed Code</button>
+          <div class="btn-row">
+            <button id="btn-hint" class="btn btn-hint">💡 Hint</button>
+            <button id="btn-run" class="btn btn-run">▶ Run</button>
+            <button id="btn-answer" class="btn btn-ans">🔓 Reveal</button>
           </div>
 
           <div id="feedback" class="feedback">ERROR: The layout is unstable. Adjust properties.</div>
@@ -1061,57 +914,105 @@
   </div>
 
   <script>
+    // --- HINT DATABASE ---
+    const hints = {
+      flex: [
+        "Try using the display property with a value that enables flexible layout.",
+        "First, enable flex layout on the parent. Then use justify-content to center along the main axis.",
+        "Use justify-content with a value like 'flex-end' to align to the end of the axis.",
+        "Use align-items property to center elements on the cross axis (vertical for row direction).",
+        "Use justify-content with 'space-between' to put items at edges with equal space between them.",
+        "Use justify-content with 'space-around' to add equal space on all sides of each item.",
+        "Combine align-items: flex-end with justify-content: flex-end to push to bottom-right.",
+        "Use flex-direction property with 'column' value to stack items vertically.",
+        "Use flex-direction with 'row-reverse' to flip the order of horizontal items.",
+        "Combine flex-direction with 'column-reverse' to stack down and flip the order.",
+        "Use flex-wrap property with 'wrap' value to allow items to break to next line.",
+        "Use flex-wrap with 'wrap-reverse' to make wrapped items go upward.",
+        "Use flex-flow shorthand: 'column wrap' to combine direction and wrapping.",
+        "Use align-content: center to center all wrapped rows as a group.",
+        "Use the order property with a negative value to reorder individual flex items.",
+        "Use align-self property on the item to override the container's align-items.",
+        "Use align-self: center to override the container's alignment for just this item.",
+        "Use flex-grow property and set it to a value greater than 0 to make it expand.",
+        "Use flex-basis property to set the initial size of a flex item before free space distribution.",
+        "Combine display: flex, flex-direction: column, justify-content: center, and align-items: center."
+      ],
+      grid: [
+        "Use display: grid and grid-template-columns with two equal-width values like '1fr 1fr'.",
+        "Use grid-template-columns with three '1fr' values: '1fr 1fr 1fr'.",
+        "Add the gap property with '20px' value to create space between grid cells.",
+        "Use grid-template-rows with '50% 50%' or '1fr 1fr' to create equal-height rows.",
+        "Use grid-column: span 2 on the specific item to make it span 2 columns.",
+        "Use grid-row: span 2 on the item to make it span 2 rows vertically.",
+        "Use grid-column: 2 / 4 to place the item from column line 2 to line 4.",
+        "Use grid-row: 2 / 4 to place the item from row line 2 to line 4.",
+        "Use the repeat() function: grid-template-columns: repeat(4, 1fr).",
+        "Use justify-items: center to center all items horizontally in their grid cells.",
+        "Use align-items: center to center all items vertically within their cells.",
+        "Use place-items: center to center items both horizontally and vertically (shorthand).",
+        "Use justify-self: end to override horizontal alignment for just this item.",
+        "Use align-self: end to override vertical alignment for just this item.",
+        "Use place-self: end end to position an item at the bottom-right of its cell.",
+        "Use grid-auto-flow: column to fill columns first instead of rows.",
+        "Use justify-content: center to center the grid content horizontally.",
+        "Use align-content: end to align the grid content to the bottom.",
+        "Use grid-area: main to assign the item to a named template area.",
+        "Use grid-area: 2 / 2 / 4 / 4 (row-start / col-start / row-end / col-end)."
+      ]
+    };
+
     // --- LEVEL DATABASE ---
     const levels = [
       // FLEXBOX (20 Levels)
       // EASY (1-7)
-      { id: 1, mod: 'flex', sel: '#stage', instr: `The nodes need a flexible layout. Initialize the flex container.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex' } },
-      { id: 2, mod: 'flex', sel: '#stage', instr: `Center the element horizontally. (Hint: Don't forget to define the layout model first!)`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'center' } },
-      { id: 3, mod: 'flex', sel: '#stage', instr: `Push the element all the way to the far right edge of the stage.`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'flex-end' } },
-      { id: 4, mod: 'flex', sel: '#stage', instr: `Center the element perfectly along the vertical axis.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center' } },
-      { id: 5, mod: 'flex', sel: '#stage', instr: `Distribute the space perfectly between these three nodes, pushing outer ones to the edges.`, html: '<div class="player"></div><div class="item"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between' } },
-      { id: 6, mod: 'flex', sel: '#stage', instr: `Distribute the nodes so they have equal space entirely around them.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%', 'align-items': 'center' }, bgCss: { 'display': 'flex', 'justify-content': 'space-around' } },
-      { id: 7, mod: 'flex', sel: '#stage', instr: `Align the element to the bottom right corner of the terminal.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'flex-end', 'justify-content': 'flex-end' } },
+      { id: 1, mod: 'flex', sel: '#stage', instr: `The nodes need a flexible layout. Initialize the flex container.`, hint: `Try using the display property with a value that enables flexible layout.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex' } },
+      { id: 2, mod: 'flex', sel: '#stage', instr: `Center the element horizontally. (Hint: Don't forget to define the layout model first!)`, hint: `First, enable flex layout on the parent. Then use justify-content to center along the main axis.`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'center' } },
+      { id: 3, mod: 'flex', sel: '#stage', instr: `Push the element all the way to the far right edge of the stage.`, hint: `Use justify-content with a value like 'flex-end' to align to the end of the axis.`, html: '<div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'justify-content': 'flex-end' } },
+      { id: 4, mod: 'flex', sel: '#stage', instr: `Center the element perfectly along the vertical axis.`, hint: `Use align-items property to center elements on the cross axis (vertical for row direction).`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center' } },
+      { id: 5, mod: 'flex', sel: '#stage', instr: `Distribute the space perfectly between these three nodes, pushing outer ones to the edges.`, hint: `Use justify-content with 'space-between' to put items at edges with equal space between them.`, html: '<div class="player"></div><div class="item"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between' } },
+      { id: 6, mod: 'flex', sel: '#stage', instr: `Distribute the nodes so they have equal space entirely around them.`, hint: `Use justify-content with 'space-around' to add equal space on all sides of each item.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%', 'align-items': 'center' }, bgCss: { 'display': 'flex', 'justify-content': 'space-around' } },
+      { id: 7, mod: 'flex', sel: '#stage', instr: `Align the element to the bottom right corner of the terminal.`, hint: `Combine align-items: flex-end with justify-content: flex-end to push to bottom-right.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'align-items': 'flex-end', 'justify-content': 'flex-end' } },
       // INTERMEDIATE (8-14)
-      { id: 8, mod: 'flex', sel: '#stage', instr: `Change the main flow direction so the elements stack vertically.`, html: '<div class="player"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column' } },
-      { id: 9, mod: 'flex', sel: '#stage', instr: `Keep them horizontal, but reverse the visual order.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'row-reverse' } },
-      { id: 10, mod: 'flex', sel: '#stage', instr: `Stack the items vertically, and flip their order simultaneously.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column-reverse' } },
-      { id: 11, mod: 'flex', sel: '#stage', instr: `The items are squished together! Allow them to drop to a new row.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap' } },
-      { id: 12, mod: 'flex', sel: '#stage', instr: `Allow them to wrap, but force new lines to generate upward instead of downward.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap-reverse' } },
-      { id: 13, mod: 'flex', sel: '#stage', instr: `Use the compound shorthand to stack items vertically AND wrap them onto new columns.`, html: '<div class="item" style="height:40%"></div><div class="item" style="height:40%"></div><div class="player" style="height:40%"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-flow': 'column wrap' } },
-      { id: 14, mod: 'flex', sel: '#stage', instr: `Bring the multiple rows tightly together into the exact center.`, html: '<div class="player" style="width:40%"></div><div class="player" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { height: '100%', 'justify-content': 'center' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap', 'align-content': 'center' } },
+      { id: 8, mod: 'flex', sel: '#stage', instr: `Change the main flow direction so the elements stack vertically.`, hint: `Use flex-direction property with 'column' value to stack items vertically.`, html: '<div class="player"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column' } },
+      { id: 9, mod: 'flex', sel: '#stage', instr: `Keep them horizontal, but reverse the visual order.`, hint: `Use flex-direction with 'row-reverse' to flip the order of horizontal items.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'row-reverse' } },
+      { id: 10, mod: 'flex', sel: '#stage', instr: `Stack the items vertically, and flip their order simultaneously.`, hint: `Combine flex-direction with 'column-reverse' to stack down and flip the order.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'flex', 'flex-direction': 'column-reverse' } },
+      { id: 11, mod: 'flex', sel: '#stage', instr: `The items are squished together! Allow them to drop to a new row.`, hint: `Use flex-wrap property with 'wrap' value to allow items to break to next line.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap' } },
+      { id: 12, mod: 'flex', sel: '#stage', instr: `Allow them to wrap, but force new lines to generate upward instead of downward.`, hint: `Use flex-wrap with 'wrap-reverse' to make wrapped items go upward.`, html: '<div class="item" style="width:40%"></div><div class="item" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { width: '100%' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap-reverse' } },
+      { id: 13, mod: 'flex', sel: '#stage', instr: `Use the compound shorthand to stack items vertically AND wrap them onto new columns.`, hint: `Use flex-flow shorthand: 'column wrap' to combine direction and wrapping.`, html: '<div class="item" style="height:40%"></div><div class="item" style="height:40%"></div><div class="player" style="height:40%"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-flow': 'column wrap' } },
+      { id: 14, mod: 'flex', sel: '#stage', instr: `Bring the multiple rows tightly together into the exact center.`, hint: `Use align-content: center to center all wrapped rows as a group.`, html: '<div class="player" style="width:40%"></div><div class="player" style="width:40%"></div><div class="player" style="width:40%"></div>', baseCss: { height: '100%', 'justify-content': 'center' }, bgCss: { 'display': 'flex', 'flex-wrap': 'wrap', 'align-content': 'center' } },
       // HARD (15-20)
-      { id: 15, mod: 'flex', sel: '.player', instr: `Target the specific player element and hijack its rendering priority to place it first.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', 'align-items': 'center', height: '100%' }, bgCss: { 'order': '-1' } },
-      { id: 16, mod: 'flex', sel: '.player', instr: `Break rank! Override the container's vertical alignment and force the player to the bottom.`, html: '<div class="item"></div><div class="player"></div><div class="item"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-start' }, bgCss: { 'align-self': 'flex-end' } },
-      { id: 17, mod: 'flex', sel: '.player', instr: `Independently center the target element vertically, leaving the others at the bottom.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-end' }, bgCss: { 'align-self': 'center' } },
-      { id: 18, mod: 'flex', sel: '.player', instr: `Command the player to absorb all remaining empty space in the container.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'center' }, bgCss: { 'flex-grow': '1' } },
-      { id: 19, mod: 'flex', sel: '.player', instr: `Hardcode the initial main-axis size of the player node to exactly 50%.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', width: '100%', 'align-items': 'center' }, bgCss: { 'flex-basis': '50%' } },
-      { id: 20, mod: 'flex', sel: '#stage', instr: `Final Challenge: Configure the layout model, change flow to vertical, and lock the nodes precisely in the dead center.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-direction': 'column', 'justify-content': 'center', 'align-items': 'center' } },
+      { id: 15, mod: 'flex', sel: '.player', instr: `Target the specific player element and hijack its rendering priority to place it first.`, hint: `Use the order property with a negative value to reorder individual flex items.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', 'align-items': 'center', height: '100%' }, bgCss: { 'order': '-1' } },
+      { id: 16, mod: 'flex', sel: '.player', instr: `Break rank! Override the container's vertical alignment and force the player to the bottom.`, hint: `Use align-self property on the item to override the container's align-items.`, html: '<div class="item"></div><div class="player"></div><div class="item"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-start' }, bgCss: { 'align-self': 'flex-end' } },
+      { id: 17, mod: 'flex', sel: '.player', instr: `Independently center the target element vertically, leaving the others at the bottom.`, hint: `Use align-self: center to override the container's alignment for just this item.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'flex-end' }, bgCss: { 'align-self': 'center' } },
+      { id: 18, mod: 'flex', sel: '.player', instr: `Command the player to absorb all remaining empty space in the container.`, hint: `Use flex-grow property and set it to a value greater than 0 to make it expand.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', height: '100%', 'align-items': 'center' }, bgCss: { 'flex-grow': '1' } },
+      { id: 19, mod: 'flex', sel: '.player', instr: `Hardcode the initial main-axis size of the player node to exactly 50%.`, hint: `Use flex-basis property to set the initial size of a flex item before free space distribution.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'flex', width: '100%', 'align-items': 'center' }, bgCss: { 'flex-basis': '50%' } },
+      { id: 20, mod: 'flex', sel: '#stage', instr: `Final Challenge: Configure the layout model, change flow to vertical, and lock the nodes precisely in the dead center.`, hint: `Combine display: flex, flex-direction: column, justify-content: center, and align-items: center.`, html: '<div class="player"></div><div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'flex', 'flex-direction': 'column', 'justify-content': 'center', 'align-items': 'center' } },
 
       // GRID (20 Levels)
       // EASY (1-7)
-      { id: 1, mod: 'grid', sel: '#stage', instr: `Establish a 2D matrix container and slice it into two identical columns.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr' } },
-      { id: 2, mod: 'grid', sel: '#stage', instr: `Construct a foundation using three equal-width columns.`, html: '<div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' } },
-      { id: 3, mod: 'grid', sel: '#stage', instr: `Keep two columns, but pry them apart with a 20px spatial gap.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'gap': '20px' } },
-      { id: 4, mod: 'grid', sel: '#stage', instr: `Configure the matrix to possess two rows, each taking up exactly 50% height.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-rows': '50% 50%' } },
-      { id: 5, mod: 'grid', sel: '.player', instr: `Make the target unit stretch its boundary across two column slots.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': 'span 2' } },
-      { id: 6, mod: 'grid', sel: '.player', instr: `Command the player element to stretch downward, covering two row slots.`, html: '<div class="player"></div><div class="item"></div><div class="item"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-template-rows': '1fr 1fr' }, bgCss: { 'grid-row': 'span 2' } },
-      { id: 7, mod: 'grid', sel: '.player', instr: `Use raw coordinates: Force the element to begin at vertical line 2 and end at vertical line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': '2 / 4' } },
+      { id: 1, mod: 'grid', sel: '#stage', instr: `Establish a 2D matrix container and slice it into two identical columns.`, hint: `Use display: grid and grid-template-columns with two equal-width values like '1fr 1fr'.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr' } },
+      { id: 2, mod: 'grid', sel: '#stage', instr: `Construct a foundation using three equal-width columns.`, hint: `Use grid-template-columns with three '1fr' values: '1fr 1fr 1fr'.`, html: '<div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' } },
+      { id: 3, mod: 'grid', sel: '#stage', instr: `Keep two columns, but pry them apart with a 20px spatial gap.`, hint: `Add the gap property with '20px' value to create space between grid cells.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'gap': '20px' } },
+      { id: 4, mod: 'grid', sel: '#stage', instr: `Configure the matrix to possess two rows, each taking up exactly 50% height.`, hint: `Use grid-template-rows with '50% 50%' or '1fr 1fr' to create equal-height rows.`, html: '<div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-rows': '50% 50%' } },
+      { id: 5, mod: 'grid', sel: '.player', instr: `Make the target unit stretch its boundary across two column slots.`, hint: `Use grid-column: span 2 on the specific item to make it span 2 columns.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': 'span 2' } },
+      { id: 6, mod: 'grid', sel: '.player', instr: `Command the player element to stretch downward, covering two row slots.`, hint: `Use grid-row: span 2 on the item to make it span 2 rows vertically.`, html: '<div class="player"></div><div class="item"></div><div class="item"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-template-rows': '1fr 1fr' }, bgCss: { 'grid-row': 'span 2' } },
+      { id: 7, mod: 'grid', sel: '.player', instr: `Use raw coordinates: Force the element to begin at vertical line 2 and end at vertical line 4.`, hint: `Use grid-column: 2 / 4 to place the item from column line 2 to line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-columns': '1fr 1fr 1fr' }, bgCss: { 'grid-column': '2 / 4' } },
       // INTERMEDIATE (8-14)
-      { id: 8, mod: 'grid', sel: '.player', instr: `Use horizontal coordinate tracking: Map the item from row line 2 to row line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-row': '2 / 4' } },
-      { id: 9, mod: 'grid', sel: '#stage', instr: `Use functional syntax to procedurally generate exactly four identical columns.`, html: '<div class="item"></div><div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': 'repeat(4, 1fr)' } },
-      { id: 10, mod: 'grid', sel: '#stage', instr: `Centralize every item horizontally within their respective allocated grid sectors.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'justify-items': 'center' } },
-      { id: 11, mod: 'grid', sel: '#stage', instr: `Centralize every item vertically inside their designated grid slots.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'align-items': 'center' } },
-      { id: 12, mod: 'grid', sel: '#stage', instr: `Employ the global compound shorthand to center items on both axes internally.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'place-items': 'center center' } },
-      { id: 13, mod: 'grid', sel: '.player', instr: `Override the container protocol: Align only this individual horizontally to the right side of its cell.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'align-items': 'center' }, bgCss: { 'justify-self': 'end' } },
-      { id: 14, mod: 'grid', sel: '.player', instr: `Independently align this specific element to the absolute bottom of its grid slot.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'justify-items': 'center' }, bgCss: { 'align-self': 'end' } },
+      { id: 8, mod: 'grid', sel: '.player', instr: `Use horizontal coordinate tracking: Map the item from row line 2 to row line 4.`, hint: `Use grid-row: 2 / 4 to place the item from row line 2 to line 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-row': '2 / 4' } },
+      { id: 9, mod: 'grid', sel: '#stage', instr: `Use functional syntax to procedurally generate exactly four identical columns.`, hint: `Use the repeat() function: grid-template-columns: repeat(4, 1fr).`, html: '<div class="item"></div><div class="item"></div><div class="item"></div><div class="player"></div>', baseCss: {}, bgCss: { 'display': 'grid', 'grid-template-columns': 'repeat(4, 1fr)' } },
+      { id: 10, mod: 'grid', sel: '#stage', instr: `Centralize every item horizontally within their respective allocated grid sectors.`, hint: `Use justify-items: center to center all items horizontally in their grid cells.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'justify-items': 'center' } },
+      { id: 11, mod: 'grid', sel: '#stage', instr: `Centralize every item vertically inside their designated grid slots.`, hint: `Use align-items: center to center all items vertically within their cells.`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'align-items': 'center' } },
+      { id: 12, mod: 'grid', sel: '#stage', instr: `Employ the global compound shorthand to center items on both axes internally.`, hint: `Use place-items: center to center items both horizontally and vertically (shorthand).`, html: '<div class="player"></div>', baseCss: { height: '100%' }, bgCss: { 'display': 'grid', 'place-items': 'center center' } },
+      { id: 13, mod: 'grid', sel: '.player', instr: `Override the container protocol: Align only this individual horizontally to the right side of its cell.`, hint: `Use justify-self: end to override horizontal alignment for just this item.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'align-items': 'center' }, bgCss: { 'justify-self': 'end' } },
+      { id: 14, mod: 'grid', sel: '.player', instr: `Independently align this specific element to the absolute bottom of its grid slot.`, hint: `Use align-self: end to override vertical alignment for just this item.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'justify-items': 'center' }, bgCss: { 'align-self': 'end' } },
       // HARD (15-20)
-      { id: 15, mod: 'grid', sel: '.player', instr: `Use the personal override shorthand to push the target to the bottom-right corner of its container cell.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%' }, bgCss: { 'place-self': 'end end' } },
-      { id: 16, mod: 'grid', sel: '#stage', instr: `Alter the matrix flow algorithm so newly populated elements fill downward via columns, not rows.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'grid-template-rows': '1fr 1fr' }, bgCss: { 'display': 'grid', 'grid-auto-flow': 'column' } },
-      { id: 17, mod: 'grid', sel: '#stage', instr: `Take the entire grid network structure and center it horizontally on the stage.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-columns': '50px' }, bgCss: { 'display': 'grid', 'justify-content': 'center' } },
-      { id: 18, mod: 'grid', sel: '#stage', instr: `Shift the whole combined grid layout firmly to the bottom of the visible stage.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-rows': '50px', 'justify-content': 'center' }, bgCss: { 'display': 'grid', 'align-content': 'end' } },
-      { id: 19, mod: 'grid', sel: '.player', instr: `Map the element to inhabit the pre-allocated template area identified as 'main'.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-areas': '"head head" "side main"', 'grid-template-columns': '1fr 2fr', 'grid-template-rows': '1fr 2fr' }, bgCss: { 'grid-area': 'main' } },
-      { id: 20, mod: 'grid', sel: '.player', instr: `Final Grid Boss: Execute a complex bounding box area. Anchor from Row 2, Col 2, spanning until Row 4, Col 4.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-columns': '1fr 1fr 1fr', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-area': '2 / 2 / 4 / 4' } },
+      { id: 15, mod: 'grid', sel: '.player', instr: `Use the personal override shorthand to push the target to the bottom-right corner of its container cell.`, hint: `Use place-self: end end to position an item at the bottom-right of its cell.`, html: '<div class="player"></div>', baseCss: { 'display': 'grid', height: '100%' }, bgCss: { 'place-self': 'end end' } },
+      { id: 16, mod: 'grid', sel: '#stage', instr: `Alter the matrix flow algorithm so newly populated elements fill downward via columns, not rows.`, hint: `Use grid-auto-flow: column to fill columns first instead of rows.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'grid-template-rows': '1fr 1fr' }, bgCss: { 'display': 'grid', 'grid-auto-flow': 'column' } },
+      { id: 17, mod: 'grid', sel: '#stage', instr: `Take the entire grid network structure and center it horizontally on the stage.`, hint: `Use justify-content: center to center the grid content horizontally.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-columns': '50px' }, bgCss: { 'display': 'grid', 'justify-content': 'center' } },
+      { id: 18, mod: 'grid', sel: '#stage', instr: `Shift the whole combined grid layout firmly to the bottom of the visible stage.`, hint: `Use align-content: end to align the grid content to the bottom.`, html: '<div class="player"></div>', baseCss: { height: '100%', 'grid-template-rows': '50px', 'justify-content': 'center' }, bgCss: { 'display': 'grid', 'align-content': 'end' } },
+      { id: 19, mod: 'grid', sel: '.player', instr: `Map the element to inhabit the pre-allocated template area identified as 'main'.`, hint: `Use grid-area: main to assign the item to a named template area.`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-areas': '"head head" "side main"', 'grid-template-columns': '1fr 2fr', 'grid-template-rows': '1fr 2fr' }, bgCss: { 'grid-area': 'main' } },
+      { id: 20, mod: 'grid', sel: '.player', instr: `Final Grid Boss: Execute a complex bounding box area. Anchor from Row 2, Col 2, spanning until Row 4, Col 4.`, hint: `Use grid-area: 2 / 2 / 4 / 4 (row-start / col-start / row-end / col-end).`, html: '<div class="item"></div><div class="player"></div>', baseCss: { 'display': 'grid', height: '100%', 'grid-template-columns': '1fr 1fr 1fr', 'grid-template-rows': '1fr 1fr 1fr' }, bgCss: { 'grid-area': '2 / 2 / 4 / 4' } },
     ];
 
     let curMod = 'flex', curLvl = 0, modLevels = [], done = new Set();
@@ -1147,13 +1048,16 @@
       }
     });
 
-    // Theme Engine (Bound to Global Navbar)
-    const toggleTheme = () => {
-      const isLight = document.documentElement.classList.toggle('light');
-      document.querySelectorAll('.theme-knob').forEach(k => k.textContent = isLight ? '☀️' : '🌙');
-    };
-    const themeBtn = $('theme-btn-global');
-    if (themeBtn) themeBtn.onclick = toggleTheme;
+    function getModuleHistory() {
+      const flexHistory = JSON.parse(localStorage.getItem('cssquest_flex_history') || '[]');
+      const gridHistory = JSON.parse(localStorage.getItem('cssquest_grid_history') || '[]');
+
+      return {
+        flex: flexHistory.length,
+        grid: gridHistory.length,
+        total: flexHistory.length + gridHistory.length
+      };
+    }
 
     // Get dynamic 6 snippet options for a level
     function generateOptions(lvl) {
@@ -1206,6 +1110,11 @@
       $('css-ed').value = '';
       $('html-viewer').textContent = formatHTML(lvl.html);
 
+      // Set hint from hints array
+      const hintText = hints[curMod] ? hints[curMod][idx] : "No hint available";
+      $('hint-box').textContent = hintText;
+      $('hint-box').classList.remove('show');
+
       $('feedback').classList.remove('show');
       $('win-ol').classList.remove('show');
       $('btn-prev').disabled = idx === 0;
@@ -1220,10 +1129,6 @@
         line.textContent = o;
         optBox.appendChild(line);
       });
-
-      $('reveal-container').style.gridTemplateColumns = '1fr';
-      $('btn-answer').classList.remove('hidden');
-      $('btn-run-reveal').classList.add('hidden');
 
       renderPips(idx);
 
@@ -1294,6 +1199,41 @@
       });
     }
 
+    function saveProgressToHistory() {
+      // Save to localStorage
+      const historyKey = `cssquest_${curMod}_history`;
+      let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+
+      const entry = {
+        level: curLvl + 1,
+        module: curMod,
+        completed_at: new Date().toISOString(),
+        timestamp: Date.now()
+      };
+
+      history.push(entry);
+      localStorage.setItem(historyKey, JSON.stringify(history));
+
+      // Save progress and history to the backend database
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetch('/api/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ module: 'css-lab', level: curLvl + 1, score: (curLvl + 1) * 10 })
+        }).catch(err => console.error('Progress save error:', err));
+
+        fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            action: `Cleared CSS Lab Level ${curLvl + 1}`,
+            detail: `Successfully completed the layout alignment challenge using Flexbox/Grid properties.`
+          })
+        }).catch(err => console.error('History save error:', err));
+      }
+    }
+
     function validateLevel() {
       let pass = true;
       const players = document.querySelectorAll('#stage .player');
@@ -1313,28 +1253,10 @@
 
       if (pass) {
         done.add(curLvl);
+        saveProgressToHistory();
         goals.forEach(g => g.classList.add('reached'));
         setTimeout(() => $('win-ol').classList.add('show'), 300);
         renderPips(curLvl);
-
-        // Save progress and history to the database
-        const token = localStorage.getItem("token");
-        if (token) {
-          fetch('/api/progress', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ module: 'css-lab', level: curLvl + 1, score: (curLvl + 1) * 10 })
-          }).catch(err => console.error(err));
-          
-          fetch('/api/history', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ 
-              action: `Cleared CSS Lab Level ${curLvl + 1}`, 
-              detail: `Successfully completed the layout alignment challenge using Flexbox/Grid properties.` 
-            })
-          }).catch(err => console.error(err));
-        }
       }
     }
 
@@ -1345,23 +1267,31 @@
       typingTimer = setTimeout(validateLevel, 500);
     });
 
+    // Hint Button
+    $('btn-hint').onclick = () => {
+      $('hint-box').classList.toggle('show');
+    };
+
+    // Run Button
+    $('btn-run').onclick = () => {
+      applyUserCSS();
+      validateLevel();
+    };
+
+    // Reveal Answer Button
     $('btn-answer').onclick = () => {
       const lvl = modLevels[curLvl];
       const ans = Object.entries(lvl.bgCss).map(([k, v]) => `  ${k}: ${v};`).join('\n');
       $('css-ed').value = ans;
       applyUserCSS();
-      $('btn-answer').classList.add('hidden');
-      $('btn-run-reveal').classList.remove('hidden');
+      validateLevel();
     };
 
-    $('btn-run-reveal').onclick = () => validateLevel();
-    $('btn-reset').onclick = () => { $('css-ed').value = ''; loadLevel(curLvl); };
     $('btn-prev').onclick = () => { if (curLvl > 0) loadLevel(curLvl - 1); };
     $('btn-next').onclick = () => { if (curLvl < modLevels.length - 1) loadLevel(curLvl + 1); };
     $('btn-next-lvl').onclick = () => { if (curLvl < modLevels.length - 1) loadLevel(curLvl + 1); else loadPage('home'); };
 
   </script>
-  
 </body>
 
 </html>
