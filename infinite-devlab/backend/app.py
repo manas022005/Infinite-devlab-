@@ -4,6 +4,19 @@ Serves JSON API under /auth and /api, and the static frontend under /.
 Compatible with the existing frontend (login.html posts form-encoded to
 /auth/login and JSON to /auth/signup, stores `token` in localStorage).
 """
+'''
+Addig robots.txt file
+
+'''
+from flask import send_from_directory
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.root_path, 'robots.txt')
+
+
+
+
 from __future__ import annotations
 
 import os
